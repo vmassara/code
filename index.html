@@ -160,7 +160,7 @@ body.hard-mode .pc .pstat{display:none}
 #momentum .mo-lbl{font-size:.6rem;color:var(--faint);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
 #momentum .mo-dots{display:flex;gap:6px}
 .mo-dot{flex:1;height:7px;border-radius:4px;background:var(--border);transition:background .3s}
-.mo-dot.W{background:var(--gold)}.mo-dot.L{background:var(--red)}
+.mo-dot.W{background:#22a03c}.mo-dot.L{background:var(--red)}
 
 .match-nav{display:flex;gap:8px;align-items:center;margin-bottom:10px}
 .match-nav-step{font-size:.68rem;color:var(--muted);flex:1;text-align:center}
@@ -197,7 +197,7 @@ table.sc-tbl tr.hi-bowl td{background:rgba(96,216,144,.06)}
 .match-moment strong{color:var(--gold);font-style:normal}
 .potm-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(212,168,75,.1);border:1px solid var(--gold-d);border-radius:5px;padding:3px 8px;font-size:.68rem;color:var(--gold)}
 .mc-result{padding:8px 16px;text-align:right;font-size:.74rem;font-weight:700;letter-spacing:.3px}
-.mc-result.win{background:rgba(201,162,39,.1);color:var(--gold-bright)}
+.mc-result.win{background:rgba(34,160,60,.12);color:#4ade80}
 .mc-result.loss{background:rgba(204,34,51,.1);color:var(--red-l)}
 
 #fin-banner{display:none;background:linear-gradient(160deg,#0e0e1c,#14142a);border:1px solid var(--gold-d);border-radius:14px;padding:28px 22px;text-align:center;margin-bottom:12px;position:relative;overflow:hidden}
@@ -326,17 +326,15 @@ canvas#sc{display:none}
     <div id="match-display"></div>
 
     <div id="share-card">
-      <div class="sh-title">Share Your XI</div>
-      <div class="share-btns">
-        <button class="sh-btn primary" id="btn-gen">Generate Card</button>
-        <button class="sh-btn" id="btn-copy">Copy Results</button>
+      <button class="sh-btn primary" id="btn-gen" style="width:100%;padding:14px;font-size:.9rem;margin-bottom:8px">📤 Share Your XI</button>
+      <div id="share-preview" style="display:none">
+        <img id="share-img" alt="XI Card" style="width:100%;border-radius:10px;display:block;margin-bottom:8px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+          <button class="sh-btn primary" id="btn-dl">Save Image</button>
+          <button class="sh-btn" id="btn-share">Share</button>
+        </div>
       </div>
-      <div id="share-preview"><img id="share-img" alt="XI Card"></div>
-      <div id="share-dl-row">
-        <button class="sh-btn primary" id="btn-dl">Save Image</button>
-        <button class="sh-btn" id="btn-share">Share</button>
-      </div>
-      <canvas id="sc"></canvas>
+      <canvas id="sc" style="display:none"></canvas>
     </div>
 
     <button id="btn-back">← New Draft</button>
@@ -1296,86 +1294,134 @@ document.getElementById("nav-next").addEventListener("click",()=>{
 // ══════════════════════════════════════════════════════
 //  SHARE CARD
 // ══════════════════════════════════════════════════════
-document.getElementById("btn-gen").addEventListener("click",()=>{
-  const W=560,H=860,canvas=document.getElementById("sc");
-  canvas.width=W; canvas.height=H;
+document.getElementById("btn-gen").addEventListener("click",generateShareCard);
+
+function generateShareCard(){
+  const W=560,H=900,canvas=document.getElementById("sc");
+  canvas.width=W*2; canvas.height=H*2; // retina
   const ctx=canvas.getContext("2d");
+  ctx.scale(2,2);
+
   const wins=results.filter(r=>r.won).length;
-  const stats=window._tournStats||{topBat:["—",0],topBowl:["—",0]};
-
-  const bg=ctx.createLinearGradient(0,0,W,H);
-  bg.addColorStop(0,"#0d2b08"); bg.addColorStop(.5,"#152408"); bg.addColorStop(1,"#0d2b08");
-  ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-  ctx.strokeStyle="rgba(255,255,255,0.03)"; ctx.lineWidth=1;
-  for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-  const gbar=ctx.createLinearGradient(0,0,W,0);
-  gbar.addColorStop(0,"#8a620a"); gbar.addColorStop(.5,"#c9a227"); gbar.addColorStop(1,"#8a620a");
-  ctx.fillStyle=gbar; ctx.fillRect(0,0,W,5); ctx.fillRect(0,H-5,W,5);
-
-  ctx.textAlign="center";
-  ctx.fillStyle="#7aab6a"; ctx.font="500 11px system-ui";
-  ctx.fillText("WORLD CUP XI  ·  DREAM TEAM",W/2,38);
-  ctx.fillStyle="#e8c547"; ctx.font="bold 64px system-ui";
-  ctx.fillText(`${wins}–${results.length-wins}`,W/2,118);
+  const losses=results.length-wins;
   const last=results[results.length-1];
   const champion=wins===results.length&&last.won&&last.fixture.stage==="Final";
-  const verdict=champion?"World Cup Champions 🏆":!last.won&&last.fixture.stage!=="Group Stage"?`Out — ${last.fixture.stage}`:"Runners-Up";
-  ctx.fillStyle="#c9a227"; ctx.font="500 13px system-ui";
-  ctx.fillText(verdict.toUpperCase(),W/2,148);
-  const dv=ctx.createLinearGradient(40,0,W-40,0);
-  dv.addColorStop(0,"transparent"); dv.addColorStop(.5,"#c9a227"); dv.addColorStop(1,"transparent");
-  ctx.strokeStyle=dv; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(40,165); ctx.lineTo(W-40,165); ctx.stroke();
+  const stats=window._tournStats||{topBat:["—",0],topBowl:["—",0]};
 
-  const rc={bat:"#3a5fc0",ar:"#c07a1a",wk:"#8a3ab5",bowl:"#2a8a48"};
+  // ── Background ──────────────────────────────────────
+  ctx.fillStyle="#07070f";
+  ctx.fillRect(0,0,W,H);
+
+  // subtle grid lines
+  ctx.strokeStyle="rgba(255,255,255,.025)"; ctx.lineWidth=1;
+  for(let y=0;y<H;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+
+  // top gold bar
+  const gbar=ctx.createLinearGradient(0,0,W,0);
+  gbar.addColorStop(0,"#6a520a"); gbar.addColorStop(.4,"#c9a227"); gbar.addColorStop(.6,"#e8c84a"); gbar.addColorStop(1,"#6a520a");
+  ctx.fillStyle=gbar; ctx.fillRect(0,0,W,4);
+
+  // ── Header: 7-0 branding ────────────────────────────
+  ctx.textAlign="center";
+  ctx.fillStyle="#c9a227"; ctx.font="700 11px system-ui";
+  ctx.fillText("7-0  ·  WORLD CUP DRAFT",W/2,26);
+
+  // ── BIG RECORD ──────────────────────────────────────
+  const recY=90;
+  const recGrad=ctx.createLinearGradient(W/2-80,recY-70,W/2+80,recY+10);
+  recGrad.addColorStop(0,"#f5d76e"); recGrad.addColorStop(.5,"#c9a227"); recGrad.addColorStop(1,"#8a6a0a");
+  ctx.fillStyle=recGrad;
+  ctx.font="900 80px system-ui";
+  ctx.fillText(`${wins}-${losses}`,W/2,recY);
+
+  // verdict label
+  const verdictColor=champion?"#4ade80":!last.won&&last.fixture.stage!=="Group Stage"?"#f05060":"#c9a227";
+  ctx.fillStyle=verdictColor; ctx.font="700 13px system-ui";
+  const verdict=champion?"WORLD CUP CHAMPIONS 🏆":!last.won&&last.fixture.stage!=="Group Stage"?`KNOCKED OUT — ${last.fixture.stage.toUpperCase()}`:"RUNNERS-UP 🥈";
+  ctx.fillText(verdict,W/2,112);
+
+  // divider
+  const dv=ctx.createLinearGradient(40,0,W-40,0);
+  dv.addColorStop(0,"transparent"); dv.addColorStop(.5,"#c9a22788"); dv.addColorStop(1,"transparent");
+  ctx.strokeStyle=dv; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(40,126); ctx.lineTo(W-40,126); ctx.stroke();
+
+  // ── Player list ─────────────────────────────────────
+  const rc={bat:"#5ba8f0",ar:"#e08838",wk:"#a060e0",bowl:"#38c878"};
   const ord=team.filter(Boolean);
-  const sy=178,rh=52;
+  const sy=136, rh=68;
+
   ord.forEach((p,i)=>{
     const y=sy+i*rh;
-    if(i%2===0){ctx.fillStyle="rgba(255,255,255,0.03)";ctx.beginPath();ctx.roundRect(18,y+2,W-36,rh-3,5);ctx.fill();}
-    ctx.fillStyle="#c9a227"; ctx.font="500 10px system-ui"; ctx.textAlign="left";
-    ctx.fillText(String(i+1).padStart(2,"0"),28,y+24);
+    // row bg
+    ctx.fillStyle=i%2===0?"rgba(255,255,255,.03)":"rgba(0,0,0,.0)";
+    ctx.fillRect(0,y,W,rh);
+
+    // position number
+    ctx.fillStyle="#c9a22799"; ctx.font="600 11px system-ui"; ctx.textAlign="left";
+    ctx.fillText(String(i+1).padStart(2,"0"),16,y+26);
+
+    // role pill
     const c2=rc[p.r]||"#aaa";
-    ctx.fillStyle=c2+"33"; ctx.beginPath(); ctx.roundRect(48,y+11,30,16,3); ctx.fill();
-    ctx.fillStyle=c2; ctx.font="bold 9px system-ui"; ctx.textAlign="center";
-    ctx.fillText(RC[p.r],63,y+23);
-    ctx.fillStyle="#f5f0e8"; ctx.font=`${p.v>=9?"bold ":"500 "}13px system-ui`; ctx.textAlign="left";
-    ctx.fillText(p.n,88,y+21);
-    ctx.fillStyle="rgba(255,255,255,.35)"; ctx.font="10px system-ui";
-    ctx.fillText(p.sq||"",88,y+36);
-    ctx.fillStyle="#c9a22726"; ctx.beginPath(); ctx.roundRect(W-58,y+11,38,18,9); ctx.fill();
-    ctx.fillStyle="#c9a227"; ctx.font="bold 12px system-ui"; ctx.textAlign="center";
-    ctx.fillText(Math.round(p.v*10),W-39,y+24);
+    ctx.fillStyle=c2+"28";
+    ctx.beginPath(); ctx.roundRect(40,y+13,34,17,4); ctx.fill();
+    ctx.fillStyle=c2; ctx.font="700 9px system-ui"; ctx.textAlign="center";
+    ctx.fillText(RC[p.r],57,y+25);
+
+    // name
+    ctx.fillStyle="#f0ead8"; ctx.font=`${p.v>=9?"700":"500"} 14px system-ui`; ctx.textAlign="left";
+    ctx.fillText(p.n,84,y+24);
+
+    // era label
+    ctx.fillStyle="rgba(255,255,255,.32)"; ctx.font="11px system-ui";
+    ctx.fillText(p.sq||"",84,y+41);
+
+    // rating badge
+    const rating=Math.round(p.v*10);
+    const rColor=rating>=90?"#f5d76e":rating>=80?"#c9a227":"#8a7060";
+    ctx.fillStyle=rColor+"22"; ctx.beginPath(); ctx.roundRect(W-56,y+12,42,20,10); ctx.fill();
+    ctx.fillStyle=rColor; ctx.font="700 13px system-ui"; ctx.textAlign="center";
+    ctx.fillText(rating,W-35,y+26);
   });
 
-  const bY=sy+ord.length*rh+10;
+  // ── Footer stats ────────────────────────────────────
+  const fY=sy+ord.length*rh+6;
   ctx.strokeStyle=dv; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(40,bY); ctx.lineTo(W-40,bY); ctx.stroke();
-  ctx.fillStyle="#7aab6a"; ctx.font="500 9px system-ui"; ctx.textAlign="left";
-  ctx.fillText("TOP SCORER",28,bY+20);
-  ctx.fillStyle="#f5f0e8"; ctx.font="bold 12px system-ui";
-  ctx.fillText(`${stats.topBat?.[0]||"—"}  ·  ${stats.topBat?.[1]||0} runs`,28,bY+36);
-  ctx.fillStyle="#7aab6a"; ctx.font="500 9px system-ui"; ctx.textAlign="right";
-  ctx.fillText("TOP BOWLER",W-28,bY+20);
-  ctx.fillStyle="#f5f0e8"; ctx.font="bold 12px system-ui";
-  ctx.fillText(`${stats.topBowl?.[0]||"—"}  ·  ${stats.topBowl?.[1]||0} wkts`,W-28,bY+36);
-  ctx.fillStyle="rgba(255,255,255,.18)"; ctx.font="10px system-ui"; ctx.textAlign="center";
-  ctx.fillText("🏏 World Cup XI Builder",W/2,H-16);
+  ctx.beginPath(); ctx.moveTo(40,fY); ctx.lineTo(W-40,fY); ctx.stroke();
 
+  ctx.fillStyle="#c9a227"; ctx.font="600 9px system-ui"; ctx.textAlign="left";
+  ctx.fillText("TOP SCORER",16,fY+18);
+  ctx.fillStyle="#f0ead8"; ctx.font="700 12px system-ui";
+  ctx.fillText(`${stats.topBat?.[0]||"—"}  ·  ${stats.topBat?.[1]||0} runs`,16,fY+33);
+
+  ctx.fillStyle="#c9a227"; ctx.font="600 9px system-ui"; ctx.textAlign="right";
+  ctx.fillText("TOP BOWLER",W-16,fY+18);
+  ctx.fillStyle="#f0ead8"; ctx.font="700 12px system-ui";
+  ctx.fillText(`${stats.topBowl?.[0]||"—"}  ·  ${stats.topBowl?.[1]||0} wkts`,W-16,fY+33);
+
+  // bottom gold bar
+  ctx.fillStyle=gbar; ctx.fillRect(0,H-4,W,4);
+
+  // ── Export ───────────────────────────────────────────
   const url=canvas.toDataURL("image/png");
   document.getElementById("share-img").src=url;
   document.getElementById("share-preview").style.display="block";
-  document.getElementById("share-dl-row").style.display="grid";
-  document.getElementById("btn-dl").onclick=()=>{const a=document.createElement("a");a.download="worldcup-xi.png";a.href=url;a.click();};
+
+  document.getElementById("btn-dl").onclick=()=>{
+    const a=document.createElement("a");
+    a.download="7-0-world-cup-xi.png"; a.href=url; a.click();
+  };
   document.getElementById("btn-share").onclick=async()=>{
     if(navigator.share&&navigator.canShare){
-      const blob=await(await fetch(url)).blob();
-      const file=new File([blob],"worldcup-xi.png",{type:"image/png"});
-      if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:"My World Cup XI"});return;}
+      try{
+        const blob=await(await fetch(url)).blob();
+        const file=new File([blob],"7-0-xi.png",{type:"image/png"});
+        if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:`7-0 World Cup Draft — ${wins}-${losses}`});return;}
+      }catch(e){}
     }
     copyText();
   };
-});
+}
 
 document.getElementById("btn-copy").addEventListener("click",copyText);
 function copyText(){
