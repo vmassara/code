@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cricket XI — Build Your Dream World Cup Team</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --green: #1a7a3c;
+    --green-dark: #135a2c;
+    --green-light: #2ecc71;
+    --cream: #f5f0e8;
+    --gold: #f0b429;
+    --gold-dark: #c8941e;
+    --red: #e74c3c;
+    --blue: #2980b9;
+    --text: #1a1a1a;
+    --text-light: #555;
+    --card-bg: #fff;
+    --border: #ddd;
+  }
+
+  body {
+    font-family: 'Segoe UI', system-ui, sans-serif;
+    background: var(--cream);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: linear-gradient(135deg, var(--green-dark), var(--green));
+    color: #fff;
+    text-align: center;
+    padding: 20px 16px 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::before {
+    content: '';
+    position: absolute;
+    top: -40px; left: -40px;
+    width: 180px; height: 180px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.06);
+  }
+  header h1 {
+    font-size: clamp(1.4rem, 4vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 8px rgba(0,0,0,.3);
+  }
+  header p { font-size: .9rem; opacity: .85; margin-top: 4px; }
+
+  /* ── PROGRESS BAR ── */
+  #progress-bar {
+    background: rgba(0,0,0,.2);
+    height: 6px;
+  }
+  #progress-fill {
+    height: 6px;
+    background: var(--gold);
+    transition: width .5s ease;
+    width: 0%;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 16px;
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 16px;
+  }
+  @media (max-width: 700px) {
+    main { grid-template-columns: 1fr; }
+  }
+
+  /* ── PANEL CARDS ── */
+  .card {
+    background: var(--card-bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 12px 16px;
+    font-weight: 700;
+    font-size: .85rem;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    background: #f7f7f7;
+    border-bottom: 1px solid var(--border);
+    color: var(--text-light);
+  }
+
+  /* ── SPIN ZONE ── */
+  #spin-zone {
+    text-align: center;
+    padding: 20px 16px;
+  }
+  #spin-info {
+    font-size: .85rem;
+    color: var(--text-light);
+    margin-bottom: 12px;
+  }
+  #spin-info strong { color: var(--green-dark); }
+
+  /* reel */
+  #reel-wrapper {
+    background: var(--green-dark);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    min-height: 90px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+  #reel {
+    text-align: center;
+    color: #fff;
+    transition: opacity .15s;
+  }
+  #reel .year-badge {
+    display: inline-block;
+    background: var(--gold);
+    color: #000;
+    font-weight: 800;
+    font-size: 1rem;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-bottom: 4px;
+  }
+  #reel .team-name {
+    font-size: 1.5rem;
+    font-weight: 800;
+    text-shadow: 0 2px 6px rgba(0,0,0,.4);
+  }
+  #reel .team-flag { font-size: 2.2rem; }
+  #reel .host-label { font-size: .75rem; opacity: .7; margin-top: 2px; }
+
+  /* spin button */
+  #btn-spin {
+    background: linear-gradient(135deg, var(--gold), var(--gold-dark));
+    color: #000;
+    border: none;
+    border-radius: 40px;
+    padding: 14px 40px;
+    font-size: 1.1rem;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(240,180,41,.4);
+    transition: transform .1s, box-shadow .1s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  #btn-spin:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(240,180,41,.5); }
+  #btn-spin:active { transform: translateY(0); }
+  #btn-spin:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+  /* ── SQUAD GRID ── */
+  #squad-section { margin-top: 16px; }
+  #squad-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .player-card {
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 10px;
+    cursor: pointer;
+    transition: border-color .15s, transform .15s, box-shadow .15s;
+    background: #fff;
+    position: relative;
+  }
+  .player-card:hover {
+    border-color: var(--green);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(26,122,60,.2);
+  }
+  .player-card .player-name {
+    font-weight: 700;
+    font-size: .85rem;
+    line-height: 1.2;
+    margin-bottom: 4px;
+  }
+  .player-card .player-role {
+    font-size: .7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 6px;
+  }
+  .role-BAT { background: #e8f5e9; color: #2e7d32; }
+  .role-BWL { background: #fce4ec; color: #c62828; }
+  .role-ALL { background: #fff3e0; color: #e65100; }
+  .role-WK  { background: #e3f2fd; color: #1565c0; }
+
+  .player-card .rating-bar-wrap {
+    height: 5px;
+    background: #eee;
+    border-radius: 3px;
+    margin-top: 6px;
+    overflow: hidden;
+  }
+  .player-card .rating-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--green-light), var(--green-dark));
+  }
+  .player-card .rating-num {
+    font-size: .7rem;
+    color: var(--text-light);
+    margin-top: 3px;
+    text-align: right;
+  }
+
+  .player-card.selected-already {
+    opacity: .4;
+    pointer-events: none;
+  }
+
+  /* ── TEAM PANEL ── */
+  #team-panel { position: sticky; top: 16px; }
+
+  #slots-list { padding: 10px; }
+  .slot {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 8px;
+    border-radius: 8px;
+    margin-bottom: 4px;
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    font-size: .82rem;
+    min-height: 40px;
+  }
+  .slot.empty { color: #bbb; font-style: italic; }
+  .slot .slot-num {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--green-dark);
+    color: #fff;
+    font-size: .65rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .slot.empty .slot-num { background: #ccc; }
+  .slot .slot-name { font-weight: 600; flex: 1; }
+  .slot .slot-role {
+    font-size: .65rem;
+    font-weight: 700;
+    padding: 1px 5px;
+    border-radius: 3px;
+  }
+  .slot .slot-era { font-size: .65rem; color: var(--text-light); }
+  .slot .slot-rating { font-size: .7rem; font-weight: 700; color: var(--green-dark); }
+
+  #team-strength {
+    padding: 10px 12px;
+    border-top: 1px solid var(--border);
+  }
+  .strength-bar-wrap { margin-top: 4px; height: 8px; background: #eee; border-radius: 4px; overflow: hidden; }
+  .strength-bar { height: 8px; border-radius: 4px; background: linear-gradient(90deg, var(--green-light), var(--green-dark)); transition: width .5s; }
+  .strength-label { font-size: .78rem; color: var(--text-light); margin-top: 4px; display: flex; justify-content: space-between; }
+
+  /* ── SIMULATE BUTTON ── */
+  #btn-simulate {
+    display: block;
+    width: calc(100% - 20px);
+    margin: 10px;
+    background: linear-gradient(135deg, var(--green), var(--green-dark));
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: .5px;
+    transition: opacity .2s;
+  }
+  #btn-simulate:disabled { opacity: .3; cursor: not-allowed; }
+  #btn-simulate:not(:disabled):hover { opacity: .9; }
+
+  /* ── RESULTS SCREEN ── */
+  #results-screen {
+    display: none;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  .result-header {
+    text-align: center;
+    padding: 24px 16px;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    background: linear-gradient(135deg, var(--green-dark), var(--green));
+    color: #fff;
+  }
+  .result-header h2 { font-size: 1.8rem; }
+  .result-header .trophy { font-size: 4rem; display: block; margin-bottom: 8px; }
+  .result-header .record { font-size: 2.5rem; font-weight: 900; color: var(--gold); }
+  .result-header .verdict { font-size: 1rem; opacity: .9; margin-top: 4px; }
+
+  .matches-list { display: grid; gap: 8px; }
+  .match-row {
+    background: #fff;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .match-row .stage { font-size: .72rem; font-weight: 700; text-transform: uppercase; color: var(--text-light); width: 70px; }
+  .match-row .opponent { font-weight: 600; font-size: .88rem; flex: 1; }
+  .match-row .scores { font-size: .82rem; color: var(--text-light); text-align: right; }
+  .match-row .outcome {
+    font-weight: 800;
+    font-size: .78rem;
+    padding: 3px 8px;
+    border-radius: 4px;
+    min-width: 40px;
+    text-align: center;
+  }
+  .outcome-W { background: #e8f5e9; color: #2e7d32; }
+  .outcome-L { background: #fce4ec; color: #c62828; }
+  .outcome-NR { background: #f3f4f6; color: #555; }
+
+  .mvp-card {
+    background: linear-gradient(135deg, #fff8e1, #fff3cd);
+    border: 2px solid var(--gold);
+    border-radius: 10px;
+    padding: 14px;
+    text-align: center;
+    margin-top: 12px;
+  }
+  .mvp-card h3 { font-size: .8rem; text-transform: uppercase; color: var(--text-light); letter-spacing: .5px; margin-bottom: 6px; }
+  .mvp-card .mvp-name { font-size: 1.3rem; font-weight: 800; }
+  .mvp-card .mvp-stat { font-size: .82rem; color: var(--text-light); margin-top: 4px; }
+
+  #btn-restart {
+    display: block;
+    width: 100%;
+    margin-top: 16px;
+    background: var(--green-dark);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    padding: 14px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    text-transform: uppercase;
+  }
+
+  /* ── SPINNING ANIMATION ── */
+  @keyframes spin-blur {
+    0%   { opacity: 0; transform: translateY(-10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  .reel-enter { animation: spin-blur .3s ease; }
+
+  /* ── NOTIFICATION ── */
+  #notif {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #333;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 30px;
+    font-size: .88rem;
+    font-weight: 600;
+    transition: transform .3s ease;
+    z-index: 999;
+    white-space: nowrap;
+  }
+  #notif.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🏏 Cricket World Cup XI</h1>
+  <p>Spin the wheel — draft legends across eras — simulate glory</p>
+</header>
+<div id="progress-bar"><div id="progress-fill"></div></div>
+
+<!-- MAIN GAME -->
+<div id="game-screen">
+  <main>
+    <!-- LEFT: Spin + Squad -->
+    <div>
+      <div class="card">
+        <div class="card-header">
+          <span id="pick-counter">Pick 1 of 11</span>
+          &nbsp;·&nbsp; Spin to reveal a World Cup squad
+        </div>
+        <div id="spin-zone">
+          <div id="spin-info">Click <strong>SPIN</strong> to get a random World Cup team</div>
+          <div id="reel-wrapper">
+            <div id="reel">
+              <div style="color:#fff;opacity:.5;font-size:.9rem;">Press spin to start</div>
+            </div>
+          </div>
+          <button id="btn-spin">🎰 Spin</button>
+        </div>
+
+        <div id="squad-section" style="display:none;">
+          <div class="card-header" id="squad-title">Choose one player</div>
+          <div id="squad-grid"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Team Panel -->
+    <div>
+      <div class="card" id="team-panel">
+        <div class="card-header">Your XI</div>
+        <div id="slots-list"></div>
+        <div id="team-strength">
+          <div class="strength-label"><span>Team Rating</span><span id="strength-val">0</span></div>
+          <div class="strength-bar-wrap"><div class="strength-bar" id="strength-bar" style="width:0%"></div></div>
+        </div>
+        <button id="btn-simulate" disabled>Simulate Tournament →</button>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- RESULTS -->
+<div id="results-screen"></div>
+
+<div id="notif"></div>
+
+<script>
+// ══════════════════════════════════════════════════════
+//  DATA
+// ══════════════════════════════════════════════════════
+
+// roles: BAT=Batter, BWL=Bowler, ALL=All-rounder, WK=Wicketkeeper
+// rating: overall quality at that tournament (0-100)
+// bat/bowl: skill 0-100 used in simulation
+
+const SQUADS = [
+  {
+    year: 1975, host: 'England', team: 'West Indies', flag: '🇼🇮', winner: true,
+    players: [
+      { name: 'Clive Lloyd',        role: 'ALL', rating: 91, bat: 88, bowl: 55 },
+      { name: 'Viv Richards',       role: 'BAT', rating: 95, bat: 97, bowl: 30 },
+      { name: 'Gordon Greenidge',   role: 'BAT', rating: 89, bat: 90, bowl: 10 },
+      { name: 'Roy Fredericks',     role: 'BAT', rating: 82, bat: 83, bowl: 10 },
+      { name: 'Alvin Kallicharran', role: 'BAT', rating: 82, bat: 84, bowl: 10 },
+      { name: 'Keith Boyce',        role: 'ALL', rating: 76, bat: 65, bowl: 72 },
+      { name: 'Bernard Julien',     role: 'ALL', rating: 73, bat: 60, bowl: 70 },
+      { name: 'Deryck Murray',      role: 'WK',  rating: 74, bat: 62, bowl: 0  },
+      { name: 'Andy Roberts',       role: 'BWL', rating: 88, bat: 20, bowl: 89 },
+      { name: 'Vanburn Holder',     role: 'BWL', rating: 70, bat: 18, bowl: 72 },
+      { name: 'Lance Gibbs',        role: 'BWL', rating: 72, bat: 10, bowl: 74 },
+    ]
+  },
+  {
+    year: 1975, host: 'England', team: 'Australia', flag: '🇦🇺',
+    players: [
+      { name: 'Ian Chappell',    role: 'BAT', rating: 86, bat: 87, bowl: 30 },
+      { name: 'Greg Chappell',   role: 'ALL', rating: 90, bat: 91, bowl: 55 },
+      { name: 'Rod Marsh',       role: 'WK',  rating: 83, bat: 75, bowl: 0  },
+      { name: 'Ross Edwards',    role: 'BAT', rating: 71, bat: 72, bowl: 10 },
+      { name: 'Doug Walters',    role: 'BAT', rating: 76, bat: 78, bowl: 35 },
+      { name: 'Dennis Lillee',   role: 'BWL', rating: 90, bat: 22, bowl: 92 },
+      { name: 'Jeff Thomson',    role: 'BWL', rating: 87, bat: 15, bowl: 89 },
+      { name: 'Max Walker',      role: 'BWL', rating: 72, bat: 20, bowl: 74 },
+      { name: 'Ashley Mallett',  role: 'BWL', rating: 68, bat: 15, bowl: 70 },
+      { name: 'Gary Gilmour',    role: 'ALL', rating: 74, bat: 55, bowl: 75 },
+    ]
+  },
+  {
+    year: 1979, host: 'England', team: 'West Indies', flag: '🇼🇮', winner: true,
+    players: [
+      { name: 'Viv Richards',       role: 'BAT', rating: 97, bat: 98, bowl: 32 },
+      { name: 'Clive Lloyd',        role: 'ALL', rating: 89, bat: 86, bowl: 52 },
+      { name: 'Gordon Greenidge',   role: 'BAT', rating: 91, bat: 92, bowl: 10 },
+      { name: 'Desmond Haynes',     role: 'BAT', rating: 85, bat: 86, bowl: 10 },
+      { name: 'Collis King',        role: 'ALL', rating: 80, bat: 78, bowl: 68 },
+      { name: 'Deryck Murray',      role: 'WK',  rating: 75, bat: 64, bowl: 0  },
+      { name: 'Andy Roberts',       role: 'BWL', rating: 87, bat: 22, bowl: 88 },
+      { name: 'Michael Holding',    role: 'BWL', rating: 91, bat: 18, bowl: 92 },
+      { name: 'Joel Garner',        role: 'BWL', rating: 89, bat: 16, bowl: 90 },
+      { name: 'Colin Croft',        role: 'BWL', rating: 82, bat: 14, bowl: 84 },
+    ]
+  },
+  {
+    year: 1983, host: 'England', team: 'India', flag: '🇮🇳', winner: true,
+    players: [
+      { name: 'Kapil Dev',           role: 'ALL', rating: 93, bat: 80, bowl: 85 },
+      { name: 'Sunil Gavaskar',      role: 'BAT', rating: 88, bat: 90, bowl: 10 },
+      { name: 'Mohinder Amarnath',   role: 'ALL', rating: 82, bat: 78, bowl: 62 },
+      { name: 'Krishnamachari Srikkanth', role: 'BAT', rating: 77, bat: 78, bowl: 20 },
+      { name: 'Yashpal Sharma',      role: 'BAT', rating: 75, bat: 76, bowl: 10 },
+      { name: 'Sandeep Patil',       role: 'BAT', rating: 74, bat: 75, bowl: 30 },
+      { name: 'Dilip Vengsarkar',    role: 'BAT', rating: 78, bat: 80, bowl: 10 },
+      { name: 'Roger Binny',         role: 'ALL', rating: 74, bat: 55, bowl: 72 },
+      { name: 'Madan Lal',           role: 'ALL', rating: 73, bat: 52, bowl: 70 },
+      { name: 'Balwinder Sandhu',    role: 'BWL', rating: 68, bat: 18, bowl: 70 },
+      { name: 'Syed Kirmani',        role: 'WK',  rating: 76, bat: 60, bowl: 0  },
+    ]
+  },
+  {
+    year: 1983, host: 'England', team: 'West Indies', flag: '🇼🇮',
+    players: [
+      { name: 'Viv Richards',       role: 'BAT', rating: 98, bat: 99, bowl: 32 },
+      { name: 'Gordon Greenidge',   role: 'BAT', rating: 90, bat: 91, bowl: 10 },
+      { name: 'Desmond Haynes',     role: 'BAT', rating: 87, bat: 88, bowl: 10 },
+      { name: 'Clive Lloyd',        role: 'ALL', rating: 86, bat: 82, bowl: 50 },
+      { name: 'Larry Gomes',        role: 'BAT', rating: 76, bat: 78, bowl: 20 },
+      { name: 'Malcolm Marshall',   role: 'BWL', rating: 94, bat: 40, bowl: 95 },
+      { name: 'Michael Holding',    role: 'BWL', rating: 91, bat: 18, bowl: 92 },
+      { name: 'Joel Garner',        role: 'BWL', rating: 90, bat: 16, bowl: 91 },
+      { name: 'Andy Roberts',       role: 'BWL', rating: 84, bat: 22, bowl: 85 },
+      { name: 'Jeff Dujon',         role: 'WK',  rating: 80, bat: 72, bowl: 0  },
+      { name: 'Roger Harper',       role: 'ALL', rating: 70, bat: 52, bowl: 65 },
+    ]
+  },
+  {
+    year: 1987, host: 'India/Pak', team: 'Australia', flag: '🇦🇺', winner: true,
+    players: [
+      { name: 'Allan Border',       role: 'ALL', rating: 88, bat: 87, bowl: 55 },
+      { name: 'David Boon',         role: 'BAT', rating: 82, bat: 83, bowl: 10 },
+      { name: 'Geoff Marsh',        role: 'BAT', rating: 77, bat: 78, bowl: 10 },
+      { name: 'Dean Jones',         role: 'BAT', rating: 84, bat: 85, bowl: 15 },
+      { name: 'Mike Veletta',       role: 'BAT', rating: 70, bat: 71, bowl: 10 },
+      { name: 'Steve Waugh',        role: 'ALL', rating: 81, bat: 78, bowl: 68 },
+      { name: 'Greg Dyer',          role: 'WK',  rating: 67, bat: 55, bowl: 0  },
+      { name: 'Craig McDermott',    role: 'BWL', rating: 79, bat: 20, bowl: 81 },
+      { name: 'Bruce Reid',         role: 'BWL', rating: 74, bat: 10, bowl: 76 },
+      { name: 'Simon O\'Donnell',   role: 'ALL', rating: 72, bat: 60, bowl: 68 },
+      { name: 'Tim May',            role: 'BWL', rating: 66, bat: 12, bowl: 68 },
+    ]
+  },
+  {
+    year: 1992, host: 'Aus/NZ', team: 'Pakistan', flag: '🇵🇰', winner: true,
+    players: [
+      { name: 'Imran Khan',         role: 'ALL', rating: 94, bat: 82, bowl: 90 },
+      { name: 'Wasim Akram',        role: 'ALL', rating: 95, bat: 68, bowl: 97 },
+      { name: 'Waqar Younis',       role: 'BWL', rating: 90, bat: 20, bowl: 93 },
+      { name: 'Javed Miandad',      role: 'BAT', rating: 90, bat: 92, bowl: 10 },
+      { name: 'Inzamam-ul-Haq',     role: 'BAT', rating: 84, bat: 85, bowl: 10 },
+      { name: 'Ramiz Raja',         role: 'BAT', rating: 76, bat: 77, bowl: 10 },
+      { name: 'Aamir Sohail',       role: 'ALL', rating: 78, bat: 76, bowl: 52 },
+      { name: 'Salim Malik',        role: 'BAT', rating: 82, bat: 83, bowl: 30 },
+      { name: 'Mushtaq Ahmed',      role: 'BWL', rating: 80, bat: 18, bowl: 82 },
+      { name: 'Zahid Fazal',        role: 'BAT', rating: 68, bat: 70, bowl: 10 },
+      { name: 'Moin Khan',          role: 'WK',  rating: 76, bat: 68, bowl: 0  },
+    ]
+  },
+  {
+    year: 1992, host: 'Aus/NZ', team: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+    players: [
+      { name: 'Graham Gooch',       role: 'BAT', rating: 86, bat: 88, bowl: 30 },
+      { name: 'Ian Botham',         role: 'ALL', rating: 86, bat: 78, bowl: 82 },
+      { name: 'Alec Stewart',       role: 'WK',  rating: 82, bat: 80, bowl: 0  },
+      { name: 'Robin Smith',        role: 'BAT', rating: 83, bat: 84, bowl: 10 },
+      { name: 'Neil Fairbrother',   role: 'BAT', rating: 78, bat: 79, bowl: 10 },
+      { name: 'Graeme Hick',        role: 'BAT', rating: 75, bat: 76, bowl: 20 },
+      { name: 'Derek Pringle',      role: 'ALL', rating: 70, bat: 50, bowl: 68 },
+      { name: 'Phil DeFreitas',     role: 'ALL', rating: 72, bat: 45, bowl: 72 },
+      { name: 'Chris Lewis',        role: 'ALL', rating: 74, bat: 55, bowl: 70 },
+      { name: 'Richard Illingworth',role: 'BWL', rating: 64, bat: 20, bowl: 66 },
+      { name: 'Dermot Reeve',       role: 'ALL', rating: 67, bat: 52, bowl: 62 },
+    ]
+  },
+  {
+    year: 1996, host: 'India/Pak/SL', team: 'Sri Lanka', flag: '🇱🇰', winner: true,
+    players: [
+      { name: 'Sanath Jayasuriya',      role: 'ALL', rating: 94, bat: 92, bowl: 70 },
+      { name: 'Romesh Kaluwitharana',   role: 'WK',  rating: 80, bat: 78, bowl: 0  },
+      { name: 'Aravinda de Silva',      role: 'ALL', rating: 93, bat: 91, bowl: 60 },
+      { name: 'Arjuna Ranatunga',       role: 'ALL', rating: 85, bat: 82, bowl: 45 },
+      { name: 'Roshan Mahanama',        role: 'BAT', rating: 77, bat: 78, bowl: 10 },
+      { name: 'Hashan Tillakaratne',    role: 'BAT', rating: 79, bat: 80, bowl: 10 },
+      { name: 'Kumar Dharmasena',       role: 'ALL', rating: 72, bat: 55, bowl: 68 },
+      { name: 'Chaminda Vaas',          role: 'BWL', rating: 82, bat: 28, bowl: 84 },
+      { name: 'Muttiah Muralitharan',   role: 'BWL', rating: 92, bat: 10, bowl: 95 },
+      { name: 'Pramodya Wickramasinghe',role: 'BWL', rating: 68, bat: 12, bowl: 70 },
+      { name: 'Upul Chandana',          role: 'BWL', rating: 67, bat: 20, bowl: 68 },
+    ]
+  },
+  {
+    year: 1999, host: 'England', team: 'Australia', flag: '🇦🇺', winner: true,
+    players: [
+      { name: 'Steve Waugh',        role: 'ALL', rating: 92, bat: 90, bowl: 62 },
+      { name: 'Adam Gilchrist',     role: 'WK',  rating: 95, bat: 93, bowl: 0  },
+      { name: 'Mark Waugh',         role: 'BAT', rating: 87, bat: 88, bowl: 35 },
+      { name: 'Ricky Ponting',      role: 'BAT', rating: 90, bat: 91, bowl: 20 },
+      { name: 'Michael Bevan',      role: 'BAT', rating: 88, bat: 89, bowl: 35 },
+      { name: 'Tom Moody',          role: 'ALL', rating: 74, bat: 62, bowl: 68 },
+      { name: 'Shane Warne',        role: 'BWL', rating: 93, bat: 30, bowl: 95 },
+      { name: 'Glenn McGrath',      role: 'BWL', rating: 93, bat: 10, bowl: 96 },
+      { name: 'Damien Fleming',     role: 'BWL', rating: 76, bat: 18, bowl: 78 },
+      { name: 'Paul Reiffel',       role: 'BWL', rating: 72, bat: 20, bowl: 74 },
+      { name: 'Darren Lehmann',     role: 'BAT', rating: 79, bat: 80, bowl: 25 },
+    ]
+  },
+  {
+    year: 1999, host: 'England', team: 'Pakistan', flag: '🇵🇰',
+    players: [
+      { name: 'Wasim Akram',        role: 'ALL', rating: 95, bat: 68, bowl: 97 },
+      { name: 'Waqar Younis',       role: 'BWL', rating: 88, bat: 20, bowl: 91 },
+      { name: 'Saeed Anwar',        role: 'BAT', rating: 88, bat: 90, bowl: 10 },
+      { name: 'Inzamam-ul-Haq',     role: 'BAT', rating: 89, bat: 91, bowl: 10 },
+      { name: 'Shahid Afridi',      role: 'ALL', rating: 84, bat: 78, bowl: 74 },
+      { name: 'Abdul Razzaq',       role: 'ALL', rating: 80, bat: 70, bowl: 72 },
+      { name: 'Moin Khan',          role: 'WK',  rating: 78, bat: 72, bowl: 0  },
+      { name: 'Azhar Mahmood',      role: 'ALL', rating: 76, bat: 62, bowl: 72 },
+      { name: 'Shoaib Akhtar',      role: 'BWL', rating: 85, bat: 15, bowl: 88 },
+      { name: 'Saqlain Mushtaq',    role: 'BWL', rating: 82, bat: 14, bowl: 84 },
+      { name: 'Ijaz Ahmed',         role: 'BAT', rating: 79, bat: 80, bowl: 10 },
+    ]
+  },
+  {
+    year: 2003, host: 'South Africa', team: 'Australia', flag: '🇦🇺', winner: true,
+    players: [
+      { name: 'Ricky Ponting',      role: 'BAT', rating: 96, bat: 97, bowl: 20 },
+      { name: 'Adam Gilchrist',     role: 'WK',  rating: 96, bat: 94, bowl: 0  },
+      { name: 'Matthew Hayden',     role: 'BAT', rating: 91, bat: 92, bowl: 10 },
+      { name: 'Damien Martyn',      role: 'BAT', rating: 85, bat: 86, bowl: 10 },
+      { name: 'Andrew Symonds',     role: 'ALL', rating: 86, bat: 82, bowl: 70 },
+      { name: 'Michael Bevan',      role: 'BAT', rating: 87, bat: 88, bowl: 30 },
+      { name: 'Shane Watson',       role: 'ALL', rating: 78, bat: 70, bowl: 72 },
+      { name: 'Brett Lee',          role: 'BWL', rating: 88, bat: 25, bowl: 91 },
+      { name: 'Glenn McGrath',      role: 'BWL', rating: 94, bat: 10, bowl: 97 },
+      { name: 'Andy Bichel',        role: 'ALL', rating: 76, bat: 52, bowl: 74 },
+      { name: 'Jason Gillespie',    role: 'BWL', rating: 80, bat: 14, bowl: 82 },
+    ]
+  },
+  {
+    year: 2003, host: 'South Africa', team: 'India', flag: '🇮🇳',
+    players: [
+      { name: 'Sachin Tendulkar',   role: 'BAT', rating: 98, bat: 99, bowl: 40 },
+      { name: 'Sourav Ganguly',     role: 'ALL', rating: 90, bat: 88, bowl: 55 },
+      { name: 'Rahul Dravid',       role: 'BAT', rating: 91, bat: 92, bowl: 10 },
+      { name: 'Virender Sehwag',    role: 'ALL', rating: 88, bat: 89, bowl: 40 },
+      { name: 'Yuvraj Singh',       role: 'ALL', rating: 84, bat: 82, bowl: 62 },
+      { name: 'Mohammad Kaif',      role: 'BAT', rating: 75, bat: 76, bowl: 10 },
+      { name: 'Zaheer Khan',        role: 'BWL', rating: 82, bat: 20, bowl: 84 },
+      { name: 'Harbhajan Singh',    role: 'BWL', rating: 82, bat: 28, bowl: 84 },
+      { name: 'Ashish Nehra',       role: 'BWL', rating: 76, bat: 12, bowl: 78 },
+      { name: 'Javagal Srinath',    role: 'BWL', rating: 80, bat: 15, bowl: 82 },
+      { name: 'Dinesh Mongia',      role: 'ALL', rating: 70, bat: 62, bowl: 58 },
+    ]
+  },
+  {
+    year: 2007, host: 'West Indies', team: 'Australia', flag: '🇦🇺', winner: true,
+    players: [
+      { name: 'Ricky Ponting',      role: 'BAT', rating: 97, bat: 98, bowl: 20 },
+      { name: 'Adam Gilchrist',     role: 'WK',  rating: 94, bat: 92, bowl: 0  },
+      { name: 'Matthew Hayden',     role: 'BAT', rating: 89, bat: 90, bowl: 10 },
+      { name: 'Michael Clarke',     role: 'ALL', rating: 85, bat: 84, bowl: 58 },
+      { name: 'Michael Hussey',     role: 'BAT', rating: 88, bat: 89, bowl: 20 },
+      { name: 'Andrew Symonds',     role: 'ALL', rating: 88, bat: 84, bowl: 72 },
+      { name: 'Brad Haddin',        role: 'WK',  rating: 79, bat: 76, bowl: 0  },
+      { name: 'Shane Watson',       role: 'ALL', rating: 82, bat: 78, bowl: 74 },
+      { name: 'Brett Lee',          role: 'BWL', rating: 88, bat: 22, bowl: 90 },
+      { name: 'Glenn McGrath',      role: 'BWL', rating: 90, bat: 10, bowl: 93 },
+      { name: 'Nathan Bracken',     role: 'BWL', rating: 78, bat: 10, bowl: 80 },
+    ]
+  },
+  {
+    year: 2007, host: 'West Indies', team: 'Sri Lanka', flag: '🇱🇰',
+    players: [
+      { name: 'Kumar Sangakkara',   role: 'WK',  rating: 95, bat: 96, bowl: 0  },
+      { name: 'Mahela Jayawardene', role: 'BAT', rating: 93, bat: 94, bowl: 20 },
+      { name: 'Sanath Jayasuriya',  role: 'ALL', rating: 88, bat: 86, bowl: 65 },
+      { name: 'Tillakaratne Dilshan',role:'ALL', rating: 85, bat: 84, bowl: 52 },
+      { name: 'Lasith Malinga',     role: 'BWL', rating: 90, bat: 22, bowl: 93 },
+      { name: 'Chaminda Vaas',      role: 'BWL', rating: 80, bat: 25, bowl: 82 },
+      { name: 'Muttiah Muralitharan',role:'BWL', rating: 94, bat: 10, bowl: 97 },
+      { name: 'Farveez Maharoof',   role: 'ALL', rating: 72, bat: 52, bowl: 68 },
+      { name: 'Upul Tharanga',      role: 'BAT', rating: 79, bat: 80, bowl: 10 },
+      { name: 'Jehan Mubarak',      role: 'ALL', rating: 66, bat: 58, bowl: 55 },
+      { name: 'Malinga Bandara',    role: 'BWL', rating: 64, bat: 10, bowl: 66 },
+    ]
+  },
+  {
+    year: 2011, host: 'India/SL/Ban', team: 'India', flag: '🇮🇳', winner: true,
+    players: [
+      { name: 'MS Dhoni',           role: 'WK',  rating: 96, bat: 92, bowl: 0  },
+      { name: 'Sachin Tendulkar',   role: 'BAT', rating: 96, bat: 98, bowl: 38 },
+      { name: 'Virat Kohli',        role: 'BAT', rating: 88, bat: 89, bowl: 15 },
+      { name: 'Yuvraj Singh',       role: 'ALL', rating: 90, bat: 88, bowl: 72 },
+      { name: 'Gautam Gambhir',     role: 'BAT', rating: 85, bat: 86, bowl: 10 },
+      { name: 'Virender Sehwag',    role: 'ALL', rating: 85, bat: 86, bowl: 38 },
+      { name: 'Zaheer Khan',        role: 'BWL', rating: 88, bat: 18, bowl: 90 },
+      { name: 'Harbhajan Singh',    role: 'BWL', rating: 80, bat: 25, bowl: 82 },
+      { name: 'Ashish Nehra',       role: 'BWL', rating: 74, bat: 10, bowl: 76 },
+      { name: 'Munaf Patel',        role: 'BWL', rating: 72, bat: 10, bowl: 74 },
+      { name: 'Ravindra Jadeja',    role: 'ALL', rating: 80, bat: 62, bowl: 76 },
+    ]
+  },
+  {
+    year: 2011, host: 'India/SL/Ban', team: 'Sri Lanka', flag: '🇱🇰',
+    players: [
+      { name: 'Kumar Sangakkara',   role: 'WK',  rating: 96, bat: 97, bowl: 0  },
+      { name: 'Mahela Jayawardene', role: 'BAT', rating: 93, bat: 94, bowl: 20 },
+      { name: 'Tillakaratne Dilshan',role:'ALL', rating: 87, bat: 86, bowl: 52 },
+      { name: 'Upul Tharanga',      role: 'BAT', rating: 80, bat: 81, bowl: 10 },
+      { name: 'Angelo Mathews',     role: 'ALL', rating: 84, bat: 80, bowl: 72 },
+      { name: 'Thisara Perera',     role: 'ALL', rating: 74, bat: 65, bowl: 68 },
+      { name: 'Lasith Malinga',     role: 'BWL', rating: 93, bat: 20, bowl: 95 },
+      { name: 'Muttiah Muralitharan',role:'BWL', rating: 89, bat: 10, bowl: 93 },
+      { name: 'Nuwan Kulasekara',   role: 'BWL', rating: 75, bat: 22, bowl: 76 },
+      { name: 'Chamara Kapugedera', role: 'BAT', rating: 70, bat: 71, bowl: 15 },
+      { name: 'Suranga Lakmal',     role: 'BWL', rating: 68, bat: 14, bowl: 70 },
+    ]
+  },
+  {
+    year: 2015, host: 'Aus/NZ', team: 'Australia', flag: '🇦🇺', winner: true,
+    players: [
+      { name: 'Michael Clarke',     role: 'ALL', rating: 88, bat: 87, bowl: 55 },
+      { name: 'Aaron Finch',        role: 'BAT', rating: 84, bat: 85, bowl: 10 },
+      { name: 'David Warner',       role: 'BAT', rating: 91, bat: 92, bowl: 10 },
+      { name: 'Steve Smith',        role: 'ALL', rating: 90, bat: 91, bowl: 50 },
+      { name: 'Glenn Maxwell',      role: 'ALL', rating: 85, bat: 82, bowl: 68 },
+      { name: 'Shane Watson',       role: 'ALL', rating: 82, bat: 78, bowl: 72 },
+      { name: 'Brad Haddin',        role: 'WK',  rating: 80, bat: 78, bowl: 0  },
+      { name: 'Mitchell Johnson',   role: 'BWL', rating: 90, bat: 30, bowl: 93 },
+      { name: 'Mitchell Starc',     role: 'BWL', rating: 88, bat: 22, bowl: 92 },
+      { name: 'Josh Hazlewood',     role: 'BWL', rating: 84, bat: 12, bowl: 86 },
+      { name: 'Pat Cummins',        role: 'BWL', rating: 83, bat: 20, bowl: 85 },
+    ]
+  },
+  {
+    year: 2015, host: 'Aus/NZ', team: 'New Zealand', flag: '🇳🇿',
+    players: [
+      { name: 'Brendon McCullum',   role: 'WK',  rating: 90, bat: 91, bowl: 10 },
+      { name: 'Martin Guptill',     role: 'BAT', rating: 87, bat: 88, bowl: 10 },
+      { name: 'Kane Williamson',    role: 'ALL', rating: 90, bat: 91, bowl: 52 },
+      { name: 'Ross Taylor',        role: 'BAT', rating: 87, bat: 88, bowl: 10 },
+      { name: 'Grant Elliott',      role: 'ALL', rating: 75, bat: 68, bowl: 68 },
+      { name: 'Corey Anderson',     role: 'ALL', rating: 76, bat: 72, bowl: 68 },
+      { name: 'Luke Ronchi',        role: 'WK',  rating: 75, bat: 74, bowl: 0  },
+      { name: 'Daniel Vettori',     role: 'ALL', rating: 80, bat: 55, bowl: 80 },
+      { name: 'Tim Southee',        role: 'BWL', rating: 82, bat: 30, bowl: 84 },
+      { name: 'Trent Boult',        role: 'BWL', rating: 88, bat: 18, bowl: 90 },
+      { name: 'Adam Milne',         role: 'BWL', rating: 76, bat: 10, bowl: 78 },
+    ]
+  },
+  {
+    year: 2019, host: 'England', team: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿', winner: true,
+    players: [
+      { name: 'Eoin Morgan',        role: 'BAT', rating: 89, bat: 88, bowl: 10 },
+      { name: 'Jason Roy',          role: 'BAT', rating: 86, bat: 87, bowl: 10 },
+      { name: 'Jonny Bairstow',     role: 'WK',  rating: 88, bat: 89, bowl: 0  },
+      { name: 'Joe Root',           role: 'ALL', rating: 90, bat: 91, bowl: 50 },
+      { name: 'Ben Stokes',         role: 'ALL', rating: 94, bat: 88, bowl: 84 },
+      { name: 'Jos Buttler',        role: 'WK',  rating: 90, bat: 92, bowl: 0  },
+      { name: 'Jofra Archer',       role: 'BWL', rating: 87, bat: 28, bowl: 90 },
+      { name: 'Chris Woakes',       role: 'ALL', rating: 83, bat: 60, bowl: 82 },
+      { name: 'Liam Plunkett',      role: 'BWL', rating: 78, bat: 30, bowl: 80 },
+      { name: 'Adil Rashid',        role: 'BWL', rating: 80, bat: 25, bowl: 82 },
+      { name: 'Mark Wood',          role: 'BWL', rating: 80, bat: 20, bowl: 83 },
+    ]
+  },
+  {
+    year: 2019, host: 'England', team: 'New Zealand', flag: '🇳🇿',
+    players: [
+      { name: 'Kane Williamson',    role: 'ALL', rating: 94, bat: 95, bowl: 52 },
+      { name: 'Martin Guptill',     role: 'BAT', rating: 85, bat: 86, bowl: 10 },
+      { name: 'Ross Taylor',        role: 'BAT', rating: 88, bat: 89, bowl: 15 },
+      { name: 'Tom Latham',         role: 'WK',  rating: 82, bat: 82, bowl: 0  },
+      { name: 'James Neesham',      role: 'ALL', rating: 80, bat: 72, bowl: 72 },
+      { name: 'Colin de Grandhomme',role: 'ALL', rating: 80, bat: 72, bowl: 74 },
+      { name: 'Mitchell Santner',   role: 'ALL', rating: 75, bat: 55, bowl: 74 },
+      { name: 'Matt Henry',         role: 'BWL', rating: 78, bat: 15, bowl: 80 },
+      { name: 'Tim Southee',        role: 'BWL', rating: 82, bat: 28, bowl: 84 },
+      { name: 'Trent Boult',        role: 'BWL', rating: 90, bat: 18, bowl: 92 },
+      { name: 'Lockie Ferguson',    role: 'BWL', rating: 80, bat: 10, bowl: 83 },
+    ]
+  },
+  {
+    year: 2019, host: 'England', team: 'India', flag: '🇮🇳',
+    players: [
+      { name: 'Virat Kohli',        role: 'BAT', rating: 97, bat: 98, bowl: 18 },
+      { name: 'Rohit Sharma',       role: 'BAT', rating: 93, bat: 94, bowl: 20 },
+      { name: 'KL Rahul',           role: 'WK',  rating: 86, bat: 87, bowl: 0  },
+      { name: 'MS Dhoni',           role: 'WK',  rating: 86, bat: 84, bowl: 0  },
+      { name: 'Hardik Pandya',      role: 'ALL', rating: 86, bat: 80, bowl: 76 },
+      { name: 'Ravindra Jadeja',    role: 'ALL', rating: 85, bat: 70, bowl: 82 },
+      { name: 'Kuldeep Yadav',      role: 'BWL', rating: 80, bat: 18, bowl: 82 },
+      { name: 'Jasprit Bumrah',     role: 'BWL', rating: 94, bat: 12, bowl: 97 },
+      { name: 'Bhuvneshwar Kumar',  role: 'BWL', rating: 82, bat: 22, bowl: 84 },
+      { name: 'Yuzvendra Chahal',   role: 'BWL', rating: 78, bat: 10, bowl: 80 },
+      { name: 'Shikhar Dhawan',     role: 'BAT', rating: 82, bat: 83, bowl: 10 },
+    ]
+  },
+  {
+    year: 2023, host: 'India', team: 'Australia', flag: '🇦🇺', winner: true,
+    players: [
+      { name: 'Pat Cummins',        role: 'ALL', rating: 90, bat: 58, bowl: 94 },
+      { name: 'David Warner',       role: 'BAT', rating: 87, bat: 88, bowl: 10 },
+      { name: 'Travis Head',        role: 'BAT', rating: 88, bat: 89, bowl: 35 },
+      { name: 'Steve Smith',        role: 'ALL', rating: 91, bat: 92, bowl: 50 },
+      { name: 'Marnus Labuschagne', role: 'BAT', rating: 84, bat: 85, bowl: 35 },
+      { name: 'Glenn Maxwell',      role: 'ALL', rating: 88, bat: 86, bowl: 70 },
+      { name: 'Josh Inglis',        role: 'WK',  rating: 77, bat: 76, bowl: 0  },
+      { name: 'Mitchell Starc',     role: 'BWL', rating: 90, bat: 24, bowl: 93 },
+      { name: 'Josh Hazlewood',     role: 'BWL', rating: 88, bat: 12, bowl: 90 },
+      { name: 'Adam Zampa',         role: 'BWL', rating: 85, bat: 12, bowl: 87 },
+      { name: 'Mitchell Marsh',     role: 'ALL', rating: 83, bat: 80, bowl: 70 },
+    ]
+  },
+  {
+    year: 2023, host: 'India', team: 'India', flag: '🇮🇳',
+    players: [
+      { name: 'Virat Kohli',        role: 'BAT', rating: 97, bat: 98, bowl: 18 },
+      { name: 'Rohit Sharma',       role: 'BAT', rating: 91, bat: 92, bowl: 20 },
+      { name: 'Shubman Gill',       role: 'BAT', rating: 85, bat: 86, bowl: 10 },
+      { name: 'KL Rahul',           role: 'WK',  rating: 85, bat: 86, bowl: 0  },
+      { name: 'Shreyas Iyer',       role: 'BAT', rating: 82, bat: 83, bowl: 10 },
+      { name: 'Ravindra Jadeja',    role: 'ALL', rating: 88, bat: 74, bowl: 86 },
+      { name: 'Mohammed Shami',     role: 'BWL', rating: 90, bat: 16, bowl: 93 },
+      { name: 'Jasprit Bumrah',     role: 'BWL', rating: 96, bat: 12, bowl: 98 },
+      { name: 'Kuldeep Yadav',      role: 'BWL', rating: 83, bat: 14, bowl: 86 },
+      { name: 'Mohammed Siraj',     role: 'BWL', rating: 82, bat: 10, bowl: 84 },
+      { name: 'Hardik Pandya',      role: 'ALL', rating: 84, bat: 78, bowl: 74 },
+    ]
+  },
+  {
+    year: 2023, host: 'India', team: 'South Africa', flag: '🇿🇦',
+    players: [
+      { name: 'Quinton de Kock',    role: 'WK',  rating: 90, bat: 91, bowl: 0  },
+      { name: 'Temba Bavuma',       role: 'BAT', rating: 82, bat: 83, bowl: 10 },
+      { name: 'Rassie van der Dussen',role:'BAT',rating: 85, bat: 86, bowl: 15 },
+      { name: 'Aiden Markram',      role: 'ALL', rating: 84, bat: 83, bowl: 60 },
+      { name: 'David Miller',       role: 'BAT', rating: 86, bat: 87, bowl: 10 },
+      { name: 'Heinrich Klaasen',   role: 'WK',  rating: 86, bat: 87, bowl: 0  },
+      { name: 'Marco Jansen',       role: 'ALL', rating: 82, bat: 60, bowl: 80 },
+      { name: 'Keshav Maharaj',     role: 'BWL', rating: 80, bat: 20, bowl: 82 },
+      { name: 'Kagiso Rabada',      role: 'BWL', rating: 92, bat: 22, bowl: 94 },
+      { name: 'Lungi Ngidi',        role: 'BWL', rating: 80, bat: 10, bowl: 82 },
+      { name: 'Tabraiz Shamsi',     role: 'BWL', rating: 78, bat: 10, bowl: 80 },
+    ]
+  },
+  {
+    year: 2023, host: 'India', team: 'New Zealand', flag: '🇳🇿',
+    players: [
+      { name: 'Kane Williamson',    role: 'ALL', rating: 92, bat: 93, bowl: 50 },
+      { name: 'Devon Conway',       role: 'WK',  rating: 84, bat: 85, bowl: 0  },
+      { name: 'Rachin Ravindra',    role: 'ALL', rating: 82, bat: 82, bowl: 62 },
+      { name: 'Daryl Mitchell',     role: 'ALL', rating: 83, bat: 82, bowl: 55 },
+      { name: 'Tom Latham',         role: 'WK',  rating: 81, bat: 82, bowl: 0  },
+      { name: 'Glenn Phillips',     role: 'ALL', rating: 80, bat: 80, bowl: 62 },
+      { name: 'Mitchell Santner',   role: 'ALL', rating: 77, bat: 58, bowl: 76 },
+      { name: 'Matt Henry',         role: 'BWL', rating: 80, bat: 15, bowl: 82 },
+      { name: 'Tim Southee',        role: 'BWL', rating: 80, bat: 28, bowl: 82 },
+      { name: 'Trent Boult',        role: 'BWL', rating: 87, bat: 18, bowl: 90 },
+      { name: 'Lockie Ferguson',    role: 'BWL', rating: 82, bat: 10, bowl: 85 },
+    ]
+  },
+];
+
+// ══════════════════════════════════════════════════════
+//  GAME STATE
+// ══════════════════════════════════════════════════════
+
+const MAX_PICKS = 11;
+let state = {
+  picks: 0,
+  team: [],        // selected players
+  pickedIds: new Set(),  // "year-team-name"
+  currentSquad: null,
+  spinning: false,
+  spinDone: false,
+};
+
+// ══════════════════════════════════════════════════════
+//  HELPERS
+// ══════════════════════════════════════════════════════
+
+function rand(min, max) {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function teamStrength(team) {
+  if (!team.length) return 0;
+  return Math.round(team.reduce((s, p) => s + p.rating, 0) / team.length);
+}
+
+function notify(msg, ms = 2000) {
+  const el = document.getElementById('notif');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), ms);
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER TEAM SLOTS
+// ══════════════════════════════════════════════════════
+
+function renderSlots() {
+  const list = document.getElementById('slots-list');
+  list.innerHTML = '';
+  for (let i = 0; i < MAX_PICKS; i++) {
+    const p = state.team[i];
+    const div = document.createElement('div');
+    if (p) {
+      div.className = 'slot';
+      div.innerHTML = `
+        <div class="slot-num">${i + 1}</div>
+        <div class="slot-name">${p.name}</div>
+        <div class="slot-role role-${p.role}">${p.role}</div>
+        <div class="slot-era">${p.year}</div>
+        <div class="slot-rating">${p.rating}</div>`;
+    } else {
+      div.className = 'slot empty';
+      div.innerHTML = `<div class="slot-num">${i + 1}</div><em>Empty</em>`;
+    }
+    list.appendChild(div);
+  }
+
+  // Strength
+  const str = teamStrength(state.team);
+  document.getElementById('strength-val').textContent = str;
+  document.getElementById('strength-bar').style.width = str + '%';
+
+  // Progress
+  const pct = (state.picks / MAX_PICKS) * 100;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('pick-counter').textContent = `Pick ${Math.min(state.picks + 1, MAX_PICKS)} of ${MAX_PICKS}`;
+
+  // Simulate button
+  const btn = document.getElementById('btn-simulate');
+  btn.disabled = state.team.length < MAX_PICKS;
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER SQUAD
+// ══════════════════════════════════════════════════════
+
+function renderSquad(squad) {
+  const grid = document.getElementById('squad-grid');
+  const title = document.getElementById('squad-title');
+  title.textContent = `${squad.flag} ${squad.team} — ${squad.year} World Cup · Pick one player`;
+
+  grid.innerHTML = '';
+  squad.players.forEach(p => {
+    const id = `${squad.year}-${squad.team}-${p.name}`;
+    const alreadyPicked = state.pickedIds.has(id);
+    const card = document.createElement('div');
+    card.className = 'player-card' + (alreadyPicked ? ' selected-already' : '');
+    card.innerHTML = `
+      <div class="player-name">${p.name}</div>
+      <div class="player-role role-${p.role}">${p.role}</div>
+      <div style="font-size:.72rem;color:#888;margin-bottom:2px;">${squad.year} era</div>
+      <div class="rating-bar-wrap"><div class="rating-bar" style="width:${p.rating}%"></div></div>
+      <div class="rating-num">Rating: ${p.rating}</div>`;
+    if (!alreadyPicked) {
+      card.addEventListener('click', () => selectPlayer(p, squad, id));
+    }
+    grid.appendChild(card);
+  });
+
+  document.getElementById('squad-section').style.display = '';
+}
+
+// ══════════════════════════════════════════════════════
+//  SELECT PLAYER
+// ══════════════════════════════════════════════════════
+
+function selectPlayer(p, squad, id) {
+  if (state.picks >= MAX_PICKS) return;
+  const player = { ...p, year: squad.year, team: squad.team, flag: squad.flag };
+  state.team.push(player);
+  state.pickedIds.add(id);
+  state.picks++;
+  state.spinDone = false;
+
+  renderSlots();
+  document.getElementById('squad-section').style.display = 'none';
+  document.getElementById('spin-info').innerHTML = state.picks < MAX_PICKS
+    ? `Great pick! <strong>${p.name}</strong> is in. Spin again.`
+    : `Squad complete! Hit <strong>Simulate Tournament</strong>`;
+
+  if (state.picks < MAX_PICKS) {
+    document.getElementById('btn-spin').disabled = false;
+    document.getElementById('reel').innerHTML = `<div style="color:#fff;opacity:.6;font-size:.9rem;">Spin for your next pick</div>`;
+  } else {
+    document.getElementById('btn-spin').disabled = true;
+    document.getElementById('reel').innerHTML = `<div style="color:var(--gold);font-size:1.1rem;font-weight:800;">✅ XI Complete!</div>`;
+  }
+
+  notify(`✅ ${p.name} added!`);
+}
+
+// ══════════════════════════════════════════════════════
+//  SPIN LOGIC
+// ══════════════════════════════════════════════════════
+
+let spinInterval = null;
+
+function doSpin() {
+  if (state.spinning || state.spinDone || state.picks >= MAX_PICKS) return;
+  state.spinning = true;
+  document.getElementById('btn-spin').disabled = true;
+  document.getElementById('squad-section').style.display = 'none';
+
+  let ticks = 0;
+  const total = rand(14, 22);
+  const reel = document.getElementById('reel');
+
+  spinInterval = setInterval(() => {
+    ticks++;
+    const s = pick(SQUADS);
+    reel.style.opacity = '0';
+    setTimeout(() => {
+      reel.innerHTML = `
+        <div class="year-badge">${s.year}</div>
+        <div class="team-flag">${s.flag}</div>
+        <div class="team-name">${s.team}</div>
+        <div class="host-label">📍 ${s.host}</div>`;
+      reel.style.opacity = '1';
+      reel.classList.add('reel-enter');
+      setTimeout(() => reel.classList.remove('reel-enter'), 300);
+    }, 80);
+
+    if (ticks >= total) {
+      clearInterval(spinInterval);
+      const chosen = pick(SQUADS);
+      setTimeout(() => {
+        reel.style.opacity = '0';
+        setTimeout(() => {
+          reel.innerHTML = `
+            <div class="year-badge">${chosen.year} ${chosen.winner ? '🏆' : ''}</div>
+            <div class="team-flag">${chosen.flag}</div>
+            <div class="team-name">${chosen.team}</div>
+            <div class="host-label">📍 ${chosen.host}</div>`;
+          reel.style.opacity = '1';
+          state.currentSquad = chosen;
+          state.spinning = false;
+          state.spinDone = true;
+          renderSquad(chosen);
+          document.getElementById('spin-info').textContent = 'Pick one player from this squad:';
+        }, 80);
+      }, 200);
+    }
+  }, 120);
+}
+
+// ══════════════════════════════════════════════════════
+//  SIMULATION
+// ══════════════════════════════════════════════════════
+
+const OPPONENT_NAMES = [
+  { name: 'England', flag: '🏴󠁧󠁢󠁥󠁮󠁧󠁿' }, { name: 'Australia', flag: '🇦🇺' },
+  { name: 'India', flag: '🇮🇳' }, { name: 'Pakistan', flag: '🇵🇰' },
+  { name: 'South Africa', flag: '🇿🇦' }, { name: 'New Zealand', flag: '🇳🇿' },
+  { name: 'Sri Lanka', flag: '🇱🇰' }, { name: 'West Indies', flag: '🇼🇮' },
+  { name: 'Bangladesh', flag: '🇧🇩' }, { name: 'Afghanistan', flag: '🇦🇫' },
+];
+
+const STAGES = [
+  'Group', 'Group', 'Group', 'Group', 'Group', 'Group',
+  'Quarter-final', 'Semi-final', 'FINAL'
+];
+
+function calcTeamScore(team) {
+  const batters = team.filter(p => p.role === 'BAT' || p.role === 'WK' || p.role === 'ALL')
+    .sort((a, b) => b.bat - a.bat).slice(0, 6);
+  const bowlers = team.filter(p => p.role === 'BWL' || p.role === 'ALL')
+    .sort((a, b) => b.bowl - a.bowl).slice(0, 5);
+  const batScore = batters.reduce((s, p) => s + p.bat, 0) / 6;
+  const bowlScore = bowlers.reduce((s, p) => s + p.bowl, 0) / 5;
+  return (batScore * 0.55 + bowlScore * 0.45);
+}
+
+function simInnings(teamScore, isYours) {
+  const base = teamScore * 2.8;
+  const variance = rand(-35, 45);
+  return Math.max(80, Math.round(base + variance));
+}
+
+function simulateTournament() {
+  const myStrength = calcTeamScore(state.team);
+  const matches = [];
+  let wins = 0;
+  let eliminated = false;
+
+  const usedOpponents = new Set();
+  // pick opponent names different from player's team names
+  const myTeamNames = new Set(state.team.map(p => p.team));
+
+  for (let i = 0; i < STAGES.length; i++) {
+    if (eliminated) break;
+    const stage = STAGES[i];
+
+    // pick unique opponent
+    let opp;
+    for (let attempt = 0; attempt < 20; attempt++) {
+      const candidate = pick(OPPONENT_NAMES);
+      if (!usedOpponents.has(candidate.name) && !myTeamNames.has(candidate.name)) {
+        opp = candidate;
+        break;
+      }
+    }
+    if (!opp) opp = pick(OPPONENT_NAMES);
+    usedOpponents.add(opp.name);
+
+    // opponent strength — gets harder in knockouts
+    const knockoutBonus = stage === 'FINAL' ? 8 : stage === 'Semi-final' ? 5 : stage === 'Quarter-final' ? 3 : 0;
+    const oppStrength = rand(55, 80) + knockoutBonus;
+    const winProb = myStrength / (myStrength + oppStrength);
+    const won = Math.random() < winProb;
+
+    const myScore = simInnings(myStrength);
+    const oppScore = simInnings(oppStrength);
+
+    // make scores consistent with result
+    const adjustedOpp = won
+      ? Math.min(myScore - rand(1, 40), myScore - 1)
+      : Math.max(myScore + rand(1, 35), myScore + 1);
+
+    matches.push({
+      stage,
+      opp: `${opp.flag} ${opp.name}`,
+      myScore,
+      oppScore: Math.max(80, adjustedOpp),
+      won,
+    });
+
+    if (won) {
+      wins++;
+    } else if (stage !== 'Group') {
+      eliminated = true;
+    }
+  }
+
+  return matches;
+}
+
+function findMVP() {
+  return state.team.slice().sort((a, b) => b.rating - a.rating)[0];
+}
+
+// ══════════════════════════════════════════════════════
+//  RENDER RESULTS
+// ══════════════════════════════════════════════════════
+
+function renderResults(matches) {
+  const screen = document.getElementById('results-screen');
+  const wins = matches.filter(m => m.won).length;
+  const total = matches.length;
+  const finalMatch = matches[matches.length - 1];
+  const champion = wins === total;
+  const mvp = findMVP();
+
+  const verdict = champion
+    ? 'World Champions! Unbeaten perfection! 🎉'
+    : finalMatch.stage === 'FINAL' && !finalMatch.won
+    ? 'So close — fell at the final hurdle'
+    : finalMatch.stage === 'Semi-final' && !finalMatch.won
+    ? 'Semi-final exit — a valiant campaign'
+    : finalMatch.stage === 'Quarter-final' && !finalMatch.won
+    ? 'Quarter-final knocked out'
+    : `${wins} wins from ${total} group games`;
+
+  const trophy = champion ? '🏆' : wins >= 7 ? '🥈' : wins >= 5 ? '🥉' : '🏏';
+
+  screen.innerHTML = `
+    <div class="result-header">
+      <span class="trophy">${trophy}</span>
+      <h2>Tournament Over</h2>
+      <div class="record">${wins}–${total - wins}</div>
+      <div class="verdict">${verdict}</div>
+    </div>
+
+    <div class="card" style="margin-bottom:12px;">
+      <div class="card-header">Match Results</div>
+      <div class="matches-list" style="padding:10px;">
+        ${matches.map(m => `
+          <div class="match-row">
+            <span class="stage">${m.stage}</span>
+            <span class="opponent">vs ${m.opp}</span>
+            <span class="scores">${m.myScore} – ${m.oppScore}</span>
+            <span class="outcome outcome-${m.won ? 'W' : 'L'}">${m.won ? 'WIN' : 'LOSS'}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <div class="mvp-card">
+      <h3>⭐ Player of the Tournament</h3>
+      <div class="mvp-name">${mvp.name}</div>
+      <div class="mvp-stat">${mvp.flag} ${mvp.team} (${mvp.year}) · Rating ${mvp.rating}</div>
+    </div>
+
+    <div class="card" style="margin-top:12px;">
+      <div class="card-header">Your Dream XI</div>
+      <div style="padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
+        ${state.team.map((p, i) => `
+          <div style="padding:8px;border:1px solid #eee;border-radius:8px;font-size:.82rem;">
+            <div style="font-weight:700;">${i + 1}. ${p.name}</div>
+            <div style="color:#888;font-size:.72rem;">${p.flag} ${p.team} (${p.year})</div>
+            <div><span class="player-role role-${p.role}" style="font-size:.68rem;padding:1px 5px;border-radius:3px;font-weight:700;">${p.role}</span> <span style="font-weight:700;color:var(--green-dark);">${p.rating}</span></div>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <button id="btn-restart">🔄 Build Another XI</button>
+  `;
+
+  document.getElementById('game-screen').style.display = 'none';
+  screen.style.display = 'block';
+  screen.querySelector('#btn-restart').addEventListener('click', restartGame);
+}
+
+// ══════════════════════════════════════════════════════
+//  RESTART
+// ══════════════════════════════════════════════════════
+
+function restartGame() {
+  state = { picks: 0, team: [], pickedIds: new Set(), currentSquad: null, spinning: false, spinDone: false };
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('game-screen').style.display = '';
+  document.getElementById('reel').innerHTML = `<div style="color:#fff;opacity:.5;font-size:.9rem;">Press spin to start</div>`;
+  document.getElementById('squad-section').style.display = 'none';
+  document.getElementById('spin-info').innerHTML = `Click <strong>SPIN</strong> to get a random World Cup team`;
+  document.getElementById('btn-spin').disabled = false;
+  document.getElementById('progress-fill').style.width = '0%';
+  renderSlots();
+}
+
+// ══════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════
+
+renderSlots();
+
+document.getElementById('btn-spin').addEventListener('click', doSpin);
+document.getElementById('btn-simulate').addEventListener('click', () => {
+  const matches = simulateTournament();
+  renderResults(matches);
+});
+</script>
+</body>
+</html>
