@@ -2057,7 +2057,8 @@ document.getElementById("btn-sim").addEventListener("click",()=>{
       <div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;·&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
   fin.style.display="block";
 
-  document.getElementById("share-card").style.display="none";
+  document.getElementById("share-card").style.display="block";
+  document.getElementById("share-preview").style.display="none";
   // store for share
   window._tournStats=stats;
   showMatch(0);
@@ -2362,7 +2363,13 @@ function copyText(){
 document.getElementById("btn-back").addEventListener("click",()=>{
   team=new Array(11).fill(null); taken=new Set(); sq=null; sel=null;
   spinning=false; lastSquadDrawn=null;
-  hardMode=false; document.body.classList.remove("hard-mode");
+  hardMode=false; reSpinsLeft=0; document.body.classList.remove("hard-mode");
+  document.getElementById("share-card").style.display="none";
+  document.getElementById("share-preview").style.display="none";
+  document.getElementById("fin-banner").style.display="none";
+  document.getElementById("momentum").style.display="none";
+  document.getElementById("smry").innerHTML="";
+  document.getElementById("match-display").innerHTML="";
   document.getElementById("reel").innerHTML=`<div class="idle">Press Spin to reveal a squad</div>`;
   document.getElementById("reel").style.opacity="1";
   document.getElementById("squad-panel").innerHTML=`<div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Click any available player to draft them directly.</div>`;
