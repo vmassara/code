@@ -75,7 +75,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-hei
 @media(max-width:500px){.sq-grid{grid-template-columns:repeat(2,1fr)}}
 
 .pc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 10px;cursor:pointer;transition:all .15s;position:relative;user-select:none}
-.pc.avail:hover{border-color:var(--gold);background:#1e2e1e;box-shadow:0 0 0 2px rgba(212,168,75,.2)}
+.pc.avail:hover{border-color:var(--gold-d);background:#1e2e1e}
+.pc.sel{border-color:var(--gold)!important;background:#242010!important;box-shadow:0 0 0 2px rgba(212,168,75,.35)!important}
 .pc.avail{border-color:var(--green-d)}
 .pc.taken{opacity:.28;pointer-events:none}
 .pc.quota-full{opacity:.3;pointer-events:none}
@@ -113,6 +114,8 @@ body.hard-mode .pc .pstat{display:none}
 #slots-list{margin-bottom:8px}
 .slot{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;background:var(--surface);border:1px solid var(--border);margin-bottom:3px;font-size:.74rem;min-height:34px}
 .slot.empty{color:var(--faint);font-style:italic}
+.slot.slot-target{cursor:pointer;border-color:var(--gold);color:var(--gold);background:rgba(212,168,75,.07);transition:all .12s}
+.slot.slot-target:hover{background:rgba(212,168,75,.16);box-shadow:0 0 0 2px rgba(212,168,75,.25)}
 .slot-num{width:17px;height:17px;border-radius:50%;background:var(--border);color:var(--muted);font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .slot.filled .slot-num{background:var(--green-d);color:#fff}
 .slot-name{font-weight:600;color:var(--cream);flex:1}
@@ -752,22 +755,22 @@ const FIXTURES=[
 // ══════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════
-let team=[], taken=new Set(), sq=null;
+let team=new Array(11).fill(null), taken=new Set(), sq=null, sel=null;
 let hardMode=false, reSpinsLeft=3, lastSquadDrawn=null;
 let results=[], currentMatch=0;
 
 // ══════════════════════════════════════════════════════
 //  DRAFT HELPERS
 // ══════════════════════════════════════════════════════
-function cntR(r){return team.filter(p=>p.r===r).length;}
+function cntR(r){return team.filter(p=>p&&p.r===r).length;}
 function fullR(r){return cntR(r)>=Q[r];}
-function fullTeam(){return team.length>=11;}
-function avgV(){return team.length?team.reduce((s,p)=>s+p.v,0)/team.length:0;}
-function canPick(p){return !taken.has(p.n)&&!fullR(p.r);}
+function fullTeam(){return team.every(p=>p!==null);}
+function avgV(){const f=team.filter(Boolean);return f.length?f.reduce((s,p)=>s+p.v,0)/f.length:0;}
 
 function updateHeader(){
-  document.getElementById("hdr-count").textContent=team.length+"/11";
-  document.getElementById("prog-fill").style.width=(team.length/11*100)+"%";
+  const filled=team.filter(Boolean).length;
+  document.getElementById("hdr-count").textContent=filled+"/11";
+  document.getElementById("prog-fill").style.width=(filled/11*100)+"%";
 }
 
 function updateRoleTracker(){
@@ -782,9 +785,8 @@ function updateRoleTracker(){
 function updateSlots(){
   const list=document.getElementById("slots-list");
   list.innerHTML="";
-  const ord=[...team.filter(p=>p.r==="bat"),...team.filter(p=>p.r==="ar"),...team.filter(p=>p.r==="wk"),...team.filter(p=>p.r==="bowl")];
   for(let i=0;i<11;i++){
-    const p=ord[i],div=document.createElement("div");
+    const p=team[i], div=document.createElement("div");
     if(p){
       div.className="slot filled";
       div.innerHTML=`<div class="slot-num">${i+1}</div>
@@ -792,7 +794,11 @@ function updateSlots(){
         <span class="role-tag ${p.r}">${RC[p.r]}</span>
         <span class="slot-era">${p.sq||""}</span>
         <span class="slot-v">${p.v}</span>`;
-    }else{
+    } else if(sel){
+      div.className="slot empty slot-target";
+      div.innerHTML=`<div class="slot-num">${i+1}</div><em>Bat at #${i+1}</em>`;
+      div.addEventListener("click",()=>placePlayer(i));
+    } else {
       div.className="slot empty";
       div.innerHTML=`<div class="slot-num">${i+1}</div><em>Empty</em>`;
     }
@@ -870,18 +876,30 @@ document.getElementById("btn-spin-again").addEventListener("click",()=>{
 // ══════════════════════════════════════════════════════
 //  SQUAD RENDERING — click any player to draft instantly
 // ══════════════════════════════════════════════════════
+function squadHint(){
+  if(!sq) return;
+  const el=document.querySelector(".squad-hint");
+  if(!el) return;
+  if(sel)
+    el.textContent=`${sel.n} selected — click a batting position on the right`;
+  else {
+    const needed=["bat","ar","wk","bowl"].filter(r=>!fullR(r)).map(r=>RL[r]).join(", ");
+    el.textContent=`Still need: ${needed} — click a player to select`;
+  }
+}
+
 function renderSquad(s){
-  sq=s;
+  sq=s; sel=null;
   const needed=["bat","ar","wk","bowl"].filter(r=>!fullR(r)).map(r=>RL[r]).join(", ");
   document.getElementById("squad-panel").innerHTML=`
     <div class="sq-head">
       <div class="sq-title">${s.t} <span style="color:var(--faint);font-weight:400">— ${s.y}</span></div>
       <div class="sq-sub">${s.ev} · ${s.host}</div>
     </div>
-    <div class="squad-hint">Still need: ${needed} — click any player to draft</div>
+    <div class="squad-hint">Still need: ${needed} — click a player to select</div>
     <div class="sq-grid" id="sq-grid">
       ${s.p.map((p,i)=>{
-        const tk=taken.has(p.n), qf=!tk&&fullR(p.r), ok=!tk&&!qf;
+        const tk=taken.has(p.n), qf=!tk&&fullR(p.r);
         return`<div class="pc ${tk?"taken":qf?"quota-full":"avail"}" data-i="${i}">
           <div class="pn">${p.n}</div>
           <span class="role-tag ${p.r}">${RC[p.r]}</span>
@@ -892,42 +910,58 @@ function renderSquad(s){
     </div>`;
 
   document.querySelectorAll("#sq-grid .pc.avail").forEach(c=>{
-    c.addEventListener("click",()=>pickPlayer(s.p[+c.dataset.i],c));
+    c.addEventListener("click",()=>selectPlayer(s.p[+c.dataset.i],c));
   });
 
   document.getElementById("btn-spin-again").style.display="none";
   document.getElementById("btn-spin").disabled=true;
+  updateSlots();
 }
 
-function pickPlayer(p,card){
+function selectPlayer(p,card){
   if(taken.has(p.n)||fullR(p.r)||fullTeam())return;
-  const picked={...p,sq:`${sq.t} '${String(sq.y).slice(-2)}`};
-  team.push(picked); taken.add(picked.n);
+  // toggle off if clicking already-selected player
+  if(sel&&sel.n===p.n){
+    sel=null;
+    card.classList.remove("sel");
+    updateSlots();
+    squadHint();
+    return;
+  }
+  sel={...p,sq:`${sq.t} '${String(sq.y).slice(-2)}`};
+  document.querySelectorAll("#sq-grid .pc").forEach(c=>c.classList.remove("sel"));
+  card.classList.add("sel");
+  updateSlots();   // re-render slots as pick targets
+  squadHint();
+}
 
-  // animate picked card, lock all other avail cards
-  card.classList.remove("avail");
-  card.classList.add("taken","pop");
-  setTimeout(()=>card.classList.remove("pop"),200);
-  document.querySelectorAll("#sq-grid .pc.avail").forEach(c=>{
-    c.classList.remove("avail"); c.classList.add("quota-full");
+function placePlayer(position){
+  if(!sel||team[position])return;
+  const picked={...sel};
+  team[position]=picked;
+  taken.add(picked.n);
+
+  // mark card taken, lock remaining avail cards
+  document.querySelectorAll("#sq-grid .pc").forEach(c=>{
+    const cp=sq.p[+c.dataset.i];
+    if(cp&&cp.n===picked.n){c.classList.remove("avail","sel");c.classList.add("taken","pop");setTimeout(()=>c.classList.remove("pop"),200);}
+    else if(c.classList.contains("avail")){c.classList.remove("avail");c.classList.add("quota-full");}
   });
 
+  sel=null;
   if(lastSquadDrawn) setTimeout(()=>showMissedToast(picked,lastSquadDrawn),600);
   renderUI();
 
   if(fullTeam()){
     calcSquadGrade();
-    document.getElementById("btn-spin-again").style.display="none";
     document.getElementById("btn-spin").disabled=true;
     document.getElementById("respin-bar").style.display="none";
     document.querySelector(".squad-hint").textContent="XI complete — simulate your tournament!";
   } else {
-    // one pick per spin: enable spin again, hide re-spin bar until next spin
     document.getElementById("btn-spin").disabled=false;
     document.getElementById("btn-spin").textContent="🎰 Spin Again";
-    document.getElementById("btn-spin-again").style.display="none";
     document.getElementById("respin-bar").style.display="none";
-    document.querySelector(".squad-hint").textContent=`✓ ${picked.n} drafted — spin for the next squad`;
+    document.querySelector(".squad-hint").textContent=`✓ ${picked.n} placed at #${position+1} — spin for the next squad`;
   }
 }
 
@@ -974,10 +1008,10 @@ document.getElementById("rs-tourn").addEventListener("click",()=>doRespin(SQUADS
 // ══════════════════════════════════════════════════════
 function calcSquadGrade(){
   const avg=avgV();
-  const bat=team.filter(p=>p.r==="bat").reduce((s,p)=>s+p.v,0)/Q.bat;
-  const ar=team.filter(p=>p.r==="ar").reduce((s,p)=>s+p.v,0)/Q.ar;
-  const wk=(team.find(p=>p.r==="wk")||{v:0}).v;
-  const bowl=team.filter(p=>p.r==="bowl").reduce((s,p)=>s+p.v,0)/Q.bowl;
+  const bat=team.filter(p=>p&&p.r==="bat").reduce((s,p)=>s+p.v,0)/Q.bat;
+  const ar=team.filter(p=>p&&p.r==="ar").reduce((s,p)=>s+p.v,0)/Q.ar;
+  const wk=(team.find(p=>p&&p.r==="wk")||{v:0}).v;
+  const bowl=team.filter(p=>p&&p.r==="bowl").reduce((s,p)=>s+p.v,0)/Q.bowl;
   const letter=avg>=9?"S":avg>=8.4?"A":avg>=7.8?"B":avg>=7.2?"C":"D";
   const tag=letter==="S"?"All-time legendary XI":letter==="A"?"Elite — formidable squad":letter==="B"?"Solid with match-winners":letter==="C"?"Respectably balanced":"Needs reinforcements";
   const el=document.getElementById("squad-grade");
@@ -1033,13 +1067,7 @@ function genOppSc(names,total){
 
 function simulateMatch(fixture){
   const os=fixture.oppStr;
-  // Batting order — any arrangement the player built
-  const batOrder=[
-    ...team.filter(p=>p.r==="bat"),
-    team.find(p=>p.r==="wk"),
-    ...team.filter(p=>p.r==="ar"),
-    ...team.filter(p=>p.r==="bowl"),
-  ].filter(Boolean);
+  const batOrder=team.filter(Boolean);
 
   let total=0,wk=0,extras=rand(5,18);
   const sc=batOrder.map((p,i)=>{
@@ -1050,7 +1078,7 @@ function simulateMatch(fixture){
   });
   total=Math.max(total+extras,90);
 
-  const bowlers=[...team.filter(p=>p.r==="bowl"),...team.filter(p=>p.r==="ar")];
+  const bowlers=[...team.filter(p=>p&&p.r==="bowl"),...team.filter(p=>p&&p.r==="ar")];
   const bowling=bowlers.map(p=>({...p,...simBowler(p,os)}));
 
   const winP=Math.max(.15,Math.min(.83,.5+(avgV()-os/10)/3*.35));
@@ -1077,7 +1105,7 @@ document.getElementById("btn-sim").addEventListener("click",()=>{
   document.getElementById("sim-phase").classList.add("active");
 
   // Team strip
-  document.getElementById("team-strip").innerHTML=team.map(p=>`
+  document.getElementById("team-strip").innerHTML=team.filter(Boolean).map((p,i)=>`
     <div class="tc_ ${p.r}">
       <div class="tn">${p.n}</div>
       <div class="ts">${p.sq||""}</div>
@@ -1108,7 +1136,7 @@ document.getElementById("btn-sim").addEventListener("click",()=>{
   const last=results[results.length-1];
   const champion=wins===results.length&&last.fixture.stage==="Final"&&last.won;
   const runMap={},wktMap={};
-  team.forEach(p=>{runMap[p.n]=0;wktMap[p.n]=0;});
+  team.filter(Boolean).forEach(p=>{runMap[p.n]=0;wktMap[p.n]=0;});
   results.forEach(m=>{
     m.scorecard.filter(b=>!b.dnb).forEach(b=>{runMap[b.n]=(runMap[b.n]||0)+b.runs;});
     m.bowling.forEach(b=>{wktMap[b.n]=(wktMap[b.n]||0)+b.wickets;});
@@ -1276,7 +1304,7 @@ document.getElementById("btn-gen").addEventListener("click",()=>{
   ctx.beginPath(); ctx.moveTo(40,165); ctx.lineTo(W-40,165); ctx.stroke();
 
   const rc={bat:"#3a5fc0",ar:"#c07a1a",wk:"#8a3ab5",bowl:"#2a8a48"};
-  const ord=[...team.filter(p=>p.r==="bat"),...team.filter(p=>p.r==="ar"),...team.filter(p=>p.r==="wk"),...team.filter(p=>p.r==="bowl")];
+  const ord=team.filter(Boolean);
   const sy=178,rh=52;
   ord.forEach((p,i)=>{
     const y=sy+i*rh;
@@ -1329,7 +1357,7 @@ document.getElementById("btn-copy").addEventListener("click",copyText);
 function copyText(){
   const wins=results.filter(r=>r.won).length;
   const s=window._tournStats||{};
-  const lines=["🏏 World Cup XI Dream Team",`Record: ${wins}–${results.length-wins}`,"",...team.map((p,i)=>`${i+1}. ${p.n} (${RL[p.r]}) — ${p.sq||""} [${p.v}]`),`\n🏏 Top scorer: ${s.topBat?.[0]} ${s.topBat?.[1]} runs`,`🎯 Top bowler: ${s.topBowl?.[0]} ${s.topBowl?.[1]} wkts`];
+  const lines=["🏏 World Cup XI Dream Team",`Record: ${wins}–${results.length-wins}`,"",...team.map((p,i)=>p?`${i+1}. ${p.n} (${RL[p.r]}) — ${p.sq||""} [${p.v}]`:null).filter(Boolean),`\n🏏 Top scorer: ${s.topBat?.[0]} ${s.topBat?.[1]} runs`,`🎯 Top bowler: ${s.topBowl?.[0]} ${s.topBowl?.[1]} wkts`];
   navigator.clipboard?.writeText(lines.join("\n")).then(()=>alert("Copied!")).catch(()=>alert("Copy not supported"));
 }
 
@@ -1337,7 +1365,7 @@ function copyText(){
 //  BACK / RESET
 // ══════════════════════════════════════════════════════
 document.getElementById("btn-back").addEventListener("click",()=>{
-  team=[]; taken=new Set(); sq=null;
+  team=new Array(11).fill(null); taken=new Set(); sq=null; sel=null;
   spinning=false; reSpinsLeft=3; lastSquadDrawn=null;
   document.getElementById("reel").innerHTML=`<div class="idle">Press Spin to reveal a squad</div>`;
   document.getElementById("reel").style.opacity="1";
