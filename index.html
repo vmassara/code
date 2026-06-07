@@ -268,6 +268,19 @@ canvas#sc{display:none}
 </head>
 <body>
 <div id="missed-toast"></div>
+
+<!-- Privacy Policy Modal -->
+<div id="pp-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:999;display:none;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#1a1a2e;border:1px solid rgba(201,162,39,.3);border-radius:14px;max-width:480px;width:100%;padding:28px 24px;position:relative;max-height:80vh;overflow-y:auto">
+    <button onclick="document.getElementById('pp-overlay').style.display='none'" style="position:absolute;top:12px;right:14px;background:none;border:none;color:rgba(255,255,255,.4);font-size:1.2rem;cursor:pointer">✕</button>
+    <h3 style="color:#c9a227;font-size:1rem;margin:0 0 14px">Privacy Policy</h3>
+    <p style="color:rgba(240,234,216,.75);font-size:.8rem;line-height:1.7;margin:0 0 10px">11-0 is a browser-based game. We don't collect, store, or transmit any personal data — ever.</p>
+    <p style="color:rgba(240,234,216,.75);font-size:.8rem;line-height:1.7;margin:0 0 10px">Everything happens locally in your browser. Your team, your results, and your score never leave your device. We have no servers, no accounts, no analytics, and no tracking of any kind.</p>
+    <p style="color:rgba(240,234,216,.75);font-size:.8rem;line-height:1.7;margin:0 0 10px">The share feature generates an image entirely on your device. If you choose to share it, you do so through your own apps — we're not involved in that process.</p>
+    <p style="color:rgba(240,234,216,.5);font-size:.72rem;margin:0">If you have any questions, you can reach us at <span style="color:#c9a227">hello@11-0.xyz</span></p>
+  </div>
+</div>
+
 <div id="app">
   <div id="hdr">
     <div style="display:flex;align-items:center">
@@ -394,6 +407,11 @@ canvas#sc{display:none}
 
     <button id="btn-back">← New Draft</button>
   </div>
+</div>
+
+<div style="text-align:center;padding:20px 0 28px;font-size:.68rem;color:rgba(255,255,255,.2)">
+  <a href="#" onclick="event.preventDefault();document.getElementById('pp-overlay').style.display='flex'" style="color:rgba(255,255,255,.2);text-decoration:none">Privacy Policy</a>
+  &nbsp;·&nbsp; 11-0.xyz
 </div>
 
 <script>
@@ -2335,7 +2353,7 @@ function generateShareCard(){
     a.download="11-0-world-cup-xi.png"; a.href=url; a.click();
   };
 
-  const gameUrl="https://vmassara.github.io/code/";
+  const gameUrl="https://11-0.xyz";
   const avgRating=Math.round(team.filter(Boolean).reduce((a,p)=>a+p.v,0)/team.filter(Boolean).length*10);
   const topBatName=stats.topBat?.[0]||"my opener";
   const topBatRuns=stats.topBat?.[1]||0;
