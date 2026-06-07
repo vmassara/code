@@ -2332,30 +2332,28 @@ function generateShareCard(){
     a.download="11-0-world-cup-xi.png"; a.href=url; a.click();
   };
 
+  const gameUrl="https://vmassara.github.io/code/";
+  const shareText=`I went ${wins}-${losses} in the 11-0 World Cup Draft! Can you do better?\n${gameUrl}`;
   document.getElementById("btn-share").onclick=async()=>{
     if(navigator.share){
       try{
         const blob=await(await fetch(url)).blob();
         const file=new File([blob],"11-0-xi.png",{type:"image/png"});
         if(navigator.canShare&&navigator.canShare({files:[file]})){
-          await navigator.share({files:[file],title:`My 11-0 World Cup XI — ${wins}-${losses}`,text:`I went ${wins}-${losses} in the 11-0 World Cup Draft! Can you do better?`});
+          await navigator.share({files:[file],title:`My 11-0 World Cup XI — ${wins}-${losses}`,text:shareText});
           return;
         }
+        await navigator.share({title:`My 11-0 World Cup XI — ${wins}-${losses}`,text:shareText});
+        return;
       }catch(e){}
     }
-    // fallback — download
+    // fallback — copy text + download image
+    navigator.clipboard?.writeText(shareText).catch(()=>{});
     const a=document.createElement("a");
     a.download="11-0-world-cup-xi.png"; a.href=url; a.click();
   };
 }
 
-document.getElementById("btn-copy").addEventListener("click",copyText);
-function copyText(){
-  const wins=results.filter(r=>r.won).length;
-  const s=window._tournStats||{};
-  const lines=["🏏 World Cup XI Dream Team",`Record: ${wins}–${results.length-wins}`,"",...team.map((p,i)=>p?`${i+1}. ${p.n} (${RL[p.r]}) — ${p.sq||""} [${Math.round(p.v*10)}]`:null).filter(Boolean),`\n🏏 Top scorer: ${s.topBat?.[0]} ${s.topBat?.[1]} runs`,`🎯 Top bowler: ${s.topBowl?.[0]} ${s.topBowl?.[1]} wkts`];
-  navigator.clipboard?.writeText(lines.join("\n")).then(()=>alert("Copied!")).catch(()=>alert("Copy not supported"));
-}
 
 // ══════════════════════════════════════════════════════
 //  BACK / RESET
