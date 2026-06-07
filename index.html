@@ -1711,7 +1711,7 @@ function renderSquad(s){
     </div>
     <div class="squad-hint">Still need: ${needed} — click a player to select</div>
     <div class="sq-grid" id="sq-grid">
-      ${s.p.map((p,i)=>({p,i})).sort((a,b)=>b.p.v-a.p.v).map(({p,i})=>{
+      ${s.p.map((p,i)=>({p,i})).sort(hardMode?(a,b)=>a.p.n.localeCompare(b.p.n):(a,b)=>b.p.v-a.p.v).map(({p,i})=>{
         const tk=taken.has(p.n), qf=!tk&&fullR(p.r);
         return`<div class="pc ${tk?"taken":qf?"quota-full":"avail"}" data-i="${i}">
           <div class="pn">${p.n}</div>
@@ -1787,6 +1787,7 @@ document.getElementById("hard-toggle").addEventListener("click",()=>{
   const btn=document.getElementById("hard-toggle");
   btn.textContent=hardMode?"Hard Mode 🔒":"Normal Mode";
   btn.classList.toggle("on",hardMode);
+  if(sq) renderSquad(sq);
 });
 
 // ══════════════════════════════════════════════════════
