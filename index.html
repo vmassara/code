@@ -793,7 +793,7 @@ function updateSlots(){
         <div class="slot-name">${p.n}</div>
         <span class="role-tag ${p.r}">${RC[p.r]}</span>
         <span class="slot-era">${p.sq||""}</span>
-        <span class="slot-v">${p.v}</span>`;
+        <span class="slot-v">${Math.round(p.v*10)}</span>`;
     } else if(sel){
       div.className="slot empty slot-target";
       div.innerHTML=`<div class="slot-num">${i+1}</div><em>Bat at #${i+1}</em>`;
@@ -807,7 +807,7 @@ function updateSlots(){
   // Strength bar
   const avg=avgV();
   const pct=((avg-6)/4)*100;
-  document.getElementById("str-val").textContent=avg?avg.toFixed(2):"—";
+  document.getElementById("str-val").textContent=avg?Math.round(avg*10)+"/100":"—";
   document.getElementById("str-bar").style.width=avg?Math.max(0,Math.min(100,pct))+"%":"0%";
 }
 
@@ -903,7 +903,7 @@ function renderSquad(s){
         return`<div class="pc ${tk?"taken":qf?"quota-full":"avail"}" data-i="${i}">
           <div class="pn">${p.n}</div>
           <span class="role-tag ${p.r}">${RC[p.r]}</span>
-          <div class="prating">${p.v}</div>
+          <div class="prating">${Math.round(p.v*10)}</div>
           ${p.s?`<div class="pstat">${p.s}</div>`:""}
         </div>`;
       }).join("")}
@@ -1018,16 +1018,16 @@ function calcSquadGrade(){
   el.style.display="block";
   el.innerHTML=`<div class="sg-row">
     <div><div class="sg-letter sg-${letter}">${letter}</div></div>
-    <div style="text-align:right"><div class="sg-tag">${tag}</div><div class="sg-avg">Avg ${avg.toFixed(2)} / 10</div></div>
+    <div style="text-align:right"><div class="sg-tag">${tag}</div><div class="sg-avg">Avg ${Math.round(avg*10)} / 100</div></div>
   </div>
-  <div class="sg-break">🏏 Batting ${bat.toFixed(1)} &nbsp;·&nbsp; ⚡ All-rounders ${ar.toFixed(1)} &nbsp;·&nbsp; 🧤 Keeper ${wk.toFixed(1)} &nbsp;·&nbsp; 🎯 Bowling ${bowl.toFixed(1)}</div>`;
+  <div class="sg-break">🏏 Batting ${Math.round(bat*10)} &nbsp;·&nbsp; ⚡ All-rounders ${Math.round(ar*10)} &nbsp;·&nbsp; 🧤 Keeper ${Math.round(wk*10)} &nbsp;·&nbsp; 🎯 Bowling ${Math.round(bowl*10)}</div>`;
 }
 
 function showMissedToast(picked,squad){
   const missed=squad.p.filter(p=>p.r===picked.r&&p.n!==picked.n&&!taken.has(p.n)).sort((a,b)=>b.v-a.v)[0];
   if(!missed||missed.v<=picked.v)return;
   const t=document.getElementById("missed-toast");
-  t.textContent=`You could've had ${missed.n} (${missed.v}) instead`;
+  t.textContent=`You could've had ${missed.n} (${Math.round(missed.v*10)}) instead`;
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),3200);
 }
@@ -1321,7 +1321,7 @@ document.getElementById("btn-gen").addEventListener("click",()=>{
     ctx.fillText(p.sq||"",88,y+36);
     ctx.fillStyle="#c9a22726"; ctx.beginPath(); ctx.roundRect(W-58,y+11,38,18,9); ctx.fill();
     ctx.fillStyle="#c9a227"; ctx.font="bold 12px system-ui"; ctx.textAlign="center";
-    ctx.fillText(p.v,W-39,y+24);
+    ctx.fillText(Math.round(p.v*10),W-39,y+24);
   });
 
   const bY=sy+ord.length*rh+10;
@@ -1357,7 +1357,7 @@ document.getElementById("btn-copy").addEventListener("click",copyText);
 function copyText(){
   const wins=results.filter(r=>r.won).length;
   const s=window._tournStats||{};
-  const lines=["🏏 World Cup XI Dream Team",`Record: ${wins}–${results.length-wins}`,"",...team.map((p,i)=>p?`${i+1}. ${p.n} (${RL[p.r]}) — ${p.sq||""} [${p.v}]`:null).filter(Boolean),`\n🏏 Top scorer: ${s.topBat?.[0]} ${s.topBat?.[1]} runs`,`🎯 Top bowler: ${s.topBowl?.[0]} ${s.topBowl?.[1]} wkts`];
+  const lines=["🏏 World Cup XI Dream Team",`Record: ${wins}–${results.length-wins}`,"",...team.map((p,i)=>p?`${i+1}. ${p.n} (${RL[p.r]}) — ${p.sq||""} [${Math.round(p.v*10)}]`:null).filter(Boolean),`\n🏏 Top scorer: ${s.topBat?.[0]} ${s.topBat?.[1]} runs`,`🎯 Top bowler: ${s.topBowl?.[0]} ${s.topBowl?.[1]} wkts`];
   navigator.clipboard?.writeText(lines.join("\n")).then(()=>alert("Copied!")).catch(()=>alert("Copy not supported"));
 }
 
