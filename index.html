@@ -420,7 +420,7 @@
           &nbsp;·&nbsp; Spin to reveal a World Cup squad
         </div>
         <div id="spin-zone">
-          <div id="spin-info">Click <strong>SPIN</strong> to get a random World Cup team</div>
+          <div id="spin-info">Click <strong>SPIN</strong> to pick your first 🏏 Batsman</div>
           <div id="reel-wrapper">
             <div id="reel">
               <div style="color:#fff;opacity:.5;font-size:.9rem;">Press spin to start</div>
@@ -886,7 +886,15 @@ const SQUADS = [
 //  GAME STATE
 // ══════════════════════════════════════════════════════
 
-const MAX_PICKS = 11;
+const MAX_PICKS = 10;
+const SLOT_ROLES = ['BAT','BAT','BAT','BAT','WK','ALL','ALL','BWL','BWL','BWL'];
+const SLOT_LABELS = {
+  BAT: '🏏 Batsman',
+  WK:  '🧤 Wicketkeeper',
+  ALL: '⚡ All-rounder',
+  BWL: '🎯 Bowler',
+};
+
 let state = {
   picks: 0,
   team: [],        // selected players
@@ -953,7 +961,8 @@ function renderSlots() {
   // Progress
   const pct = (state.picks / MAX_PICKS) * 100;
   document.getElementById('progress-fill').style.width = pct + '%';
-  document.getElementById('pick-counter').textContent = `Pick ${Math.min(state.picks + 1, MAX_PICKS)} of ${MAX_PICKS}`;
+  const roleNeeded = state.picks < MAX_PICKS ? ` — ${SLOT_LABELS[SLOT_ROLES[state.picks]]}` : '';
+  document.getElementById('pick-counter').textContent = `Pick ${Math.min(state.picks + 1, MAX_PICKS)} of ${MAX_PICKS}${roleNeeded}`;
 
   // Simulate button
   const btn = document.getElementById('btn-simulate');
@@ -964,13 +973,30 @@ function renderSlots() {
 //  RENDER SQUAD
 // ══════════════════════════════════════════════════════
 
+function currentNeededRole() {
+  return SLOT_ROLES[state.picks];
+}
+
 function renderSquad(squad) {
   const grid = document.getElementById('squad-grid');
   const title = document.getElementById('squad-title');
-  title.textContent = `${squad.flag} ${squad.team} — ${squad.year} World Cup · Pick one player`;
+  const role = currentNeededRole();
+  title.textContent = `${squad.flag} ${squad.team} — ${squad.year} World Cup · Pick a ${SLOT_LABELS[role]}`;
+
+  // Filter to only players matching the needed role
+  const eligible = squad.players.filter(p => p.role === role);
 
   grid.innerHTML = '';
-  squad.players.forEach(p => {
+
+  if (eligible.length === 0) {
+    grid.innerHTML = `<div style="padding:16px;color:#888;font-size:.88rem;">No ${role} in this squad — spin again for a different team.</div>`;
+    document.getElementById('btn-spin').disabled = false;
+    state.spinDone = false;
+    document.getElementById('squad-section').style.display = '';
+    return;
+  }
+
+  eligible.forEach(p => {
     const id = `${squad.year}-${squad.team}-${p.name}`;
     const alreadyPicked = state.pickedIds.has(id);
     const card = document.createElement('div');
@@ -1004,8 +1030,9 @@ function selectPlayer(p, squad, id) {
 
   renderSlots();
   document.getElementById('squad-section').style.display = 'none';
+  const nextRole = state.picks < MAX_PICKS ? SLOT_LABELS[SLOT_ROLES[state.picks]] : null;
   document.getElementById('spin-info').innerHTML = state.picks < MAX_PICKS
-    ? `Great pick! <strong>${p.name}</strong> is in. Spin again.`
+    ? `Great pick! <strong>${p.name}</strong> is in. Now pick a <strong>${nextRole}</strong>.`
     : `Squad complete! Hit <strong>Simulate Tournament</strong>`;
 
   if (state.picks < MAX_PICKS) {
@@ -1066,7 +1093,7 @@ function doSpin() {
           state.spinning = false;
           state.spinDone = true;
           renderSquad(chosen);
-          document.getElementById('spin-info').textContent = 'Pick one player from this squad:';
+          document.getElementById('spin-info').textContent = `Pick a ${SLOT_LABELS[currentNeededRole()]} from this squad:`;
         }, 80);
       }, 200);
     }
@@ -1249,7 +1276,8 @@ function restartGame() {
   document.getElementById('game-screen').style.display = '';
   document.getElementById('reel').innerHTML = `<div style="color:#fff;opacity:.5;font-size:.9rem;">Press spin to start</div>`;
   document.getElementById('squad-section').style.display = 'none';
-  document.getElementById('spin-info').innerHTML = `Click <strong>SPIN</strong> to get a random World Cup team`;
+  const firstRole = SLOT_LABELS[SLOT_ROLES[0]];
+  document.getElementById('spin-info').innerHTML = `Click <strong>SPIN</strong> to pick your first ${firstRole}`;
   document.getElementById('btn-spin').disabled = false;
   document.getElementById('progress-fill').style.width = '0%';
   renderSlots();
