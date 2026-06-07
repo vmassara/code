@@ -838,6 +838,7 @@ function doSpin(){
   if(spinning||fullTeam())return;
   spinning=true;
   document.getElementById("btn-spin").disabled=true;
+  document.getElementById("btn-spin").textContent="🎰 Spin";
   document.getElementById("btn-spin-again").style.display="none";
   document.getElementById("respin-bar").style.display="none";
   document.getElementById("squad-panel").innerHTML=`<div class="sq-idle" style="opacity:.4">Spinning…</div>`;
@@ -894,7 +895,7 @@ function renderSquad(s){
     c.addEventListener("click",()=>pickPlayer(s.p[+c.dataset.i],c));
   });
 
-  document.getElementById("btn-spin-again").style.display=fullTeam()?"none":"block";
+  document.getElementById("btn-spin-again").style.display="none";
   document.getElementById("btn-spin").disabled=true;
 }
 
@@ -903,15 +904,12 @@ function pickPlayer(p,card){
   const picked={...p,sq:`${sq.t} '${String(sq.y).slice(-2)}`};
   team.push(picked); taken.add(picked.n);
 
-  // animate card
+  // animate picked card, lock all other avail cards
   card.classList.remove("avail");
   card.classList.add("taken","pop");
   setTimeout(()=>card.classList.remove("pop"),200);
-
-  // re-check quota-full for other cards in grid
   document.querySelectorAll("#sq-grid .pc.avail").forEach(c=>{
-    const cp=sq.p[+c.dataset.i];
-    if(fullR(cp.r)){c.classList.remove("avail");c.classList.add("quota-full");}
+    c.classList.remove("avail"); c.classList.add("quota-full");
   });
 
   if(lastSquadDrawn) setTimeout(()=>showMissedToast(picked,lastSquadDrawn),600);
@@ -922,16 +920,14 @@ function pickPlayer(p,card){
     document.getElementById("btn-spin-again").style.display="none";
     document.getElementById("btn-spin").disabled=true;
     document.getElementById("respin-bar").style.display="none";
-    // update hint
     document.querySelector(".squad-hint").textContent="XI complete — simulate your tournament!";
   } else {
-    document.getElementById("btn-spin").disabled=true;
-    document.getElementById("btn-spin-again").style.display="block";
-    // refresh hint
-    const needed=["bat","ar","wk","bowl"].filter(r=>!fullR(r)).map(r=>RL[r]).join(", ");
-    const hint=document.querySelector(".squad-hint");
-    if(hint) hint.textContent=`Still need: ${needed} — pick more or spin again`;
-    updateRespinUI();
+    // one pick per spin: enable spin again, hide re-spin bar until next spin
+    document.getElementById("btn-spin").disabled=false;
+    document.getElementById("btn-spin").textContent="🎰 Spin Again";
+    document.getElementById("btn-spin-again").style.display="none";
+    document.getElementById("respin-bar").style.display="none";
+    document.querySelector(".squad-hint").textContent=`✓ ${picked.n} drafted — spin for the next squad`;
   }
 }
 
