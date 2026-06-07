@@ -95,6 +95,34 @@ body{background:#d8d0be;font-family:"DM Mono",monospace;min-height:100vh;display
 .xs .xr{font-size:10px;font-weight:500;color:#6b5d47;margin-top:1px}
 .xs .xi{font-size:8px;color:#c8bfb0}
 
+/* SQUAD GRADE */
+#squad-grade{display:none;background:#152408;border-radius:10px;padding:14px 18px;margin-bottom:10px;display:none}
+#squad-grade .sg-row{display:flex;align-items:center;justify-content:space-between}
+#squad-grade .sg-letter{font-family:"Playfair Display",serif;font-size:42px;line-height:1}
+.sg-S{color:#e8c547}.sg-A{color:#7aab6a}.sg-B{color:#5a9cc0}.sg-C{color:#c9a227}.sg-D{color:#c07a1a}
+#squad-grade .sg-label{font-size:9px;color:#7aab6a;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
+#squad-grade .sg-breakdown{font-size:10px;color:#a8c8a0;margin-top:6px;line-height:1.8;border-top:1px solid #2a4a15;padding-top:8px}
+#squad-grade .sg-avg{font-size:9px;color:#7aab6a;letter-spacing:.5px}
+
+/* MISSED PICK TOAST */
+#missed-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1d3310;color:#c9a227;border:1px solid #2a4a15;padding:10px 18px;border-radius:30px;font-size:10px;letter-spacing:.5px;transition:transform .3s ease;z-index:999;white-space:nowrap;pointer-events:none}
+#missed-toast.show{transform:translateX(-50%) translateY(0)}
+
+/* MOMENTUM BAR */
+#momentum{margin-bottom:12px;padding:10px 14px;background:#fefcf7;border:1px solid #e8dcc8;border-radius:9px}
+#momentum .mo-label{font-size:9px;color:#9a8c78;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+#momentum .mo-dots{display:flex;gap:5px}
+.mo-dot{width:24px;height:8px;border-radius:4px;background:#e8dcc8;transition:background .3s}
+.mo-dot.W{background:#2a8a48}.mo-dot.L{background:#c02020}.mo-dot.upcoming{background:#e8dcc8;border:1px dashed #c8bfb0}
+
+/* PLAYER OF MATCH */
+.potm-badge{display:inline-flex;align-items:center;gap:5px;background:#fffbf0;border:1px solid #c9a227;border-radius:5px;padding:4px 8px;font-size:9px;color:#8a6010;margin-top:6px;letter-spacing:.3px}
+.potm-badge strong{color:#6a4008}
+
+/* MATCH MOMENT */
+.match-moment{background:#152408;border-radius:7px;padding:10px 12px;margin:8px 0;font-size:10px;color:#7aab6a;line-height:1.7;font-style:italic}
+.match-moment strong{color:#c9a227;font-style:normal}
+
 #go-sim{display:none;background:#c9a227;color:#152408;border:none;padding:12px;font-family:"DM Mono",monospace;font-size:12px;font-weight:500;letter-spacing:1.5px;border-radius:8px;cursor:pointer;width:100%;text-transform:uppercase;transition:all .15s;margin-top:4px}
 #go-sim:hover{background:#e8c547}
 
@@ -182,6 +210,7 @@ canvas#sc{display:none}
 </style>
 </head>
 <body>
+<div id="missed-toast"></div>
 <div id="app">
   <div id="hdr">
     <div><h1>World Cup XI</h1><div class="sub">Draft The Greatest ODI Team</div></div>
@@ -214,6 +243,7 @@ canvas#sc{display:none}
 
       <div class="xi-hdr"><span>Your XI</span><span id="tc-label">0 of 11</span></div>
       <div class="xi-grid" id="xi-grid"></div>
+      <div id="squad-grade"></div>
       <button id="go-sim">Simulate World Cup &rarr;</button>
     </div>
 
@@ -222,6 +252,11 @@ canvas#sc{display:none}
       <div class="team-cards" id="team-cards"></div>
       <div class="smry" id="smry"></div>
       <div id="fin"></div>
+
+      <div id="momentum" style="display:none">
+        <div class="mo-label">Tournament Momentum</div>
+        <div class="mo-dots" id="mo-dots"></div>
+      </div>
 
       <div class="match-nav">
         <button id="nav-prev" disabled>&larr; Prev</button>
@@ -589,20 +624,60 @@ function renderSquad(s){
   document.getElementById("draw-hint").textContent="Pick a highlighted player, or skip for a different squad.";
 }
 
+// ── Squad grade ──
+function calcSquadGrade(){
+  const avg=avgV();
+  const bat=team.filter(p=>p.r==="bat").reduce((s,p)=>s+p.v,0)/4;
+  const ar=team.filter(p=>p.r==="ar").reduce((s,p)=>s+p.v,0)/2;
+  const wk=(team.find(p=>p.r==="wk")||{v:0}).v;
+  const bowl=team.filter(p=>p.r==="bowl").reduce((s,p)=>s+p.v,0)/4;
+  const letter=avg>=9?"S":avg>=8.4?"A":avg>=7.8?"B":avg>=7.2?"C":"D";
+  const tagline=letter==="S"?"All-time legendary XI":letter==="A"?"Elite draft — formidable team":letter==="B"?"Solid XI with match-winners":letter==="C"?"Respectable — room for improvement":"Needs work";
+  document.getElementById("squad-grade").style.display="block";
+  document.getElementById("squad-grade").innerHTML=`
+    <div class="sg-row">
+      <div><div class="sg-letter sg-${letter}">${letter}</div><div class="sg-label">Squad Rating</div></div>
+      <div style="text-align:right">
+        <div style="color:#c9a227;font-family:'Playfair Display',serif;font-size:16px">${tagline}</div>
+        <div class="sg-avg">Avg rating ${avg.toFixed(2)} / 10</div>
+      </div>
+    </div>
+    <div class="sg-breakdown">
+      🏏 Batting ${bat.toFixed(1)} &nbsp;·&nbsp; ⚡ All-rounders ${ar.toFixed(1)} &nbsp;·&nbsp; 🧤 Keeper ${wk.toFixed(1)} &nbsp;·&nbsp; 🎯 Bowling ${bowl.toFixed(1)}
+    </div>`;
+}
+
+// ── Missed pick toast ──
+let lastSquadDrawn=null;
+function showMissedToast(pickedPlayer, squad){
+  const missed=squad.p.filter(p=>p.r===pickedPlayer.r&&p.n!==pickedPlayer.n&&!taken.has(p.n))
+    .sort((a,b)=>b.v-a.v)[0];
+  if(!missed||missed.v<=pickedPlayer.v) return;
+  const t=document.getElementById("missed-toast");
+  t.textContent=`You could have had ${missed.n} (${missed.v}) instead`;
+  t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"),3200);
+}
+
 document.getElementById("draw-btn").addEventListener("click",()=>{
   if(fullTeam()||pickedThisDraw)return;
   pickedThisDraw=false; sel=null;
-  renderSquad(SQUADS[Math.floor(Math.random()*SQUADS.length)]);
+  lastSquadDrawn=SQUADS[Math.floor(Math.random()*SQUADS.length)];
+  renderSquad(lastSquadDrawn);
 });
 
 document.getElementById("pick-btn").addEventListener("click",()=>{
   if(!sel||fullTeam())return;
-  team.push(sel); taken.add(sel.n);
+  const pickedCopy={...sel};
+  team.push(pickedCopy); taken.add(pickedCopy.n);
   pickedThisDraw=true; renderXI();
   document.querySelectorAll("#sq-grid .pc.sel").forEach(c=>{c.classList.remove("sel");c.classList.add("taken");});
   document.getElementById("pick-btn").disabled=true;
   document.getElementById("pick-btn").textContent="✓ Added";
+  // show missed pick after a short delay
+  if(lastSquadDrawn) setTimeout(()=>showMissedToast(pickedCopy,lastSquadDrawn),600);
   if(fullTeam()){
+    calcSquadGrade();
     document.getElementById("draw-btn").disabled=true;
     document.getElementById("draw-btn").textContent="XI Complete";
     document.getElementById("draw-hint").textContent="Your XI is ready. Simulate the World Cup!";
@@ -788,10 +863,46 @@ function buildFinalBanner(){
   fin.style.display="block";
 }
 
+// ── Match moment quotes ──
+const MOMENTS_WIN=[
+  (b,bo)=>`<strong>${b.n}</strong> produces a masterclass — ${b.runs} off ${b.balls} balls leaves the crowd stunned.`,
+  (b,bo)=>`<strong>${bo.n}</strong> rips through the top order. ${bo.wickets} wickets in a spell of pure devastation.`,
+  (b,bo)=>`Trailing badly at the drinks break, <strong>${b.n}</strong> digs in and turns the match on its head.`,
+  (b,bo)=>`A yorker of outrageous quality from <strong>${bo.n}</strong> seals the deal in the final over.`,
+  (b,bo)=>`<strong>${b.n}</strong>'s measured innings gives the XI the platform they desperately needed.`,
+  (b,bo)=>`The pitch offers help for the seamers. <strong>${bo.n}</strong> exploits it mercilessly.`,
+];
+const MOMENTS_LOSS=[
+  (b,bo)=>`A poor start with the bat sets the tone. <strong>${b.n}</strong> can't rescue the innings alone.`,
+  (b,bo)=>`<strong>${bo.n}</strong> is expensive, going for over 8 an over. The total proves well short.`,
+  (b,bo)=>`They needed 60 off 4 overs. The innings collapses. The dressing room is silent.`,
+  (b,bo)=>`A crucial dropped catch changes the game — the opposition capitalise ruthlessly.`,
+  (b,bo)=>`<strong>${b.n}</strong> fights hard, but the lower order can't support. 3 wickets fall in 2 overs.`,
+];
+function getMatchMoment(m){
+  const topBat=m.scorecard.filter(b=>!b.dnb).sort((a,b_)=>b_.runs-a.runs)[0]||{n:"No.11",runs:0,balls:0};
+  const topBowl=[...m.bowling].sort((a,b_)=>b_.wickets-a.wickets)[0]||{n:"No-one",wickets:0};
+  const pool=m.won?MOMENTS_WIN:MOMENTS_LOSS;
+  return pool[Math.floor(Math.random()*pool.length)](topBat,topBowl);
+}
+
+// ── Momentum bar ──
+function renderMomentum(upToIdx){
+  const el=document.getElementById("mo-dots");
+  el.innerHTML=FIXTURES.map((_,i)=>{
+    const r=results[i];
+    if(i>upToIdx||!r) return`<div class="mo-dot upcoming" title="${FIXTURES[i].stage}"></div>`;
+    return`<div class="mo-dot ${r.won?"W":"L"}" title="${r.won?"Won":"Lost"} vs ${r.fixture.opp}"></div>`;
+  }).join("");
+  document.getElementById("momentum").style.display="block";
+}
+
 function showMatch(idx){
   currentMatch=idx;
   const m=results[idx];
   const total=results.length;
+
+  renderMomentum(idx);
 
   // Nav
   document.getElementById("nav-prev").disabled=idx===0;
@@ -808,6 +919,13 @@ function showMatch(idx){
   const bowlingSort=[...m.bowling].sort((a,b_)=>b_.wickets-a.wickets||a.runs-b_.runs).slice(0,5);
   // Opp top 3
   const topOpp=[...m.oppScorecard].sort((a,b_)=>b_.runs-a.runs).slice(0,3);
+
+  // Player of the match
+  const potm=topBat[0]&&topBat[0].runs>=40?topBat[0]:bowlingSort[0]?.wickets>=3?bowlingSort[0]:topBat[0]||bowlingSort[0];
+  const potmStat=potm?.runs!=null&&potm.runs>0?`${potm.runs} runs (${potm.balls}b)`:`${potm?.wickets||0}-${potm?.runs||0}`;
+
+  // Match moment quote
+  const moment=getMatchMoment(m);
 
   document.getElementById("match-display").innerHTML=`
     <div class="mc">
@@ -876,6 +994,10 @@ function showMatch(idx){
           `).join("")}
           <div style="font-size:9px;color:#9a8c78;padding:5px 0 0;border-top:1px solid #ede5d5;margin-top:4px">Total <strong>${m.oppTotal}/${m.oppWickets}</strong></div>
         </div>
+      </div>
+      <div class="mc-body" style="padding-top:0">
+        <div class="match-moment">${moment}</div>
+        ${potm?`<div class="potm-badge">⭐ Player of the Match &nbsp; <strong>${potm.n}</strong> &nbsp; ${potmStat}</div>`:""}
       </div>
       <div class="mc-result ${m.won?"win":"loss"}">${m.margin}</div>
     </div>`;
