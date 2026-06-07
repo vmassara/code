@@ -7,237 +7,221 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --green:#1a7a3c;--green-dark:#135a2c;--green-mid:#1d5c30;
-  --cream:#f5f0e8;--paper:#fefcf7;--border:#e0d8c8;
-  --gold:#f0b429;--gold-dark:#c8941e;
-  --text:#1a1208;--muted:#7a6e60;--light:#b8ac9a;
+  --bg:#0b1a0e;--surface:#111d13;--card:#172019;--border:#243526;
+  --gold:#d4a84b;--gold-d:#a07828;--gold-l:#f0c96a;
+  --green:#22c55e;--green-d:#16a34a;
+  --cream:#f0ead8;--muted:#8aaa8a;--faint:#4a6a4a;
+  --bat:#6ab0f5;--ar:#f0a050;--wk:#c080f0;--bowl:#60d890;
+  --red:#f05060;
 }
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#d4ccba;min-height:100vh;display:flex;justify-content:center;padding:20px 12px}
-#app{background:var(--cream);border-radius:14px;overflow:hidden;border:1px solid #c8c0a8;width:100%;max-width:1000px;box-shadow:0 8px 36px rgba(0,0,0,.18)}
+body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:16px 8px;color:var(--cream)}
+#app{width:100%;max-width:960px}
 
 /* ── HEADER ── */
-#hdr{background:linear-gradient(135deg,var(--green-dark),var(--green));padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
-#hdr::before{content:'';position:absolute;top:-30px;left:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.05)}
-#hdr h1{font-size:clamp(1.2rem,3.5vw,1.9rem);font-weight:800;color:#fff;letter-spacing:-.3px}
-#hdr .sub{font-size:.72rem;color:rgba(255,255,255,.6);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
-#hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
-#hdr-count{font-size:1.5rem;font-weight:800;color:var(--gold);line-height:1;text-align:right}
-#hdr-clabel{font-size:.65rem;color:rgba(255,255,255,.55);letter-spacing:.5px;text-transform:uppercase;text-align:right}
-#hard-toggle{background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.7);padding:4px 10px;font-size:.7rem;letter-spacing:.5px;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all .15s}
+#hdr{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+#hdr h1{font-size:clamp(1.1rem,3vw,1.6rem);font-weight:800;color:var(--gold);letter-spacing:-.5px}
+#hdr .sub{font-size:.68rem;color:var(--muted);margin-top:2px;letter-spacing:.4px}
+#hdr-right{display:flex;align-items:center;gap:10px}
+#hdr-count{font-size:1.8rem;font-weight:900;color:var(--gold);line-height:1;min-width:48px;text-align:right}
+#hdr-clabel{font-size:.6rem;color:var(--faint);letter-spacing:.5px;text-transform:uppercase;text-align:right}
+#hard-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;font-size:.68rem;letter-spacing:.4px;border-radius:20px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
 #hard-toggle:hover{border-color:var(--gold);color:var(--gold)}
-#hard-toggle.on{background:rgba(192,100,20,.3);border-color:#e8a040;color:#e8a040}
+#hard-toggle.on{border-color:#f0a050;color:#f0a050}
 
-#prog{height:4px;background:rgba(0,0,0,.2)}
-#prog-fill{height:4px;background:var(--gold);transition:width .4s ease;width:0%}
+#prog{height:3px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden}
+#prog-fill{height:3px;background:var(--gold);transition:width .4s ease;width:0%;border-radius:2px}
 
 /* ── PHASE WRAPPER ── */
-#main{padding:16px 18px}
 .phase{display:none}.phase.active{display:block}
 
-/* ── DRAFT: two-column layout ── */
-#draft-cols{display:grid;grid-template-columns:1fr 290px;gap:14px}
-@media(max-width:680px){#draft-cols{grid-template-columns:1fr}}
+/* ── DRAFT LAYOUT ── */
+#draft-cols{display:grid;grid-template-columns:1fr 270px;gap:10px}
+@media(max-width:660px){#draft-cols{grid-template-columns:1fr}}
 
-/* ── LEFT: SPIN ZONE ── */
-#spin-zone .pick-label{font-size:.72rem;color:var(--muted);letter-spacing:.4px;margin-bottom:10px;text-align:center}
-#spin-zone .pick-label strong{color:var(--green-dark)}
+/* SPIN ZONE */
+#reel-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px 16px;text-align:center;margin-bottom:10px;position:relative;overflow:hidden;min-height:100px;display:flex;align-items:center;justify-content:center}
+#reel-wrap::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% -20%,rgba(212,168,75,.08),transparent 70%);pointer-events:none}
+#reel{color:var(--cream)}
+#reel .yr{display:inline-block;background:var(--gold);color:#000;font-weight:800;font-size:.78rem;padding:2px 10px;border-radius:20px;margin-bottom:6px}
+#reel .flag{font-size:2.2rem;line-height:1.3}
+#reel .tname{font-size:1.5rem;font-weight:800;color:#fff;line-height:1.2}
+#reel .thost{font-size:.64rem;color:var(--faint);margin-top:4px;letter-spacing:.3px}
+#reel .idle{color:var(--faint);font-size:.85rem}
 
-#reel-wrap{background:var(--green-dark);border-radius:12px;padding:18px;min-height:90px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative;overflow:hidden}
-#reel-wrap::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.06),transparent 70%);pointer-events:none}
-#reel{text-align:center;color:#fff}
-#reel .yr{display:inline-block;background:var(--gold);color:#000;font-weight:800;font-size:.85rem;padding:2px 10px;border-radius:20px;margin-bottom:4px}
-#reel .flag{font-size:2rem}
-#reel .tname{font-size:1.4rem;font-weight:800;text-shadow:0 2px 6px rgba(0,0,0,.4);line-height:1.2}
-#reel .thost{font-size:.68rem;opacity:.6;margin-top:2px}
-#reel .idle{opacity:.45;font-size:.88rem}
+#btn-spin{display:block;width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-d));color:#000;border:none;border-radius:40px;padding:14px;font-size:1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 18px rgba(212,168,75,.3);transition:transform .1s,box-shadow .1s;margin-bottom:8px}
+#btn-spin:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 24px rgba(212,168,75,.45)}
+#btn-spin:disabled{opacity:.35;cursor:not-allowed}
 
-#btn-spin{display:block;width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;border:none;border-radius:40px;padding:13px;font-size:1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 14px rgba(240,180,41,.35);transition:transform .1s,box-shadow .1s;margin-bottom:10px}
-#btn-spin:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(240,180,41,.45)}
-#btn-spin:active{transform:none}
-#btn-spin:disabled{opacity:.45;cursor:not-allowed;transform:none}
+/* RE-SPIN BAR */
+#respin-bar{display:none;gap:6px;margin-bottom:8px}
+.rs-btn{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--muted);padding:8px;font-size:.68rem;font-weight:600;border-radius:7px;cursor:pointer;text-transform:uppercase;letter-spacing:.3px;transition:all .12s}
+.rs-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold)}
+.rs-btn:disabled{opacity:.25;cursor:not-allowed}
+#respin-count{font-size:.65rem;color:var(--faint);text-align:center;padding:2px 0}
+.rs-pip{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--gold);margin:0 2px}
+.rs-pip.used{background:var(--border)}
 
 /* SQUAD PANEL */
-#squad-panel{background:var(--paper);border:1.5px solid var(--border);border-radius:11px;padding:14px;margin-bottom:10px;min-height:80px}
-.sq-idle{color:var(--light);font-size:.85rem;text-align:center;padding:28px 0;line-height:2}
-.sq-head .sq-title{font-size:1.1rem;font-weight:700;color:var(--text)}
-.sq-head .sq-sub{font-size:.7rem;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-top:2px;margin-bottom:10px}
-.role-banner{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #c8e6c9;border-radius:7px;padding:7px 11px;font-size:.78rem;color:#2e7d32;margin-bottom:9px}
-.role-banner strong{color:#1b5e20}
-.sq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+#squad-panel{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:8px;min-height:80px}
+.sq-idle{color:var(--faint);font-size:.82rem;text-align:center;padding:24px 0;line-height:2}
+.sq-idle strong{color:var(--muted)}
+.sq-head{margin-bottom:10px}
+.sq-title{font-size:1.05rem;font-weight:700;color:var(--cream)}
+.sq-sub{font-size:.65rem;color:var(--faint);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+.squad-hint{font-size:.7rem;color:var(--green);margin-bottom:8px;padding:5px 9px;background:rgba(34,197,94,.08);border-radius:6px;border:1px solid rgba(34,197,94,.18)}
+
+/* Player grid */
+.sq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
 @media(max-width:500px){.sq-grid{grid-template-columns:repeat(2,1fr)}}
 
-/* player cards */
-.pc{background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;cursor:pointer;transition:border-color .12s,background .12s,box-shadow .12s;position:relative;user-select:none}
-.pc.selectable:hover{border-color:var(--gold);background:#fffdf5}
-.pc.sel{border-color:var(--green) !important;background:#eef7ee !important;border-width:2px}
-.pc.taken{opacity:.32;pointer-events:none}
-.pc.quota-full{opacity:.35;pointer-events:none;filter:grayscale(.5)}
-.pc.selectable{border-color:var(--green);box-shadow:0 0 0 1.5px rgba(26,122,60,.12)}
-.pc.taken::after{content:"drafted";font-size:.6rem;color:var(--gold);position:absolute;top:4px;right:5px}
-.pc.quota-full::after{content:"full";font-size:.6rem;color:var(--light);position:absolute;top:4px;right:5px}
-.pc .pn{font-size:.82rem;font-weight:600;color:var(--text);line-height:1.25;padding-right:26px}
-.pc .role-tag{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-top:3px;letter-spacing:.3px}
-.role-tag.bat{background:#dce8ff;color:#2a4a9a}
-.role-tag.ar {background:#fff0d8;color:#7a4f00}
-.role-tag.wk {background:#f0e0ff;color:#5a1a90}
-.role-tag.bowl{background:#dff5e4;color:#1a5c2a}
-.pc .prating{position:absolute;top:7px;right:8px;font-size:.82rem;font-weight:700}
-.pc .pstat{font-size:.68rem;color:var(--muted);margin-top:4px;line-height:1.35}
-/* Hard mode hides rating + stat */
+.pc{background:var(--card);border:1px solid var(--border);border-radius:8px;padding:9px 10px;cursor:pointer;transition:all .15s;position:relative;user-select:none}
+.pc.avail:hover{border-color:var(--gold);background:#1e2e1e;box-shadow:0 0 0 2px rgba(212,168,75,.2)}
+.pc.avail{border-color:var(--green-d)}
+.pc.taken{opacity:.28;pointer-events:none}
+.pc.quota-full{opacity:.3;pointer-events:none}
+.pc.taken::after{content:"✓";font-size:.72rem;font-weight:700;color:var(--gold);position:absolute;top:5px;right:7px}
+.pc.quota-full::after{content:"FULL";font-size:.55rem;font-weight:700;color:var(--faint);position:absolute;top:5px;right:5px;letter-spacing:.3px}
+.pc .pn{font-size:.8rem;font-weight:600;color:var(--cream);line-height:1.3;padding-right:22px}
+.role-tag{display:inline-block;font-size:.6rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-top:3px;letter-spacing:.3px}
+.role-tag.bat{background:rgba(106,176,245,.18);color:var(--bat)}
+.role-tag.ar {background:rgba(240,160,80,.18);color:var(--ar)}
+.role-tag.wk {background:rgba(192,128,240,.18);color:var(--wk)}
+.role-tag.bowl{background:rgba(96,216,144,.18);color:var(--bowl)}
+.pc .prating{position:absolute;top:7px;right:7px;font-size:.8rem;font-weight:700;color:var(--gold)}
+.pc .pstat{font-size:.64rem;color:var(--faint);margin-top:4px;line-height:1.3}
 body.hard-mode .pc .prating{visibility:hidden}
 body.hard-mode .pc .pstat{display:none}
 
-/* RESPIN BAR */
-#respin-bar{display:none;flex-direction:column;gap:6px;margin-bottom:10px}
-#respin-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
-.rs-btn{background:transparent;border:1.5px solid var(--border);color:var(--muted);padding:7px 8px;font-size:.72rem;font-weight:600;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:.3px;transition:all .12s}
-.rs-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold-dark)}
-.rs-btn:disabled{opacity:.3;cursor:not-allowed}
-#respin-count{font-size:.7rem;color:var(--muted);text-align:center;letter-spacing:.3px}
-.rs-pip{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin:0 2px}
-.rs-pip.used{background:#d0c8b8}
+/* SPIN AGAIN button */
+#btn-spin-again{display:none;width:100%;background:transparent;border:1px solid var(--border);color:var(--muted);border-radius:7px;padding:9px;font-size:.75rem;font-weight:600;cursor:pointer;text-transform:uppercase;letter-spacing:.4px;transition:all .12s;margin-top:6px}
+#btn-spin-again:hover{border-color:var(--gold);color:var(--gold)}
 
-/* ACTION BAR */
-#act{display:none;gap:7px;margin-bottom:12px}
-#btn-pick{background:var(--green-dark);color:#c8e6c9;border:none;padding:10px 16px;font-size:.78rem;font-weight:700;border-radius:7px;cursor:pointer;text-transform:uppercase;letter-spacing:.3px;flex:1;transition:background .12s}
-#btn-pick:hover{background:var(--green)}
-#btn-pick:disabled{background:#ccc;color:#999;cursor:not-allowed}
-#btn-skip{background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:10px 14px;font-size:.72rem;border-radius:7px;cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:all .12s}
-#btn-skip:hover{border-color:var(--gold);color:var(--gold-dark)}
-
-/* ── RIGHT: TEAM PANEL ── */
-#team-panel{position:sticky;top:16px}
-#role-tracker{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:10px}
-.rtb{background:var(--paper);border:1.5px solid var(--border);border-radius:8px;padding:8px;text-align:center;transition:border-color .2s,background .2s}
-.rtb .rl{font-size:.62rem;color:var(--light);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+/* ── TEAM PANEL ── */
+#team-panel{position:sticky;top:10px}
+#role-tracker{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:8px}
+.rtb{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center;transition:all .2s}
+.rtb .rl{font-size:.58rem;color:var(--faint);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
 .rtb .rd{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-bottom:3px}
-.dot{width:9px;height:9px;border-radius:50%;border:1.5px solid #d0c4b0;background:transparent;transition:all .2s}
+.dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--border);background:transparent;transition:all .2s}
 .dot.on{border-color:transparent}
-.rtb.bat .dot.on{background:#3a5fc0}.rtb.ar .dot.on{background:#c07a1a}
-.rtb.wk .dot.on{background:#8a3ab5}.rtb.bowl .dot.on{background:#2a8a48}
-.rtb.full{border-color:var(--gold);background:#fffbf0}
-.rtb.full .rl{color:var(--gold-dark)}
-.rtc{font-size:.68rem;color:var(--muted)}
+.rtb.bat .dot.on{background:var(--bat)}.rtb.ar .dot.on{background:var(--ar)}
+.rtb.wk .dot.on{background:var(--wk)}.rtb.bowl .dot.on{background:var(--bowl)}
+.rtb.full{border-color:var(--gold-d)}
+.rtb.full .rl{color:var(--gold)}
+.rtc{font-size:.64rem;color:var(--muted)}
 
 #slots-list{margin-bottom:8px}
-.slot{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;background:var(--paper);border:1px solid var(--border);margin-bottom:3px;font-size:.76rem;min-height:36px}
-.slot.empty{color:var(--light);font-style:italic}
-.slot-num{width:18px;height:18px;border-radius:50%;background:var(--green-dark);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.slot.empty .slot-num{background:#ccc}
-.slot-name{font-weight:600;flex:1}
-.slot-role{font-size:.6rem;font-weight:700;padding:1px 4px;border-radius:3px}
-.slot-era{font-size:.6rem;color:var(--muted)}
-.slot-v{font-size:.7rem;font-weight:700;color:var(--green-dark)}
+.slot{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;background:var(--surface);border:1px solid var(--border);margin-bottom:3px;font-size:.74rem;min-height:34px}
+.slot.empty{color:var(--faint);font-style:italic}
+.slot-num{width:17px;height:17px;border-radius:50%;background:var(--border);color:var(--muted);font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.slot.filled .slot-num{background:var(--green-d);color:#fff}
+.slot-name{font-weight:600;color:var(--cream);flex:1}
+.slot-era{font-size:.58rem;color:var(--faint)}
+.slot-v{font-size:.7rem;font-weight:700;color:var(--gold)}
 
-#team-strength{padding:8px 10px;border-top:1px solid var(--border);margin-bottom:6px}
-.str-row{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-bottom:3px}
-.str-bar-bg{height:6px;background:#eee;border-radius:3px;overflow:hidden}
-.str-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#2ecc71,var(--green-dark));transition:width .4s}
+#team-strength{padding:8px 0;margin-bottom:6px}
+.str-row{display:flex;justify-content:space-between;font-size:.68rem;color:var(--faint);margin-bottom:4px}
+.str-row span:last-child{color:var(--gold);font-weight:700}
+.str-bar-bg{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.str-bar{height:5px;border-radius:3px;background:linear-gradient(90deg,var(--green-d),var(--gold));transition:width .4s}
 
-/* Squad grade */
-#squad-grade{display:none;background:var(--green-dark);border-radius:9px;padding:12px 14px;margin-bottom:8px;color:#fff}
+#squad-grade{display:none;background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:8px}
 .sg-row{display:flex;align-items:center;justify-content:space-between}
-.sg-letter{font-size:2.6rem;font-weight:900;line-height:1}
-.sg-S{color:#e8c547}.sg-A{color:#7aab6a}.sg-B{color:#5a9cc0}.sg-C{color:var(--gold)}.sg-D{color:#e8a040}
-.sg-tag{font-size:.8rem;color:rgba(255,255,255,.85)}
-.sg-avg{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:2px}
-.sg-break{font-size:.68rem;color:rgba(255,255,255,.55);margin-top:7px;border-top:1px solid rgba(255,255,255,.12);padding-top:7px;line-height:1.8}
+.sg-letter{font-size:2.4rem;font-weight:900;line-height:1}
+.sg-S{color:var(--gold-l)}.sg-A{color:var(--bowl)}.sg-B{color:var(--bat)}.sg-C{color:var(--ar)}.sg-D{color:var(--red)}
+.sg-tag{font-size:.78rem;color:var(--cream)}
+.sg-avg{font-size:.62rem;color:var(--faint);margin-top:2px}
+.sg-break{font-size:.64rem;color:var(--faint);margin-top:8px;border-top:1px solid var(--border);padding-top:7px;line-height:1.9}
 
-#btn-sim{display:none;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border:none;border-radius:8px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;width:100%;text-transform:uppercase;letter-spacing:.5px;transition:opacity .15s}
-#btn-sim:hover{opacity:.88}
+#btn-sim{display:none;background:linear-gradient(135deg,var(--green-d),#0d7a32);color:#fff;border:none;border-radius:8px;padding:13px;font-size:.85rem;font-weight:700;cursor:pointer;width:100%;text-transform:uppercase;letter-spacing:.5px;transition:all .15s;box-shadow:0 4px 16px rgba(22,163,74,.3)}
+#btn-sim:hover{opacity:.88;transform:translateY(-1px)}
 
 /* ── SIM PHASE ── */
-.team-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
-.tc_{border-radius:7px;padding:7px 8px;text-align:center}
-.tc_.bat{background:#f0f4ff;border:1px solid #aabce0}.tc_.ar{background:#fff8f0;border:1px solid #e0c090}
-.tc_.wk{background:#f8f0ff;border:1px solid #c090e0}.tc_.bowl{background:#f0fbf4;border:1px solid #90c8a8}
-.tc_ .tn{font-size:.72rem;font-weight:600;color:var(--text);line-height:1.25}
-.tc_ .ts{font-size:.65rem;color:var(--muted);margin-top:1px}
-.tc_ .tv{font-size:.8rem;font-weight:700;margin-top:2px}
+.team-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.tc_{border-radius:7px;padding:7px 8px;text-align:center;background:var(--surface);border:1px solid var(--border)}
+.tc_.bat{border-color:rgba(106,176,245,.3)}.tc_.ar{border-color:rgba(240,160,80,.3)}
+.tc_.wk{border-color:rgba(192,128,240,.3)}.tc_.bowl{border-color:rgba(96,216,144,.3)}
+.tc_ .tn{font-size:.7rem;font-weight:600;color:var(--cream);line-height:1.25}
+.tc_ .ts{font-size:.6rem;color:var(--faint);margin-top:1px}
+.tc_ .tv{font-size:.78rem;font-weight:700;margin-top:2px}
 
-.smry{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.sc_{background:var(--green-dark);border-radius:8px;padding:10px;text-align:center}
+.smry{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:12px}
+.sc_{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
 .sc_ .sv{font-size:1.5rem;font-weight:800;color:var(--gold)}
-.sc_ .sl{font-size:.65rem;color:rgba(255,255,255,.6);letter-spacing:.8px;text-transform:uppercase;margin-top:2px}
+.sc_ .sl{font-size:.6rem;color:var(--faint);letter-spacing:.8px;text-transform:uppercase;margin-top:2px}
 
-/* Momentum */
-#momentum{margin-bottom:12px;padding:10px 14px;background:var(--paper);border:1px solid var(--border);border-radius:9px}
-#momentum .mo-lbl{font-size:.65rem;color:var(--light);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
-#momentum .mo-dots{display:flex;gap:6px;align-items:center}
-.mo-dot{flex:1;height:8px;border-radius:4px;background:#e8dcc8;transition:background .3s}
-.mo-dot.W{background:#2a8a48}.mo-dot.L{background:#c02020}.mo-dot.ahead{background:#e8dcc8;border:1px dashed #c8bfb0}
+#momentum{margin-bottom:10px;padding:10px 14px;background:var(--surface);border:1px solid var(--border);border-radius:9px}
+#momentum .mo-lbl{font-size:.6rem;color:var(--faint);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+#momentum .mo-dots{display:flex;gap:6px}
+.mo-dot{flex:1;height:7px;border-radius:4px;background:var(--border);transition:background .3s}
+.mo-dot.W{background:var(--green-d)}.mo-dot.L{background:var(--red)}
 
-/* Match nav */
-.match-nav{display:flex;gap:8px;align-items:center;margin-bottom:12px}
-.match-nav-step{font-size:.7rem;color:var(--muted);letter-spacing:.4px;flex:1;text-align:center}
-#nav-prev,#nav-next{background:transparent;border:1.5px solid var(--border);padding:8px 14px;font-size:.72rem;font-weight:600;border-radius:6px;cursor:pointer;color:var(--muted);text-transform:uppercase;transition:all .12s}
-#nav-prev:hover,#nav-next:hover{border-color:var(--gold);color:var(--gold-dark)}
-#nav-prev:disabled{opacity:.3;cursor:not-allowed}
+.match-nav{display:flex;gap:8px;align-items:center;margin-bottom:10px}
+.match-nav-step{font-size:.68rem;color:var(--muted);flex:1;text-align:center}
+#nav-prev,#nav-next{background:var(--surface);border:1px solid var(--border);padding:8px 14px;font-size:.7rem;font-weight:600;border-radius:6px;cursor:pointer;color:var(--muted);text-transform:uppercase;transition:all .12s}
+#nav-prev:hover:not(:disabled),#nav-next:hover{border-color:var(--gold);color:var(--gold)}
+#nav-prev:disabled{opacity:.25;cursor:not-allowed}
 #nav-next.primary{background:var(--gold);color:#000;border-color:var(--gold)}
-#nav-next.primary:hover{background:var(--gold-dark)}
 
-/* Match card */
-.mc{background:var(--paper);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
-.mc-head{padding:12px 16px;background:var(--green-dark);display:flex;align-items:flex-start;justify-content:space-between}
-.mc-head .mt{font-size:.95rem;font-weight:700;color:var(--gold)}
-.mc-head .ms{font-size:.65rem;color:rgba(255,255,255,.55);letter-spacing:.8px;text-transform:uppercase;text-align:right;line-height:1.8}
-.mc-scores{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--green-mid);border-bottom:1px solid #2a4a1a}
+.mc{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.mc-head{padding:12px 16px;background:var(--card);display:flex;align-items:flex-start;justify-content:space-between;border-bottom:1px solid var(--border)}
+.mc-head .mt{font-size:.92rem;font-weight:700;color:var(--gold)}
+.mc-head .ms{font-size:.62rem;color:var(--faint);letter-spacing:.6px;text-transform:uppercase;text-align:right;line-height:1.8}
+.mc-scores{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--card);border-bottom:1px solid var(--border)}
 .ms-team{text-align:center}
-.ms-r{font-size:1.6rem;font-weight:800;color:var(--gold);line-height:1}
-.ms-l{font-size:.62rem;color:rgba(255,255,255,.6);letter-spacing:.8px;text-transform:uppercase;margin-top:2px}
-.ms-vs{color:rgba(255,255,255,.25);font-size:.8rem;flex:1;text-align:center}
+.ms-r{font-size:1.5rem;font-weight:800;color:var(--gold);line-height:1}
+.ms-l{font-size:.58rem;color:var(--faint);letter-spacing:.6px;text-transform:uppercase;margin-top:2px}
+.ms-vs{color:var(--border);font-size:.8rem;flex:1;text-align:center}
 .mc-body{padding:12px 16px}
 .mc-sec{margin-bottom:10px}
-.mc-sec-title{font-size:.6rem;color:var(--light);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;border-bottom:1px solid #ede5d5;padding-bottom:3px}
-table.sc-tbl{width:100%;border-collapse:collapse;font-size:.76rem}
-table.sc-tbl th{font-size:.6rem;color:var(--light);font-weight:500;padding:3px 4px;text-align:right;letter-spacing:.5px;text-transform:uppercase}
+.mc-sec-title{font-size:.58rem;color:var(--faint);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;border-bottom:1px solid var(--border);padding-bottom:3px}
+table.sc-tbl{width:100%;border-collapse:collapse;font-size:.74rem}
+table.sc-tbl th{font-size:.58rem;color:var(--faint);font-weight:500;padding:3px 4px;text-align:right;letter-spacing:.5px;text-transform:uppercase}
 table.sc-tbl th:first-child{text-align:left}
-table.sc-tbl td{padding:4px 4px;border-bottom:1px solid #f0ece4;color:var(--text)}
-table.sc-tbl td:first-child{font-weight:500}
+table.sc-tbl td{padding:4px 4px;border-bottom:1px solid var(--border);color:var(--cream)}
 table.sc-tbl td:not(:first-child){text-align:right;color:var(--muted)}
-table.sc-tbl td.bold{font-weight:700;color:var(--text)}
-table.sc-tbl td.good{color:#2a6b2a}
-table.sc-tbl td.bad{color:#a02020}
-table.sc-tbl tr.hi{background:#fffde7}
-table.sc-tbl tr.hi-bowl{background:#f5f8f0}
-.mc-total{font-size:.7rem;color:var(--muted);padding:5px 0 0;border-top:1px solid #ede5d5;margin-top:3px}
-.mc-total strong{color:var(--text)}
-.match-moment{background:var(--green-dark);border-radius:7px;padding:9px 12px;margin:8px 0;font-size:.76rem;color:#7aab6a;line-height:1.7;font-style:italic}
+table.sc-tbl td.bold{font-weight:700;color:var(--cream)}
+table.sc-tbl td.good{color:var(--bowl)}
+table.sc-tbl td.bad{color:var(--red)}
+table.sc-tbl tr.hi td{background:rgba(212,168,75,.06)}
+table.sc-tbl tr.hi-bowl td{background:rgba(96,216,144,.06)}
+.mc-total{font-size:.66rem;color:var(--faint);padding:5px 0 0;border-top:1px solid var(--border);margin-top:3px}
+.mc-total strong{color:var(--muted)}
+.match-moment{background:var(--card);border:1px solid var(--border);border-radius:7px;padding:9px 12px;margin:8px 0;font-size:.74rem;color:var(--muted);line-height:1.7;font-style:italic}
 .match-moment strong{color:var(--gold);font-style:normal}
-.potm-badge{display:inline-flex;align-items:center;gap:5px;background:#fffbf0;border:1px solid var(--gold);border-radius:5px;padding:3px 8px;font-size:.7rem;color:#8a6010}
-.potm-badge strong{color:#6a4008}
-.mc-result{padding:8px 16px;text-align:right;font-size:.76rem;font-weight:700;letter-spacing:.3px}
-.mc-result.win{background:#e8f5e9;color:#256625}.mc-result.loss{background:#ffebee;color:#c02020}
+.potm-badge{display:inline-flex;align-items:center;gap:5px;background:rgba(212,168,75,.1);border:1px solid var(--gold-d);border-radius:5px;padding:3px 8px;font-size:.68rem;color:var(--gold)}
+.mc-result{padding:8px 16px;text-align:right;font-size:.74rem;font-weight:700;letter-spacing:.3px}
+.mc-result.win{background:rgba(34,197,94,.08);color:var(--bowl)}
+.mc-result.loss{background:rgba(240,80,96,.08);color:var(--red)}
 
-/* Final banner */
-#fin-banner{display:none;background:var(--green-dark);border-radius:11px;padding:22px;text-align:center;margin-bottom:14px}
+#fin-banner{display:none;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:22px;text-align:center;margin-bottom:12px}
 #fin-banner .fi{font-size:3rem;margin-bottom:8px}
-#fin-banner .ft{font-size:1.3rem;font-weight:800;color:var(--gold)}
-#fin-banner .fs{font-size:.78rem;color:rgba(255,255,255,.65);margin-top:5px;line-height:1.7}
-#fin-banner .fr{font-size:.78rem;color:var(--gold);margin-top:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:10px}
+#fin-banner .ft{font-size:1.25rem;font-weight:800;color:var(--gold)}
+#fin-banner .fs{font-size:.76rem;color:var(--muted);margin-top:5px;line-height:1.7}
+#fin-banner .fr{font-size:.76rem;color:var(--gold);margin-top:10px;border-top:1px solid var(--border);padding-top:10px}
 
-/* Share */
-#share-card{display:none;background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
-#share-card .sh-title{font-size:.65rem;color:var(--light);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+#share-card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+#share-card .sh-title{font-size:.62rem;color:var(--faint);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
 .share-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sh-btn{padding:10px;font-size:.72rem;font-weight:600;border-radius:7px;cursor:pointer;text-transform:uppercase;border:1.5px solid var(--border);color:var(--muted);background:transparent;transition:all .12s;letter-spacing:.3px}
-.sh-btn:hover{border-color:var(--gold);color:var(--gold-dark)}
+.sh-btn{padding:10px;font-size:.7rem;font-weight:600;border-radius:7px;cursor:pointer;text-transform:uppercase;border:1px solid var(--border);color:var(--muted);background:transparent;transition:all .12s;letter-spacing:.3px}
+.sh-btn:hover{border-color:var(--gold);color:var(--gold)}
 .sh-btn.primary{background:var(--gold);color:#000;border-color:var(--gold)}
-.sh-btn.primary:hover{background:var(--gold-dark)}
+.sh-btn.primary:hover{background:var(--gold-d)}
 #share-preview{margin-top:10px;display:none}
 #share-preview img{width:100%;border-radius:8px;display:block}
 #share-dl-row{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 canvas#sc{display:none}
 
-#btn-back{background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:9px;font-size:.72rem;border-radius:6px;cursor:pointer;width:100%;text-transform:uppercase;margin-top:8px}
-#btn-back:hover{border-color:var(--muted);color:var(--text)}
+#btn-back{background:transparent;color:var(--faint);border:1px solid var(--border);padding:9px;font-size:.7rem;border-radius:6px;cursor:pointer;width:100%;text-transform:uppercase;margin-top:8px;transition:all .12s}
+#btn-back:hover{border-color:var(--muted);color:var(--muted)}
 
-/* Toast */
-#missed-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--green-dark);color:var(--gold);border:1px solid rgba(255,255,255,.12);padding:9px 18px;border-radius:30px;font-size:.75rem;letter-spacing:.3px;transition:transform .3s ease;z-index:999;white-space:nowrap;pointer-events:none;font-weight:600}
+#missed-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--card);color:var(--gold);border:1px solid var(--border);padding:9px 18px;border-radius:30px;font-size:.74rem;letter-spacing:.3px;transition:transform .3s ease;z-index:999;white-space:nowrap;pointer-events:none;font-weight:600}
 #missed-toast.show{transform:translateX(-50%) translateY(0)}
 
-@keyframes reel-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
-.reel-in{animation:reel-in .25s ease}
+@keyframes reel-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+.reel-in{animation:reel-in .22s ease}
+@keyframes pop{0%{transform:scale(1)}50%{transform:scale(1.04)}100%{transform:scale(1)}}
+.pop{animation:pop .18s ease}
 </style>
 </head>
 <body>
@@ -246,109 +230,101 @@ canvas#sc{display:none}
   <div id="hdr">
     <div>
       <h1>🏏 World Cup XI</h1>
-      <div class="sub">Draft the greatest ODI team across eras</div>
+      <div class="sub">Draft legends across eras · Pick any player from each squad</div>
     </div>
     <div id="hdr-right">
-      <div>
+      <button id="hard-toggle">Normal Mode</button>
+      <div style="text-align:right">
         <div id="hdr-count">0/11</div>
         <div id="hdr-clabel">Drafted</div>
       </div>
-      <button id="hard-toggle">Normal Mode</button>
     </div>
   </div>
   <div id="prog"><div id="prog-fill"></div></div>
 
-  <div id="main">
+  <!-- ── DRAFT PHASE ── -->
+  <div class="phase active" id="draft-phase">
+    <div id="draft-cols">
 
-    <!-- ── DRAFT PHASE ── -->
-    <div class="phase active" id="draft-phase">
-      <div id="draft-cols">
-
-        <!-- LEFT -->
-        <div id="spin-zone">
-          <div class="pick-label" id="pick-label">Spin to reveal a World Cup squad — pick any player</div>
-
-          <div id="reel-wrap">
-            <div id="reel"><div class="idle">Press Spin to start</div></div>
-          </div>
-
-          <button id="btn-spin">🎰 Spin</button>
-
-          <div id="respin-bar">
-            <div id="respin-btn-row">
-              <button class="rs-btn" id="rs-team">🔄 New Team, Same Year</button>
-              <button class="rs-btn" id="rs-tourn">🌍 Same Team, New Year</button>
-            </div>
-            <div id="respin-count"></div>
-          </div>
-
-          <div id="squad-panel">
-            <div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Pick any player — in any order — to add to your XI.</div>
-          </div>
-
-          <div id="act">
-            <button id="btn-pick" disabled>Select a player first</button>
-            <button id="btn-skip">Skip → Spin Again</button>
-          </div>
+      <!-- LEFT -->
+      <div id="spin-zone">
+        <div id="reel-wrap">
+          <div id="reel"><div class="idle">Press Spin to reveal a squad</div></div>
         </div>
 
-        <!-- RIGHT: TEAM PANEL -->
-        <div id="team-panel">
-          <div id="role-tracker">
-            <div class="rtb bat" id="rtb-bat"><div class="rl">Batsmen</div><div class="rd" id="rd-bat"></div><div class="rtc" id="rtc-bat">0 / 4</div></div>
-            <div class="rtb ar"  id="rtb-ar" ><div class="rl">All-rounders</div><div class="rd" id="rd-ar"></div><div class="rtc" id="rtc-ar">0 / 2</div></div>
-            <div class="rtb wk"  id="rtb-wk" ><div class="rl">Keeper</div><div class="rd" id="rd-wk"></div><div class="rtc" id="rtc-wk">0 / 1</div></div>
-            <div class="rtb bowl" id="rtb-bowl"><div class="rl">Bowlers</div><div class="rd" id="rd-bowl"></div><div class="rtc" id="rtc-bowl">0 / 4</div></div>
+        <button id="btn-spin">🎰 Spin</button>
+
+        <div id="respin-bar" style="display:none;flex-direction:column;gap:5px">
+          <div style="display:flex;gap:6px">
+            <button class="rs-btn" id="rs-team">↺ Same Year</button>
+            <button class="rs-btn" id="rs-tourn">↺ Same Team</button>
           </div>
-
-          <div id="slots-list"></div>
-
-          <div id="team-strength">
-            <div class="str-row"><span>Team Rating</span><span id="str-val">—</span></div>
-            <div class="str-bar-bg"><div class="str-bar" id="str-bar" style="width:0%"></div></div>
-          </div>
-
-          <div id="squad-grade"></div>
-          <button id="btn-sim">Simulate World Cup →</button>
+          <div id="respin-count"></div>
         </div>
+
+        <div id="squad-panel">
+          <div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Click any available player to draft them directly.</div>
+        </div>
+
+        <button id="btn-spin-again">↺ Spin for a new squad</button>
+      </div>
+
+      <!-- RIGHT: TEAM PANEL -->
+      <div id="team-panel">
+        <div id="role-tracker">
+          <div class="rtb bat" id="rtb-bat"><div class="rl">Batsmen</div><div class="rd" id="rd-bat"></div><div class="rtc" id="rtc-bat">0 / 4</div></div>
+          <div class="rtb ar"  id="rtb-ar" ><div class="rl">All-rounders</div><div class="rd" id="rd-ar"></div><div class="rtc" id="rtc-ar">0 / 2</div></div>
+          <div class="rtb wk"  id="rtb-wk" ><div class="rl">Keeper</div><div class="rd" id="rd-wk"></div><div class="rtc" id="rtc-wk">0 / 1</div></div>
+          <div class="rtb bowl" id="rtb-bowl"><div class="rl">Bowlers</div><div class="rd" id="rd-bowl"></div><div class="rtc" id="rtc-bowl">0 / 4</div></div>
+        </div>
+
+        <div id="slots-list"></div>
+
+        <div id="team-strength">
+          <div class="str-row"><span>Team Rating</span><span id="str-val">—</span></div>
+          <div class="str-bar-bg"><div class="str-bar" id="str-bar" style="width:0%"></div></div>
+        </div>
+
+        <div id="squad-grade"></div>
+        <button id="btn-sim">Simulate World Cup →</button>
       </div>
     </div>
+  </div>
 
-    <!-- ── SIM PHASE ── -->
-    <div class="phase" id="sim-phase">
-      <div class="team-strip" id="team-strip"></div>
-      <div class="smry" id="smry"></div>
-      <div id="fin-banner"></div>
+  <!-- ── SIM PHASE ── -->
+  <div class="phase" id="sim-phase">
+    <div class="team-strip" id="team-strip"></div>
+    <div class="smry" id="smry"></div>
+    <div id="fin-banner"></div>
 
-      <div id="momentum" style="display:none">
-        <div class="mo-lbl">Tournament Momentum</div>
-        <div class="mo-dots" id="mo-dots"></div>
-      </div>
-
-      <div class="match-nav">
-        <button id="nav-prev" disabled>← Prev</button>
-        <div class="match-nav-step" id="nav-step">Match 1 of 7</div>
-        <button id="nav-next" class="primary">Next →</button>
-      </div>
-
-      <div id="match-display"></div>
-
-      <div id="share-card">
-        <div class="sh-title">📤 Share Your XI</div>
-        <div class="share-btns">
-          <button class="sh-btn primary" id="btn-gen">🎨 Generate Card</button>
-          <button class="sh-btn" id="btn-copy">📋 Copy Results</button>
-        </div>
-        <div id="share-preview"><img id="share-img" alt="XI Card"></div>
-        <div id="share-dl-row">
-          <button class="sh-btn primary" id="btn-dl">💾 Save Image</button>
-          <button class="sh-btn" id="btn-share">🔗 Share</button>
-        </div>
-        <canvas id="sc"></canvas>
-      </div>
-
-      <button id="btn-back">← Back to Draft</button>
+    <div id="momentum" style="display:none">
+      <div class="mo-lbl">Tournament Momentum</div>
+      <div class="mo-dots" id="mo-dots"></div>
     </div>
+
+    <div class="match-nav">
+      <button id="nav-prev" disabled>← Prev</button>
+      <div class="match-nav-step" id="nav-step">Match 1 of 7</div>
+      <button id="nav-next" class="primary">Next →</button>
+    </div>
+
+    <div id="match-display"></div>
+
+    <div id="share-card">
+      <div class="sh-title">Share Your XI</div>
+      <div class="share-btns">
+        <button class="sh-btn primary" id="btn-gen">Generate Card</button>
+        <button class="sh-btn" id="btn-copy">Copy Results</button>
+      </div>
+      <div id="share-preview"><img id="share-img" alt="XI Card"></div>
+      <div id="share-dl-row">
+        <button class="sh-btn primary" id="btn-dl">Save Image</button>
+        <button class="sh-btn" id="btn-share">Share</button>
+      </div>
+      <canvas id="sc"></canvas>
+    </div>
+
+    <button id="btn-back">← New Draft</button>
   </div>
 </div>
 
@@ -776,7 +752,7 @@ const FIXTURES=[
 // ══════════════════════════════════════════════════════
 //  STATE
 // ══════════════════════════════════════════════════════
-let team=[], taken=new Set(), sq=null, sel=null, pickedThisDraw=false;
+let team=[], taken=new Set(), sq=null;
 let hardMode=false, reSpinsLeft=3, lastSquadDrawn=null;
 let results=[], currentMatch=0;
 
@@ -810,10 +786,10 @@ function updateSlots(){
   for(let i=0;i<11;i++){
     const p=ord[i],div=document.createElement("div");
     if(p){
-      div.className="slot";
+      div.className="slot filled";
       div.innerHTML=`<div class="slot-num">${i+1}</div>
         <div class="slot-name">${p.n}</div>
-        <span class="slot-role role-tag ${p.r}">${RC[p.r]}</span>
+        <span class="role-tag ${p.r}">${RC[p.r]}</span>
         <span class="slot-era">${p.sq||""}</span>
         <span class="slot-v">${p.v}</span>`;
     }else{
@@ -840,31 +816,31 @@ renderUI();
 // ══════════════════════════════════════════════════════
 //  SPIN REEL
 // ══════════════════════════════════════════════════════
-let spinning=false, spinDone=false;
+let spinning=false;
+
+const FLAGS={Australia:"🇦🇺",India:"🇮🇳","West Indies":"🇼🇮",Pakistan:"🇵🇰","Sri Lanka":"🇱🇰",England:"🏴󠁧󠁢󠁥󠁮󠁧󠁿","New Zealand":"🇳🇿","South Africa":"🇿🇦","Bangladesh":"🇧🇩",Afghanistan:"🇦🇫"};
+function flagFor(t){return FLAGS[t]||"🏏";}
 
 function setReel(s,final=false){
   const reel=document.getElementById("reel");
   reel.style.opacity="0";
   setTimeout(()=>{
-    reel.innerHTML=`<div class="yr">${s.y}${s.ev.includes("Champions")?" CT":""}</div>
+    reel.innerHTML=`<div class="yr">${s.y}</div>
       <div class="flag">${flagFor(s.t)}</div>
       <div class="tname">${s.t}</div>
-      <div class="thost">📍 ${s.host}</div>`;
+      <div class="thost">${s.ev} · ${s.host}</div>`;
     reel.style.opacity="1";
-    if(final) reel.classList.add("reel-in");
-    setTimeout(()=>reel.classList.remove("reel-in"),300);
-  },80);
+    if(final){reel.classList.add("reel-in");setTimeout(()=>reel.classList.remove("reel-in"),300);}
+  },70);
 }
 
-const FLAGS={Australia:"🇦🇺",India:"🇮🇳","West Indies":"🇼🇮",Pakistan:"🇵🇰","Sri Lanka":"🇱🇰",England:"🏴󠁧󠁢󠁥󠁮󠁧󠁿","New Zealand":"🇳🇿","South Africa":"🇿🇦","Bangladesh":"🇧🇩",Afghanistan:"🇦🇫"};
-function flagFor(t){return FLAGS[t]||"🏏";}
-
 function doSpin(){
-  if(spinning||spinDone||fullTeam())return;
+  if(spinning||fullTeam())return;
   spinning=true;
   document.getElementById("btn-spin").disabled=true;
-  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle" style="opacity:.5">Spinning…</div>`;
+  document.getElementById("btn-spin-again").style.display="none";
   document.getElementById("respin-bar").style.display="none";
+  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle" style="opacity:.4">Spinning…</div>`;
 
   let ticks=0,total=Math.floor(Math.random()*10)+12;
   const iv=setInterval(()=>{
@@ -876,7 +852,7 @@ function doSpin(){
       setTimeout(()=>{
         setReel(chosen,true);
         lastSquadDrawn=chosen;
-        spinning=false; spinDone=true;
+        spinning=false;
         renderSquad(chosen);
         updateRespinUI();
       },200);
@@ -885,90 +861,79 @@ function doSpin(){
 }
 
 document.getElementById("btn-spin").addEventListener("click",doSpin);
+document.getElementById("btn-spin-again").addEventListener("click",()=>{
+  document.getElementById("btn-spin").disabled=false;
+  doSpin();
+});
 
 // ══════════════════════════════════════════════════════
-//  SQUAD RENDERING — any role, no ordering
+//  SQUAD RENDERING — click any player to draft instantly
 // ══════════════════════════════════════════════════════
 function renderSquad(s){
-  sq=s; sel=null;
-  document.getElementById("pick-btn").disabled=true;
-  document.getElementById("pick-btn").textContent="Select a player first";
-  document.getElementById("act").style.display="flex";
-
-  // Figure out which roles still need filling
-  const needed=["bat","ar","wk","bowl"].filter(r=>!fullR(r));
-  const neededStr=needed.map(r=>RL[r]).join(", ");
-
+  sq=s;
+  const needed=["bat","ar","wk","bowl"].filter(r=>!fullR(r)).map(r=>RL[r]).join(", ");
   document.getElementById("squad-panel").innerHTML=`
     <div class="sq-head">
-      <div class="sq-title">${s.t} — ${s.y}</div>
+      <div class="sq-title">${s.t} <span style="color:var(--faint);font-weight:400">— ${s.y}</span></div>
       <div class="sq-sub">${s.ev} · ${s.host}</div>
     </div>
-    <div class="role-banner">Still need: <strong>${neededStr}</strong> — pick any eligible player</div>
+    <div class="squad-hint">Still need: ${needed} — click any player to draft</div>
     <div class="sq-grid" id="sq-grid">
       ${s.p.map((p,i)=>{
-        const tk=taken.has(p.n);
-        const qf=!tk&&fullR(p.r);
-        const ok=!tk&&!qf;
-        const rcolor=p.v>=9?"#b5560e":p.v>=8?"#2a6b2a":p.v>=7?"#2a4a9a":"#888";
-        return`<div class="pc ${tk?"taken":qf?"quota-full":ok?"selectable":""}" data-i="${i}">
+        const tk=taken.has(p.n), qf=!tk&&fullR(p.r), ok=!tk&&!qf;
+        return`<div class="pc ${tk?"taken":qf?"quota-full":"avail"}" data-i="${i}">
           <div class="pn">${p.n}</div>
           <span class="role-tag ${p.r}">${RC[p.r]}</span>
-          <div class="prating" style="color:${rcolor}">${p.v}</div>
+          <div class="prating">${p.v}</div>
           ${p.s?`<div class="pstat">${p.s}</div>`:""}
         </div>`;
       }).join("")}
     </div>`;
 
-  document.querySelectorAll("#sq-grid .pc.selectable").forEach(c=>{
-    c.addEventListener("click",()=>{
-      if(pickedThisDraw)return;
-      document.querySelectorAll("#sq-grid .pc").forEach(x=>x.classList.remove("sel"));
-      c.classList.add("sel");
-      sel={...s.p[+c.dataset.i],sq:`${s.t} '${String(s.y).slice(-2)}`};
-      document.getElementById("pick-btn").disabled=false;
-      document.getElementById("pick-btn").textContent=`Add ${sel.n} →`;
-    });
+  document.querySelectorAll("#sq-grid .pc.avail").forEach(c=>{
+    c.addEventListener("click",()=>pickPlayer(s.p[+c.dataset.i],c));
   });
+
+  document.getElementById("btn-spin-again").style.display=fullTeam()?"none":"block";
+  document.getElementById("btn-spin").disabled=true;
 }
 
-// ══════════════════════════════════════════════════════
-//  PICK / SKIP
-// ══════════════════════════════════════════════════════
-document.getElementById("btn-pick").addEventListener("click",()=>{
-  if(!sel||fullTeam())return;
-  const picked={...sel};
+function pickPlayer(p,card){
+  if(taken.has(p.n)||fullR(p.r)||fullTeam())return;
+  const picked={...p,sq:`${sq.t} '${String(sq.y).slice(-2)}`};
   team.push(picked); taken.add(picked.n);
-  pickedThisDraw=true;
-  document.querySelectorAll("#sq-grid .pc.sel").forEach(c=>{c.classList.remove("sel");c.classList.add("taken");});
-  document.getElementById("pick-btn").disabled=true;
-  document.getElementById("pick-btn").textContent="✓ Added";
-  document.getElementById("respin-bar").style.display="none";
+
+  // animate card
+  card.classList.remove("avail");
+  card.classList.add("taken","pop");
+  setTimeout(()=>card.classList.remove("pop"),200);
+
+  // re-check quota-full for other cards in grid
+  document.querySelectorAll("#sq-grid .pc.avail").forEach(c=>{
+    const cp=sq.p[+c.dataset.i];
+    if(fullR(cp.r)){c.classList.remove("avail");c.classList.add("quota-full");}
+  });
+
   if(lastSquadDrawn) setTimeout(()=>showMissedToast(picked,lastSquadDrawn),600);
   renderUI();
+
   if(fullTeam()){
     calcSquadGrade();
+    document.getElementById("btn-spin-again").style.display="none";
     document.getElementById("btn-spin").disabled=true;
-    document.getElementById("btn-spin").textContent="XI Complete — Simulate!";
-    document.getElementById("act").style.display="none";
+    document.getElementById("respin-bar").style.display="none";
+    // update hint
+    document.querySelector(".squad-hint").textContent="XI complete — simulate your tournament!";
   } else {
-    spinDone=false;
-    document.getElementById("btn-spin").disabled=false;
-    document.getElementById("btn-spin").textContent="🎰 Spin Again";
-    document.getElementById("pick-label").innerHTML=`<strong>${11-team.length}</strong> spots left — spin for the next squad`;
-    pickedThisDraw=false;
+    document.getElementById("btn-spin").disabled=true;
+    document.getElementById("btn-spin-again").style.display="block";
+    // refresh hint
+    const needed=["bat","ar","wk","bowl"].filter(r=>!fullR(r)).map(r=>RL[r]).join(", ");
+    const hint=document.querySelector(".squad-hint");
+    if(hint) hint.textContent=`Still need: ${needed} — pick more or spin again`;
+    updateRespinUI();
   }
-});
-
-document.getElementById("btn-skip").addEventListener("click",()=>{
-  sel=null; pickedThisDraw=false; spinDone=false;
-  document.getElementById("btn-spin").disabled=false;
-  document.getElementById("act").style.display="none";
-  document.getElementById("respin-bar").style.display="none";
-  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle">Squad skipped — hit Spin for another one.</div>`;
-  document.getElementById("reel").innerHTML=`<div class="idle">Spin for another squad</div>`;
-  document.getElementById("reel").style.opacity="1";
-});
+}
 
 // ══════════════════════════════════════════════════════
 //  HARD MODE
@@ -985,16 +950,14 @@ document.getElementById("hard-toggle").addEventListener("click",()=>{
 //  RE-SPINS
 // ══════════════════════════════════════════════════════
 function updateRespinUI(){
+  if(!sq||fullTeam()){document.getElementById("respin-bar").style.display="none";return;}
   const bar=document.getElementById("respin-bar");
-  if(!sq||pickedThisDraw){bar.style.display="none";return;}
   bar.style.display="flex";
   const pips=Array.from({length:3},(_,i)=>`<span class="rs-pip${i>=reSpinsLeft?" used":""}"></span>`).join("");
-  document.getElementById("respin-count").innerHTML=`Re-spins remaining: ${pips}`;
+  document.getElementById("respin-count").innerHTML=`Re-spins: ${pips}`;
   const noLeft=reSpinsLeft<=0;
-  const sameYear=SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t);
-  const sameTeam=SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y);
-  document.getElementById("rs-team").disabled=noLeft||sameYear.length===0;
-  document.getElementById("rs-tourn").disabled=noLeft||sameTeam.length===0;
+  document.getElementById("rs-team").disabled=noLeft||SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t).length===0;
+  document.getElementById("rs-tourn").disabled=noLeft||SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y).length===0;
 }
 
 function doRespin(candidates){
@@ -1007,12 +970,8 @@ function doRespin(candidates){
   updateRespinUI();
 }
 
-document.getElementById("rs-team").addEventListener("click",()=>{
-  doRespin(SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t));
-});
-document.getElementById("rs-tourn").addEventListener("click",()=>{
-  doRespin(SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y));
-});
+document.getElementById("rs-team").addEventListener("click",()=>doRespin(SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t)));
+document.getElementById("rs-tourn").addEventListener("click",()=>doRespin(SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y)));
 
 // ══════════════════════════════════════════════════════
 //  SQUAD GRADE + MISSED TOAST
@@ -1382,17 +1341,16 @@ function copyText(){
 //  BACK / RESET
 // ══════════════════════════════════════════════════════
 document.getElementById("btn-back").addEventListener("click",()=>{
-  team=[]; taken=new Set(); sq=null; sel=null; pickedThisDraw=false;
-  spinning=false; spinDone=false; reSpinsLeft=3; lastSquadDrawn=null;
-  document.getElementById("reel").innerHTML=`<div class="idle">Press Spin to start</div>`;
+  team=[]; taken=new Set(); sq=null;
+  spinning=false; reSpinsLeft=3; lastSquadDrawn=null;
+  document.getElementById("reel").innerHTML=`<div class="idle">Press Spin to reveal a squad</div>`;
   document.getElementById("reel").style.opacity="1";
-  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Pick any player — in any order — to add to your XI.</div>`;
-  document.getElementById("act").style.display="none";
+  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Click any available player to draft them directly.</div>`;
   document.getElementById("respin-bar").style.display="none";
   document.getElementById("squad-grade").style.display="none";
-  document.getElementById("pick-label").innerHTML="Spin to reveal a World Cup squad — pick any player";
   document.getElementById("btn-spin").disabled=false;
   document.getElementById("btn-spin").textContent="🎰 Spin";
+  document.getElementById("btn-spin-again").style.display="none";
   renderUI();
   document.getElementById("sim-phase").classList.remove("active");
   document.getElementById("draft-phase").classList.add("active");
