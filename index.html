@@ -1117,6 +1117,20 @@ const STAGES = [
   'Quarter-final', 'Semi-final', 'FINAL'
 ];
 
+// Generic opposition batting names per nation
+const OPP_BATTERS = {
+  'England':      ['Z. Crawley','B. Duckett','J. Root','H. Brook','B. Stokes','J. Buttler','M. Ali','C. Woakes','M. Wood','J. Anderson','O. Robinson'],
+  'Australia':    ['D. Warner','T. Head','S. Smith','M. Labuschagne','G. Maxwell','A. Finch','J. Inglis','M. Marsh','P. Cummins','M. Starc','A. Zampa'],
+  'India':        ['R. Sharma','S. Gill','V. Kohli','S. Iyer','K. Rahul','H. Pandya','R. Jadeja','M. Shami','J. Bumrah','K. Yadav','M. Siraj'],
+  'Pakistan':     ['B. Azam','I. Ahmed','S. Shakeel','A. Shafique','S. Khan','I. Ahmed','H. Rauf','S. Afridi','U. Mir','M. Nawaz','N. Haq'],
+  'South Africa': ['Q. de Kock','T. Bavuma','R. van der Dussen','A. Markram','D. Miller','H. Klaasen','M. Jansen','K. Maharaj','K. Rabada','L. Ngidi','T. Shamsi'],
+  'New Zealand':  ['D. Conway','W. Young','K. Williamson','D. Mitchell','G. Phillips','T. Latham','M. Santner','M. Henry','T. Southee','T. Boult','L. Ferguson'],
+  'Sri Lanka':    ['P. Nissanka','K. Mendis','S. Samarawickrama','C. Asalanka','D. de Silva','D. Shanaka','M. Theekshana','D. Wellalage','D. Madushanka','K. Rajitha','L. Malinga'],
+  'West Indies':  ['S. Hope','K. Mayers','N. Pooran','R. Chase','R. Powell','J. Holder','A. Joseph','O. Thomas','A. Nurse','H. Walsh','K. Pierre'],
+  'Bangladesh':   ['L. Das','T. Hasan','N. Shanto','S. Al Hasan','T. Hridoy','M. Hossain','N. Ahmed','S. Islam','T. Ahmed','M. Rahman','H. Miraz'],
+  'Afghanistan':  ['R. Gurbaz','I. Zadran','R. Shah','H. Shahidi','I. Alikhil','A. Omarzai','M. Nabi','R. Khan','M. Mujeeb','F. Farooqi','N. Haq'],
+};
+
 function calcTeamScore(team) {
   const batters = team.filter(p => p.role === 'BAT' || p.role === 'WK' || p.role === 'ALL')
     .sort((a, b) => b.bat - a.bat).slice(0, 6);
@@ -1127,143 +1141,461 @@ function calcTeamScore(team) {
   return (batScore * 0.55 + bowlScore * 0.45);
 }
 
-function simInnings(teamScore, isYours) {
-  const base = teamScore * 2.8;
-  const variance = rand(-35, 45);
-  return Math.max(80, Math.round(base + variance));
+// Simulate an individual batter's score given their bat rating and position
+function simBatterScore(batRating, position) {
+  // Higher positions (1-4) more likely to bat long; tail less so
+  const maxPotential = batRating * (position <= 4 ? 1.8 : position <= 6 ? 1.2 : 0.6);
+  const duck = Math.random() < (0.12 + position * 0.03);
+  if (duck) return { runs: 0, balls: 1, out: true };
+  const runs = Math.round(Math.random() * maxPotential * (0.4 + Math.random() * 0.6));
+  const balls = Math.round(runs * (0.9 + Math.random() * 0.5));
+  const out = Math.random() < 0.85;
+  return { runs: Math.min(runs, 180), balls: Math.max(balls, runs), out };
+}
+
+// Simulate a bowler's figures given bowl rating and conditions
+function simBowlerFigures(bowlRating, oppBatStrength) {
+  const overs = rand(8, 10);
+  // Wicket probability per ball roughly scaled by rating vs opposition
+  const wicketChance = (bowlRating / (bowlRating + oppBatStrength)) * 0.08;
+  const balls = overs * 6;
+  let wickets = 0;
+  for (let b = 0; b < balls; b++) {
+    if (Math.random() < wicketChance) wickets++;
+  }
+  wickets = Math.min(wickets, 5);
+  const runsConceded = Math.round((oppBatStrength / 100) * overs * (rand(5, 9)));
+  return { overs, wickets, runs: runsConceded };
+}
+
+// Generate a full innings for your team
+function simYourInnings(team, oppBowlStrength) {
+  const battingOrder = [
+    ...team.filter(p => p.role === 'BAT'),
+    ...team.filter(p => p.role === 'WK'),
+    ...team.filter(p => p.role === 'ALL'),
+    ...team.filter(p => p.role === 'BWL'),
+  ];
+  let total = 0, wickets = 0, extras = rand(5, 18);
+  const scorecard = [];
+
+  battingOrder.forEach((p, i) => {
+    if (wickets >= 9) { scorecard.push({ name: p.name, runs: 0, balls: 0, out: false, dnb: true }); return; }
+    const res = simBatterScore(p.bat, i + 1);
+    // Scale down by opponent bowling strength
+    const scaledRuns = Math.round(res.runs * (1 - (oppBowlStrength - 60) / 300));
+    const finalRuns = Math.max(0, scaledRuns);
+    total += finalRuns;
+    if (res.out) wickets++;
+    scorecard.push({ name: p.name, runs: finalRuns, balls: res.balls, out: res.out, dnb: false });
+  });
+
+  total += extras;
+  return { total: Math.max(total, 85), wickets, extras, scorecard };
+}
+
+// Generate opposition innings
+function simOppInnings(oppNames, oppBatStrength, myBowlStrength) {
+  const total_opp = Math.round(oppBatStrength * 2.8 + rand(-30, 40));
+  // distribute runs across top 6
+  let remaining = total_opp;
+  const scorecard = [];
+  for (let i = 0; i < 8; i++) {
+    const name = oppNames[i] || `Player ${i+1}`;
+    if (i === 7) { scorecard.push({ name, runs: Math.max(0, remaining), balls: rand(5,20) }); break; }
+    const share = i < 2 ? rand(20, 70) : i < 5 ? rand(5, 45) : rand(0, 25);
+    const runs = Math.min(share, remaining);
+    remaining -= runs;
+    if (remaining < 0) remaining = 0;
+    scorecard.push({ name, runs: Math.max(0, runs), balls: rand(runs, runs + 30) });
+    if (remaining <= 0) break;
+  }
+  const extras = rand(5, 15);
+  return { total: Math.max(total_opp + extras, 85), wickets: rand(4, 10), extras, scorecard };
+}
+
+// Generate bowling figures for your bowlers against the opposition
+function simYourBowling(team, oppBatStrength) {
+  const bowlers = team.filter(p => p.role === 'BWL' || p.role === 'ALL')
+    .sort((a, b) => b.bowl - a.bowl);
+  return bowlers.map(p => {
+    const fig = simBowlerFigures(p.bowl, oppBatStrength);
+    return { name: p.name, ...fig };
+  });
+}
+
+function simulateMatch(opp, oppStrength, stage) {
+  const myBatStrength = calcTeamScore(state.team);
+  const knockoutBonus = stage === 'FINAL' ? 8 : stage === 'Semi-final' ? 5 : stage === 'Quarter-final' ? 3 : 0;
+  const realOppStrength = oppStrength + knockoutBonus;
+
+  const oppBowlStrength = realOppStrength * 0.9;
+  const oppBatStrength  = realOppStrength * 1.05;
+
+  const yourInnings = simYourInnings(state.team, oppBowlStrength);
+  const yourBowling = simYourBowling(state.team, oppBatStrength);
+
+  // Determine result from totals
+  const winProb = myBatStrength / (myBatStrength + realOppStrength);
+  const won = Math.random() < winProb;
+
+  // Build opp innings consistent with result
+  const oppNames = OPP_BATTERS[opp.name] || Array.from({length:8},(_,i)=>`Player ${i+1}`);
+  let oppInn = simOppInnings(oppNames, oppBatStrength, myBatStrength);
+
+  // Adjust opp total to match result
+  if (won && oppInn.total >= yourInnings.total) {
+    oppInn.total = yourInnings.total - rand(5, 50);
+    oppInn.wickets = Math.min(oppInn.wickets + 2, 10);
+  } else if (!won && oppInn.total <= yourInnings.total) {
+    oppInn.total = yourInnings.total + rand(5, 45);
+  }
+  oppInn.total = Math.max(oppInn.total, 80);
+
+  // Distribute wickets among your bowlers proportionally
+  let wktsLeft = won ? oppInn.wickets : Math.min(oppInn.wickets, 9);
+  yourBowling.forEach((b, i) => {
+    const share = i === yourBowling.length - 1 ? wktsLeft : Math.min(rand(0, 3), wktsLeft);
+    b.wickets = share;
+    wktsLeft -= share;
+    wktsLeft = Math.max(0, wktsLeft);
+  });
+
+  const margin = won
+    ? yourInnings.total > oppInn.total
+      ? `Won by ${yourInnings.total - oppInn.total} runs`
+      : `Won by ${rand(1,8)} wickets`
+    : oppInn.total > yourInnings.total
+      ? `Lost by ${oppInn.total - yourInnings.total} runs`
+      : `Lost by ${rand(1,6)} wickets`;
+
+  return {
+    stage,
+    opp: `${opp.flag} ${opp.name}`,
+    oppName: opp.name,
+    won,
+    margin,
+    yourInnings,
+    oppInnings: oppInn,
+    yourBowling,
+  };
 }
 
 function simulateTournament() {
   const myStrength = calcTeamScore(state.team);
   const matches = [];
-  let wins = 0;
   let eliminated = false;
-
   const usedOpponents = new Set();
-  // pick opponent names different from player's team names
   const myTeamNames = new Set(state.team.map(p => p.team));
 
   for (let i = 0; i < STAGES.length; i++) {
     if (eliminated) break;
     const stage = STAGES[i];
 
-    // pick unique opponent
     let opp;
     for (let attempt = 0; attempt < 20; attempt++) {
       const candidate = pick(OPPONENT_NAMES);
       if (!usedOpponents.has(candidate.name) && !myTeamNames.has(candidate.name)) {
-        opp = candidate;
-        break;
+        opp = candidate; break;
       }
     }
     if (!opp) opp = pick(OPPONENT_NAMES);
     usedOpponents.add(opp.name);
 
-    // opponent strength — gets harder in knockouts
-    const knockoutBonus = stage === 'FINAL' ? 8 : stage === 'Semi-final' ? 5 : stage === 'Quarter-final' ? 3 : 0;
-    const oppStrength = rand(55, 80) + knockoutBonus;
-    const winProb = myStrength / (myStrength + oppStrength);
-    const won = Math.random() < winProb;
+    const oppStrength = rand(55, 80);
+    const match = simulateMatch(opp, oppStrength, stage);
+    matches.push(match);
 
-    const myScore = simInnings(myStrength);
-    const oppScore = simInnings(oppStrength);
+    if (!match.won && stage !== 'Group') eliminated = true;
+  }
+  return matches;
+}
 
-    // make scores consistent with result
-    const adjustedOpp = won
-      ? Math.min(myScore - rand(1, 40), myScore - 1)
-      : Math.max(myScore + rand(1, 35), myScore + 1);
+// Accumulate tournament stats across all matches
+function buildTournamentStats(matches) {
+  const runs = {}, wkts = {};
+  state.team.forEach(p => { runs[p.name] = 0; wkts[p.name] = 0; });
+  matches.forEach(m => {
+    m.yourInnings.scorecard.forEach(b => { if (!b.dnb) runs[b.name] = (runs[b.name] || 0) + b.runs; });
+    m.yourBowling.forEach(b => { wkts[b.name] = (wkts[b.name] || 0) + b.wickets; });
+  });
+  const topBat = Object.entries(runs).sort((a,b) => b[1]-a[1]).slice(0,3);
+  const topBowl = Object.entries(wkts).sort((a,b) => b[1]-a[1]).slice(0,3);
+  return { topBat, topBowl };
+}
 
-    matches.push({
-      stage,
-      opp: `${opp.flag} ${opp.name}`,
-      myScore,
-      oppScore: Math.max(80, adjustedOpp),
-      won,
-    });
+// ══════════════════════════════════════════════════════
+//  MATCH-BY-MATCH PLAY THROUGH
+// ══════════════════════════════════════════════════════
 
-    if (won) {
-      wins++;
-    } else if (stage !== 'Group') {
-      eliminated = true;
-    }
+let tournamentMatches = [];
+let currentMatchIdx = 0;
+
+function startTournament() {
+  tournamentMatches = simulateTournament();
+  currentMatchIdx = 0;
+  document.getElementById('game-screen').style.display = 'none';
+  document.getElementById('results-screen').style.display = 'block';
+  showMatch(0);
+}
+
+function showMatch(idx) {
+  const m = tournamentMatches[idx];
+  const screen = document.getElementById('results-screen');
+  const isLast = idx === tournamentMatches.length - 1;
+  const isKnockoutLoss = !m.won && m.stage !== 'Group';
+
+  const stageBadge = m.stage === 'FINAL'
+    ? '🏆 FINAL'
+    : m.stage === 'Semi-final' ? '🥊 Semi-final'
+    : m.stage === 'Quarter-final' ? '⚔️ Quarter-final'
+    : `📋 Group Stage · Match ${idx + 1}`;
+
+  // Top scorers from your innings
+  const topBat = m.yourInnings.scorecard
+    .filter(b => !b.dnb)
+    .sort((a,b) => b.runs - a.runs)
+    .slice(0, 4);
+
+  // Top opposition scorers
+  const topOppBat = m.oppInnings.scorecard
+    .sort((a,b) => b.runs - a.runs)
+    .slice(0, 3);
+
+  // Top bowlers from your attack
+  const topBowl = m.yourBowling
+    .sort((a,b) => b.wickets - a.wickets || a.runs - b.runs)
+    .slice(0, 4);
+
+  screen.innerHTML = `
+    <div style="max-width:680px;margin:0 auto;padding:16px;">
+
+      <!-- Stage + result banner -->
+      <div class="result-header" style="padding:18px 16px;margin-bottom:14px;">
+        <div style="font-size:.8rem;opacity:.8;margin-bottom:6px;text-transform:uppercase;letter-spacing:1px;">${stageBadge}</div>
+        <div style="font-size:1.5rem;font-weight:900;">Your XI vs ${m.opp}</div>
+        <div style="margin-top:10px;display:flex;justify-content:center;align-items:center;gap:20px;">
+          <div style="text-align:center;">
+            <div style="font-size:2rem;font-weight:900;color:var(--gold);">${m.yourInnings.total}/${m.yourInnings.wickets}</div>
+            <div style="font-size:.75rem;opacity:.7;">YOUR XI</div>
+          </div>
+          <div style="font-size:1.4rem;opacity:.5;">vs</div>
+          <div style="text-align:center;">
+            <div style="font-size:2rem;font-weight:900;color:${m.won?'#aaa':'#ff8a80'};">${m.oppInnings.total}/${m.oppInnings.wickets}</div>
+            <div style="font-size:.75rem;opacity:.7;">${m.opp}</div>
+          </div>
+        </div>
+        <div style="margin-top:10px;">
+          <span style="display:inline-block;padding:6px 16px;border-radius:20px;font-weight:800;font-size:.9rem;
+            background:${m.won?'var(--gold)':'rgba(255,255,255,.15)'};color:${m.won?'#000':'#fff'};">
+            ${m.won ? '✅' : '❌'} ${m.margin}
+          </span>
+        </div>
+      </div>
+
+      <!-- Your batting scorecard -->
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-header">🏏 Your Batting</div>
+        <table style="width:100%;border-collapse:collapse;font-size:.83rem;">
+          <thead>
+            <tr style="background:#f7f7f7;">
+              <th style="padding:7px 12px;text-align:left;font-weight:600;color:#666;">Batter</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">R</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">B</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">SR</th>
+              <th style="padding:7px 12px;text-align:center;font-weight:600;color:#666;"></th>
+            </tr>
+          </thead>
+          <tbody>
+            ${m.yourInnings.scorecard.filter(b=>!b.dnb).map(b => {
+              const sr = b.balls > 0 ? ((b.runs / b.balls) * 100).toFixed(0) : '—';
+              const highlight = b.runs >= 50 ? 'background:#fffde7;' : '';
+              const century = b.runs >= 100 ? '💯' : b.runs >= 50 ? '⭐' : b.runs === 0 ? '🦆' : '';
+              return `<tr style="${highlight}border-bottom:1px solid #f0f0f0;">
+                <td style="padding:7px 12px;font-weight:${b.runs>=50?'700':'400'};">${b.name}</td>
+                <td style="padding:7px 8px;text-align:right;font-weight:700;font-size:.95rem;">${b.runs}</td>
+                <td style="padding:7px 8px;text-align:right;color:#888;">${b.balls}</td>
+                <td style="padding:7px 8px;text-align:right;color:#888;">${sr}</td>
+                <td style="padding:7px 12px;text-align:center;">${century}</td>
+              </tr>`;
+            }).join('')}
+            <tr style="background:#f7f7f7;font-weight:700;">
+              <td style="padding:7px 12px;">Extras / Total</td>
+              <td style="padding:7px 8px;text-align:right;" colspan="3">${m.yourInnings.extras} · <strong>${m.yourInnings.total}/${m.yourInnings.wickets}</strong></td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Your bowling figures -->
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-header">🎯 Your Bowling</div>
+        <table style="width:100%;border-collapse:collapse;font-size:.83rem;">
+          <thead>
+            <tr style="background:#f7f7f7;">
+              <th style="padding:7px 12px;text-align:left;font-weight:600;color:#666;">Bowler</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">O</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">W</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">R</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">Econ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${topBowl.map(b => {
+              const econ = (b.runs / b.overs).toFixed(1);
+              const highlight = b.wickets >= 3 ? 'background:#f3e5f5;' : '';
+              const badge = b.wickets >= 5 ? '🌟' : b.wickets >= 3 ? '🔥' : '';
+              return `<tr style="${highlight}border-bottom:1px solid #f0f0f0;">
+                <td style="padding:7px 12px;font-weight:${b.wickets>=3?'700':'400'};">${b.name} ${badge}</td>
+                <td style="padding:7px 8px;text-align:right;color:#888;">${b.overs}</td>
+                <td style="padding:7px 8px;text-align:right;font-weight:700;">${b.wickets}</td>
+                <td style="padding:7px 8px;text-align:right;color:#888;">${b.runs}</td>
+                <td style="padding:7px 8px;text-align:right;color:${econ<6?'var(--green-dark)':econ>8?'#c62828':'#888'};">${econ}</td>
+              </tr>`;
+            }).join('')}
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Opposition batting highlights -->
+      <div class="card" style="margin-bottom:16px;">
+        <div class="card-header">${m.opp} — Top Scorers</div>
+        <table style="width:100%;border-collapse:collapse;font-size:.83rem;">
+          <thead>
+            <tr style="background:#f7f7f7;">
+              <th style="padding:7px 12px;text-align:left;font-weight:600;color:#666;">Batter</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">R</th>
+              <th style="padding:7px 8px;text-align:right;font-weight:600;color:#666;">B</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${topOppBat.map(b => `
+              <tr style="border-bottom:1px solid #f0f0f0;">
+                <td style="padding:7px 12px;">${b.name}</td>
+                <td style="padding:7px 8px;text-align:right;font-weight:700;">${b.runs}</td>
+                <td style="padding:7px 8px;text-align:right;color:#888;">${b.balls}</td>
+              </tr>`).join('')}
+            <tr style="background:#f7f7f7;font-weight:700;">
+              <td style="padding:7px 12px;">Total</td>
+              <td style="padding:7px 8px;text-align:right;" colspan="2">${m.oppInnings.total}/${m.oppInnings.wickets}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Nav buttons -->
+      ${isKnockoutLoss || isLast
+        ? `<button id="btn-next-match" style="display:block;width:100%;padding:14px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;text-transform:uppercase;">
+            View Tournament Summary →
+           </button>`
+        : `<button id="btn-next-match" style="display:block;width:100%;padding:14px;background:var(--gold);color:#000;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;text-transform:uppercase;">
+            ${isKnockoutLoss ? 'View Summary' : idx < tournamentMatches.length - 1 ? `Next Match: ${tournamentMatches[idx+1].stage} vs ${tournamentMatches[idx+1].opp} →` : 'View Summary →'}
+           </button>`
+      }
+    </div>
+  `;
+
+  const btn = document.getElementById('btn-next-match');
+  if (isKnockoutLoss || isLast) {
+    btn.addEventListener('click', () => showSummary());
+  } else {
+    btn.addEventListener('click', () => showMatch(idx + 1));
   }
 
-  return matches;
+  screen.scrollTop = 0;
+  window.scrollTo(0, 0);
+}
+
+function showSummary() {
+  const matches = tournamentMatches;
+  const wins = matches.filter(m => m.won).length;
+  const total = matches.length;
+  const lastMatch = matches[matches.length - 1];
+  const champion = wins === total && lastMatch.stage === 'FINAL';
+  const stats = buildTournamentStats(matches);
+
+  const verdict = champion
+    ? 'World Champions! 🎉'
+    : lastMatch.stage === 'FINAL' && !lastMatch.won ? 'Runners-up — so close!'
+    : lastMatch.stage === 'Semi-final' && !lastMatch.won ? 'Semi-final exit'
+    : lastMatch.stage === 'Quarter-final' && !lastMatch.won ? 'Quarter-final exit'
+    : `${wins}/${total} group games won`;
+
+  const trophy = champion ? '🏆' : wins >= 7 ? '🥈' : wins >= 5 ? '🥉' : '🏏';
+
+  const screen = document.getElementById('results-screen');
+  screen.innerHTML = `
+    <div style="max-width:680px;margin:0 auto;padding:16px;">
+      <div class="result-header" style="margin-bottom:14px;">
+        <span class="trophy">${trophy}</span>
+        <h2>Tournament Complete</h2>
+        <div class="record">${wins}–${total - wins}</div>
+        <div class="verdict">${verdict}</div>
+      </div>
+
+      <!-- Results log -->
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-header">All Results</div>
+        <div style="padding:10px;">
+          ${matches.map(m => `
+            <div class="match-row">
+              <span class="stage">${m.stage}</span>
+              <span class="opponent">vs ${m.opp}</span>
+              <span class="scores" style="font-size:.78rem;">${m.yourInnings.total}/${m.yourInnings.wickets} v ${m.oppInnings.total}/${m.oppInnings.wickets}</span>
+              <span class="outcome outcome-${m.won?'W':'L'}">${m.won?'W':'L'}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <!-- Tournament batting/bowling leaders -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+        <div class="card">
+          <div class="card-header">🏏 Top Run Scorers</div>
+          <div style="padding:10px;">
+            ${stats.topBat.map(([name, runs], i) => `
+              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:.83rem;">
+                <span>${['🥇','🥈','🥉'][i]} ${name}</span>
+                <strong>${runs} runs</strong>
+              </div>`).join('')}
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">🎯 Top Wicket Takers</div>
+          <div style="padding:10px;">
+            ${stats.topBowl.map(([name, wkts], i) => `
+              <div style="display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #f0f0f0;font-size:.83rem;">
+                <span>${['🥇','🥈','🥉'][i]} ${name}</span>
+                <strong>${wkts} wkts</strong>
+              </div>`).join('')}
+          </div>
+        </div>
+      </div>
+
+      <!-- Your XI -->
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-header">Your Dream XI</div>
+        <div style="padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;">
+          ${state.team.map((p, i) => `
+            <div style="padding:8px;border:1px solid #eee;border-radius:8px;font-size:.82rem;">
+              <div style="font-weight:700;">${i+1}. ${p.name}</div>
+              <div style="color:#888;font-size:.7rem;">${p.flag} ${p.team} (${p.year})</div>
+              <span class="player-role role-${p.role}" style="font-size:.65rem;padding:1px 5px;border-radius:3px;font-weight:700;">${p.role}</span>
+              <span style="font-weight:700;color:var(--green-dark);margin-left:4px;font-size:.8rem;">${p.rating}</span>
+            </div>`).join('')}
+        </div>
+      </div>
+
+      <button id="btn-restart" style="display:block;width:100%;padding:14px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;text-transform:uppercase;">🔄 Build Another XI</button>
+    </div>
+  `;
+
+  screen.querySelector('#btn-restart').addEventListener('click', restartGame);
+  window.scrollTo(0, 0);
 }
 
 function findMVP() {
   return state.team.slice().sort((a, b) => b.rating - a.rating)[0];
-}
-
-// ══════════════════════════════════════════════════════
-//  RENDER RESULTS
-// ══════════════════════════════════════════════════════
-
-function renderResults(matches) {
-  const screen = document.getElementById('results-screen');
-  const wins = matches.filter(m => m.won).length;
-  const total = matches.length;
-  const finalMatch = matches[matches.length - 1];
-  const champion = wins === total;
-  const mvp = findMVP();
-
-  const verdict = champion
-    ? 'World Champions! Unbeaten perfection! 🎉'
-    : finalMatch.stage === 'FINAL' && !finalMatch.won
-    ? 'So close — fell at the final hurdle'
-    : finalMatch.stage === 'Semi-final' && !finalMatch.won
-    ? 'Semi-final exit — a valiant campaign'
-    : finalMatch.stage === 'Quarter-final' && !finalMatch.won
-    ? 'Quarter-final knocked out'
-    : `${wins} wins from ${total} group games`;
-
-  const trophy = champion ? '🏆' : wins >= 7 ? '🥈' : wins >= 5 ? '🥉' : '🏏';
-
-  screen.innerHTML = `
-    <div class="result-header">
-      <span class="trophy">${trophy}</span>
-      <h2>Tournament Over</h2>
-      <div class="record">${wins}–${total - wins}</div>
-      <div class="verdict">${verdict}</div>
-    </div>
-
-    <div class="card" style="margin-bottom:12px;">
-      <div class="card-header">Match Results</div>
-      <div class="matches-list" style="padding:10px;">
-        ${matches.map(m => `
-          <div class="match-row">
-            <span class="stage">${m.stage}</span>
-            <span class="opponent">vs ${m.opp}</span>
-            <span class="scores">${m.myScore} – ${m.oppScore}</span>
-            <span class="outcome outcome-${m.won ? 'W' : 'L'}">${m.won ? 'WIN' : 'LOSS'}</span>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <div class="mvp-card">
-      <h3>⭐ Player of the Tournament</h3>
-      <div class="mvp-name">${mvp.name}</div>
-      <div class="mvp-stat">${mvp.flag} ${mvp.team} (${mvp.year}) · Rating ${mvp.rating}</div>
-    </div>
-
-    <div class="card" style="margin-top:12px;">
-      <div class="card-header">Your Dream XI</div>
-      <div style="padding:10px;display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;">
-        ${state.team.map((p, i) => `
-          <div style="padding:8px;border:1px solid #eee;border-radius:8px;font-size:.82rem;">
-            <div style="font-weight:700;">${i + 1}. ${p.name}</div>
-            <div style="color:#888;font-size:.72rem;">${p.flag} ${p.team} (${p.year})</div>
-            <div><span class="player-role role-${p.role}" style="font-size:.68rem;padding:1px 5px;border-radius:3px;font-weight:700;">${p.role}</span> <span style="font-weight:700;color:var(--green-dark);">${p.rating}</span></div>
-          </div>`).join('')}
-      </div>
-    </div>
-
-    <button id="btn-restart">🔄 Build Another XI</button>
-  `;
-
-  document.getElementById('game-screen').style.display = 'none';
-  screen.style.display = 'block';
-  screen.querySelector('#btn-restart').addEventListener('click', restartGame);
 }
 
 // ══════════════════════════════════════════════════════
@@ -1290,10 +1622,7 @@ function restartGame() {
 renderSlots();
 
 document.getElementById('btn-spin').addEventListener('click', doSpin);
-document.getElementById('btn-simulate').addEventListener('click', () => {
-  const matches = simulateTournament();
-  renderResults(matches);
-});
+document.getElementById('btn-simulate').addEventListener('click', startTournament);
 </script>
 </body>
 </html>
