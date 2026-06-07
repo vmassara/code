@@ -119,6 +119,17 @@ body.hard-mode .pc .pstat{display:none}
 .slot.empty{color:var(--faint);font-style:italic}
 .slot.slot-target{cursor:pointer;border-color:var(--gold);color:var(--gold);background:rgba(212,168,75,.07);transition:all .12s}
 .slot.slot-target:hover{background:rgba(212,168,75,.16);box-shadow:0 0 0 2px rgba(212,168,75,.25)}
+.slot.slot-target.fit-good{border-color:#22a03c;color:#4ade80;background:rgba(34,160,60,.07)}
+.slot.slot-target.fit-good:hover{background:rgba(34,160,60,.15);box-shadow:0 0 0 2px rgba(34,160,60,.3)}
+.slot.slot-target.fit-ok{border-color:#d08020;color:#f0a840;background:rgba(208,128,32,.07)}
+.slot.slot-target.fit-ok:hover{background:rgba(208,128,32,.14);box-shadow:0 0 0 2px rgba(208,128,32,.3)}
+.slot.slot-target.fit-bad{border-color:var(--red);color:var(--red-l);background:rgba(204,34,51,.07)}
+.slot.slot-target.fit-bad:hover{background:rgba(204,34,51,.14);box-shadow:0 0 0 2px rgba(204,34,51,.3)}
+.fit-label{font-size:.55rem;font-weight:700;letter-spacing:.3px;margin-left:auto;padding:1px 5px;border-radius:3px;opacity:.85}
+.fit-good .fit-label{background:rgba(34,160,60,.2);color:#4ade80}
+.fit-ok .fit-label{background:rgba(208,128,32,.2);color:#f0a840}
+.fit-bad .fit-label{background:rgba(204,34,51,.2);color:var(--red-l)}
+.fit-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .slot-num{width:17px;height:17px;border-radius:50%;background:var(--border);color:var(--muted);font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .slot.filled .slot-num{background:var(--green-d);color:#fff}
 .slot-name{font-weight:600;color:var(--cream);flex:1}
@@ -798,15 +809,21 @@ function updateSlots(){
   for(let i=0;i<11;i++){
     const p=team[i], div=document.createElement("div");
     if(p){
+      const fit=positionFit(p.r,i+1);
+      const fc=fitClass(fit);
+      const dotCol=fc==="fit-good"?"#22a03c":fc==="fit-ok"?"#d08020":"#cc2233";
       div.className="slot filled";
       div.innerHTML=`<div class="slot-num">${i+1}</div>
         <div class="slot-name">${p.n}</div>
         <span class="role-tag ${p.r}">${RC[p.r]}</span>
         <span class="slot-era">${p.sq||""}</span>
-        <span class="slot-v">${Math.round(p.v*10)}</span>`;
+        <span class="slot-v">${Math.round(p.v*10)}</span>
+        <span class="fit-dot" style="background:${dotCol}" title="${fitLabel(fit)} position for ${RL[p.r]}"></span>`;
     } else if(sel){
-      div.className="slot empty slot-target";
-      div.innerHTML=`<div class="slot-num">${i+1}</div><em>Bat at #${i+1}</em>`;
+      const fit=positionFit(sel.r,i+1);
+      const fc=fitClass(fit);
+      div.className=`slot empty slot-target ${fc}`;
+      div.innerHTML=`<div class="slot-num">${i+1}</div><em>Bat at #${i+1}</em><span class="fit-label">${fitLabel(fit)}</span>`;
       div.addEventListener("click",()=>placePlayer(i));
     } else {
       div.className="slot empty";
@@ -814,10 +831,10 @@ function updateSlots(){
     }
     list.appendChild(div);
   }
-  // Strength bar
-  const avg=avgV();
-  const pct=((avg-6)/4)*100;
-  document.getElementById("str-val").textContent=avg?Math.round(avg*10)+"/100":"—";
+  // Strength bar — uses fit-weighted average once any player is placed
+  const avg=avgV(), effAvg=effectiveAvgV();
+  const pct=((effAvg-6)/4)*100;
+  document.getElementById("str-val").textContent=avg?Math.round(effAvg*10)+"/100":"—";
   document.getElementById("str-bar").style.width=avg?Math.max(0,Math.min(100,pct))+"%":"0%";
 }
 
@@ -1017,18 +1034,20 @@ document.getElementById("rs-tourn").addEventListener("click",()=>doRespin(SQUADS
 //  SQUAD GRADE + MISSED TOAST
 // ══════════════════════════════════════════════════════
 function calcSquadGrade(){
-  const avg=avgV();
-  const bat=team.filter(p=>p&&p.r==="bat").reduce((s,p)=>s+p.v,0)/Q.bat;
-  const ar=team.filter(p=>p&&p.r==="ar").reduce((s,p)=>s+p.v,0)/Q.ar;
-  const wk=(team.find(p=>p&&p.r==="wk")||{v:0}).v;
-  const bowl=team.filter(p=>p&&p.r==="bowl").reduce((s,p)=>s+p.v,0)/Q.bowl;
-  const letter=avg>=9?"S":avg>=8.4?"A":avg>=7.8?"B":avg>=7.2?"C":"D";
+  const avg=avgV(), eff=effectiveAvgV();
+  const bat=team.filter(p=>p&&p.r==="bat").reduce((s,p)=>s+p.v*positionFit(p.r,team.indexOf(p)+1),0)/Q.bat;
+  const ar=team.filter(p=>p&&p.r==="ar").reduce((s,p)=>s+p.v*positionFit(p.r,team.indexOf(p)+1),0)/Q.ar;
+  const wkP=team.find(p=>p&&p.r==="wk"); const wk=wkP?wkP.v*positionFit("wk",team.indexOf(wkP)+1):0;
+  const bowl=team.filter(p=>p&&p.r==="bowl").reduce((s,p)=>s+p.v*positionFit(p.r,team.indexOf(p)+1),0)/Q.bowl;
+  const letter=eff>=9?"S":eff>=8.4?"A":eff>=7.8?"B":eff>=7.2?"C":"D";
   const tag=letter==="S"?"All-time legendary XI":letter==="A"?"Elite — formidable squad":letter==="B"?"Solid with match-winners":letter==="C"?"Respectably balanced":"Needs reinforcements";
+  const penalty=Math.round((avg-eff)*10);
+  const penStr=penalty>0?` <span style="color:var(--red-l);font-size:.7rem">-${penalty} positioning</span>`:"";
   const el=document.getElementById("squad-grade");
   el.style.display="block";
   el.innerHTML=`<div class="sg-row">
     <div><div class="sg-letter sg-${letter}">${letter}</div></div>
-    <div style="text-align:right"><div class="sg-tag">${tag}</div><div class="sg-avg">Avg ${Math.round(avg*10)} / 100</div></div>
+    <div style="text-align:right"><div class="sg-tag">${tag}</div><div class="sg-avg">Eff. ${Math.round(eff*10)} / 100${penStr}</div></div>
   </div>
   <div class="sg-break">🏏 Batting ${Math.round(bat*10)} &nbsp;·&nbsp; ⚡ All-rounders ${Math.round(ar*10)} &nbsp;·&nbsp; 🧤 Keeper ${Math.round(wk*10)} &nbsp;·&nbsp; 🎯 Bowling ${Math.round(bowl*10)}</div>`;
 }
@@ -1047,10 +1066,27 @@ function showMissedToast(picked,squad){
 // ══════════════════════════════════════════════════════
 function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 
+// Natural batting ranges per role (1-indexed positions)
+const ROLE_RANGE={bat:[1,6],ar:[5,8],wk:[4,7],bowl:[8,11]};
+function positionFit(role,pos){
+  const [lo,hi]=ROLE_RANGE[role]||[1,11];
+  if(pos>=lo&&pos<=hi)return 1.0;
+  const dist=pos<lo?lo-pos:pos-hi;
+  return Math.max(0.45,1.0-dist*0.13);
+}
+function fitClass(fit){return fit>=0.93?"fit-good":fit>=0.74?"fit-ok":"fit-bad";}
+function fitLabel(fit){return fit>=0.93?"IDEAL":fit>=0.74?"OK":"RISKY";}
+
+function effectiveAvgV(){
+  const vals=team.map((p,i)=>p?p.v*positionFit(p.r,i+1):null).filter(v=>v!==null);
+  return vals.length?vals.reduce((s,v)=>s+v,0)/vals.length:0;
+}
+
 function simBatter(player,position,oppBowl){
   const pf=position<=2?1.0:position<=4?.82:position<=6?.58:position<=8?.32:.15;
   if(Math.random()<.07+(position-1)*.025)return{runs:0,balls:1,out:true};
-  const cap=player.bat*1.6*pf;
+  const fit=positionFit(player.r,position);
+  const cap=player.bat*1.6*pf*fit;
   const raw=Math.round(cap*Math.pow(Math.random(),.65));
   const adj=Math.max(0,Math.round(raw*(1-(oppBowl-65)/280)));
   const sr=72+Math.random()*62;
@@ -1091,7 +1127,7 @@ function simulateMatch(fixture){
   const bowlers=[...team.filter(p=>p&&p.r==="bowl"),...team.filter(p=>p&&p.r==="ar")];
   const bowling=bowlers.map(p=>({...p,...simBowler(p,os)}));
 
-  const winP=Math.max(.15,Math.min(.83,.5+(avgV()-os/10)/3*.35));
+  const winP=Math.max(.15,Math.min(.83,.5+(effectiveAvgV()-os/10)/3*.35));
   const won=Math.random()<winP;
   let oppTotal=Math.round(os*2.1+rand(-20,30));
   if(won&&oppTotal>=total)oppTotal=total-rand(8,48);
