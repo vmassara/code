@@ -4,297 +4,337 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>World Cup XI Builder</title>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:#d8d0be;font-family:"DM Mono",monospace;min-height:100vh;display:flex;justify-content:center;padding:24px 16px}
-#app{background:#f5f0e8;border-radius:14px;overflow:hidden;border:1px solid #d8ccb4;width:100%;max-width:860px;box-shadow:0 6px 32px rgba(0,0,0,.14)}
+:root{
+  --green:#1a7a3c;--green-dark:#135a2c;--green-mid:#1d5c30;
+  --cream:#f5f0e8;--paper:#fefcf7;--border:#e0d8c8;
+  --gold:#f0b429;--gold-dark:#c8941e;
+  --text:#1a1208;--muted:#7a6e60;--light:#b8ac9a;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#d4ccba;min-height:100vh;display:flex;justify-content:center;padding:20px 12px}
+#app{background:var(--cream);border-radius:14px;overflow:hidden;border:1px solid #c8c0a8;width:100%;max-width:1000px;box-shadow:0 8px 36px rgba(0,0,0,.18)}
 
-/* HEADER */
-#hdr{background:#152408;padding:14px 20px;display:flex;align-items:center;justify-content:space-between}
-#hdr h1{font-family:"Playfair Display",serif;font-size:20px;color:#c9a227;margin:0}
-#hdr .sub{font-size:9px;color:#7aab6a;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
-.hct .num{font-family:"Playfair Display",serif;font-size:22px;color:#e8c547;text-align:right}
-.hct .lbl{font-size:9px;color:#7aab6a;letter-spacing:1px;text-transform:uppercase;text-align:right}
+/* ── HEADER ── */
+#hdr{background:linear-gradient(135deg,var(--green-dark),var(--green));padding:16px 20px;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+#hdr::before{content:'';position:absolute;top:-30px;left:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.05)}
+#hdr h1{font-size:clamp(1.2rem,3.5vw,1.9rem);font-weight:800;color:#fff;letter-spacing:-.3px}
+#hdr .sub{font-size:.72rem;color:rgba(255,255,255,.6);margin-top:2px;letter-spacing:.5px;text-transform:uppercase}
+#hdr-right{display:flex;flex-direction:column;align-items:flex-end;gap:8px}
+#hdr-count{font-size:1.5rem;font-weight:800;color:var(--gold);line-height:1;text-align:right}
+#hdr-clabel{font-size:.65rem;color:rgba(255,255,255,.55);letter-spacing:.5px;text-transform:uppercase;text-align:right}
+#hard-toggle{background:transparent;border:1px solid rgba(255,255,255,.3);color:rgba(255,255,255,.7);padding:4px 10px;font-size:.7rem;letter-spacing:.5px;border-radius:4px;cursor:pointer;text-transform:uppercase;transition:all .15s}
+#hard-toggle:hover{border-color:var(--gold);color:var(--gold)}
+#hard-toggle.on{background:rgba(192,100,20,.3);border-color:#e8a040;color:#e8a040}
 
-#main{padding:18px 20px}
+#prog{height:4px;background:rgba(0,0,0,.2)}
+#prog-fill{height:4px;background:var(--gold);transition:width .4s ease;width:0%}
+
+/* ── PHASE WRAPPER ── */
+#main{padding:16px 18px}
 .phase{display:none}.phase.active{display:block}
 
-/* ROLE TRACKER */
-#rt{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:16px}
-.rtb{background:#fefcf7;border:1.5px solid #e8dcc8;border-radius:9px;padding:9px 10px;text-align:center;transition:border-color .2s,background .2s}
-.rtb .rl{font-size:9px;color:#9a8c78;letter-spacing:1px;text-transform:uppercase;margin-bottom:5px}
-.rtb .rd{display:flex;gap:4px;justify-content:center;flex-wrap:wrap;margin-bottom:4px}
-.dot{width:10px;height:10px;border-radius:50%;border:1.5px solid #d0c4b0;background:transparent;transition:all .2s}
-.dot.on{border-color:transparent}
-.rtb.bat .dot.on{background:#3a5fc0}
-.rtb.ar  .dot.on{background:#c07a1a}
-.rtb.wk  .dot.on{background:#8a3ab5}
-.rtb.bowl .dot.on{background:#2a8a48}
-.rtb.full{border-color:#c9a227;background:#fffbf0}
-.rtb.full .rl{color:#c9a227}
-.rtc{font-size:10px;color:#6b5d47}
+/* ── DRAFT: two-column layout ── */
+#draft-cols{display:grid;grid-template-columns:1fr 290px;gap:14px}
+@media(max-width:680px){#draft-cols{grid-template-columns:1fr}}
 
-/* HARD MODE TOGGLE */
-#hard-toggle{background:transparent;border:1.5px solid #3a5a28;color:#7aab6a;padding:5px 12px;font-family:"DM Mono",monospace;font-size:9px;letter-spacing:1px;border-radius:5px;cursor:pointer;text-transform:uppercase;transition:all .15s}
-#hard-toggle:hover{border-color:#c9a227;color:#c9a227}
-#hard-toggle.on{background:#3a1a08;border-color:#c07a1a;color:#e8a040}
-/* Hide stats in hard mode */
-body.hard-mode .pc .pr{visibility:hidden}
-body.hard-mode .pc .ps{display:none}
-body.hard-mode .pc.selectable .pr{visibility:hidden}
+/* ── LEFT: SPIN ZONE ── */
+#spin-zone .pick-label{font-size:.72rem;color:var(--muted);letter-spacing:.4px;margin-bottom:10px;text-align:center}
+#spin-zone .pick-label strong{color:var(--green-dark)}
 
-/* DRAW BUTTON */
-#draw-wrap{text-align:center;margin-bottom:10px}
-#draw-btn{background:#c9a227;color:#152408;border:none;padding:12px 36px;font-family:"DM Mono",monospace;font-size:13px;font-weight:500;letter-spacing:1.5px;border-radius:8px;cursor:pointer;text-transform:uppercase;transition:all .15s}
-#draw-btn:hover{background:#e8c547;letter-spacing:2px}
-#draw-btn:disabled{background:#bbb;color:#888;cursor:not-allowed;letter-spacing:1.5px}
-#draw-hint{font-size:10px;color:#9a8c78;margin-top:7px;letter-spacing:0.3px}
+#reel-wrap{background:var(--green-dark);border-radius:12px;padding:18px;min-height:90px;display:flex;align-items:center;justify-content:center;margin-bottom:12px;position:relative;overflow:hidden}
+#reel-wrap::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(255,255,255,.06),transparent 70%);pointer-events:none}
+#reel{text-align:center;color:#fff}
+#reel .yr{display:inline-block;background:var(--gold);color:#000;font-weight:800;font-size:.85rem;padding:2px 10px;border-radius:20px;margin-bottom:4px}
+#reel .flag{font-size:2rem}
+#reel .tname{font-size:1.4rem;font-weight:800;text-shadow:0 2px 6px rgba(0,0,0,.4);line-height:1.2}
+#reel .thost{font-size:.68rem;opacity:.6;margin-top:2px}
+#reel .idle{opacity:.45;font-size:.88rem}
 
-/* RE-SPIN BAR */
-#respin-bar{display:none;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
-.rs-btn{background:transparent;border:1.5px solid #d8ccb4;color:#6b5d47;padding:7px 12px;font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.5px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:all .12s;flex:1;min-width:0;white-space:nowrap}
-.rs-btn:hover:not(:disabled){border-color:#c9a227;color:#a07010}
-.rs-btn:disabled{opacity:.3;cursor:not-allowed}
-#respin-count{font-size:9px;color:#9a8c78;letter-spacing:.5px;white-space:nowrap;text-align:center;width:100%}
-.rs-pip{display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9a227;margin:0 2px;transition:background .2s}
-.rs-pip.used{background:#d8ccb4}
+#btn-spin{display:block;width:100%;background:linear-gradient(135deg,var(--gold),var(--gold-dark));color:#000;border:none;border-radius:40px;padding:13px;font-size:1rem;font-weight:800;cursor:pointer;text-transform:uppercase;letter-spacing:1px;box-shadow:0 4px 14px rgba(240,180,41,.35);transition:transform .1s,box-shadow .1s;margin-bottom:10px}
+#btn-spin:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(240,180,41,.45)}
+#btn-spin:active{transform:none}
+#btn-spin:disabled{opacity:.45;cursor:not-allowed;transform:none}
 
 /* SQUAD PANEL */
-#squad-panel{background:#fefcf7;border:1.5px solid #e8dcc8;border-radius:11px;padding:16px;margin-bottom:14px;min-height:80px}
-.sq-placeholder{color:#b8ac9a;font-size:11px;text-align:center;padding:30px 0;line-height:2}
-.sq-title{font-family:"Playfair Display",serif;font-size:20px;color:#1a1208;font-weight:700}
-.sq-sub{font-size:9px;color:#6b5d47;letter-spacing:1px;text-transform:uppercase;margin-top:2px;margin-bottom:12px}
-
-/* Role need banner */
-.role-need{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #c8e6c9;border-radius:7px;padding:8px 12px;font-size:10px;color:#2e7d32;margin-bottom:10px}
-.role-need strong{color:#1b5e20}
-
+#squad-panel{background:var(--paper);border:1.5px solid var(--border);border-radius:11px;padding:14px;margin-bottom:10px;min-height:80px}
+.sq-idle{color:var(--light);font-size:.85rem;text-align:center;padding:28px 0;line-height:2}
+.sq-head .sq-title{font-size:1.1rem;font-weight:700;color:var(--text)}
+.sq-head .sq-sub{font-size:.7rem;color:var(--muted);letter-spacing:.8px;text-transform:uppercase;margin-top:2px;margin-bottom:10px}
+.role-banner{background:linear-gradient(135deg,#e8f5e9,#f1f8e9);border:1px solid #c8e6c9;border-radius:7px;padding:7px 11px;font-size:.78rem;color:#2e7d32;margin-bottom:9px}
+.role-banner strong{color:#1b5e20}
 .sq-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
-@media(max-width:600px){.sq-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:500px){.sq-grid{grid-template-columns:repeat(2,1fr)}}
 
-.pc{background:#f5f0e8;border:1.5px solid #e8dcc8;border-radius:8px;padding:9px 10px;cursor:pointer;transition:all .12s;position:relative;user-select:none}
-.pc:hover:not(.taken):not(.locked){border-color:#c9a227;background:#fffdf5}
-.pc.sel{border-color:#2d5a1b !important;background:#eef7ee !important;border-width:2px}
-.pc.taken{opacity:.35;cursor:not-allowed}
-.pc.locked{opacity:.38;cursor:not-allowed;filter:grayscale(.5)}
-.pc.selectable{border-color:#2a6b2a;box-shadow:0 0 0 1.5px rgba(42,107,42,.15)}
-.pc.taken::after{content:"drafted";font-size:7px;color:#c9a227;position:absolute;top:4px;right:5px;letter-spacing:.3px}
-.pc.locked::after{content:"wrong role";font-size:7px;color:#b0a090;position:absolute;top:4px;right:5px;letter-spacing:.2px}
-.pc .pn{font-size:11px;font-weight:500;color:#1a1208;line-height:1.3;padding-right:22px}
-.pc .pt{display:inline-block;font-size:8px;padding:1px 5px;border-radius:3px;margin-top:3px;letter-spacing:.3px}
-.pt.bat{background:#dce8ff;color:#2a4a9a}
-.pt.ar {background:#fff0d8;color:#7a4f00}
-.pt.wk {background:#f0e0ff;color:#5a1a90}
-.pt.bowl{background:#dff5e4;color:#1a5c2a}
-.pc .pr{position:absolute;top:7px;right:8px;font-size:12px;font-weight:500}
-.pc .ps{font-size:9px;color:#6b5d47;margin-top:4px;line-height:1.4}
+/* player cards */
+.pc{background:var(--cream);border:1.5px solid var(--border);border-radius:8px;padding:9px 10px;cursor:pointer;transition:border-color .12s,background .12s,box-shadow .12s;position:relative;user-select:none}
+.pc.selectable:hover{border-color:var(--gold);background:#fffdf5}
+.pc.sel{border-color:var(--green) !important;background:#eef7ee !important;border-width:2px}
+.pc.taken{opacity:.32;pointer-events:none}
+.pc.quota-full{opacity:.35;pointer-events:none;filter:grayscale(.5)}
+.pc.selectable{border-color:var(--green);box-shadow:0 0 0 1.5px rgba(26,122,60,.12)}
+.pc.taken::after{content:"drafted";font-size:.6rem;color:var(--gold);position:absolute;top:4px;right:5px}
+.pc.quota-full::after{content:"full";font-size:.6rem;color:var(--light);position:absolute;top:4px;right:5px}
+.pc .pn{font-size:.82rem;font-weight:600;color:var(--text);line-height:1.25;padding-right:26px}
+.pc .role-tag{display:inline-block;font-size:.65rem;font-weight:700;padding:1px 5px;border-radius:3px;margin-top:3px;letter-spacing:.3px}
+.role-tag.bat{background:#dce8ff;color:#2a4a9a}
+.role-tag.ar {background:#fff0d8;color:#7a4f00}
+.role-tag.wk {background:#f0e0ff;color:#5a1a90}
+.role-tag.bowl{background:#dff5e4;color:#1a5c2a}
+.pc .prating{position:absolute;top:7px;right:8px;font-size:.82rem;font-weight:700}
+.pc .pstat{font-size:.68rem;color:var(--muted);margin-top:4px;line-height:1.35}
+/* Hard mode hides rating + stat */
+body.hard-mode .pc .prating{visibility:hidden}
+body.hard-mode .pc .pstat{display:none}
+
+/* RESPIN BAR */
+#respin-bar{display:none;flex-direction:column;gap:6px;margin-bottom:10px}
+#respin-btn-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.rs-btn{background:transparent;border:1.5px solid var(--border);color:var(--muted);padding:7px 8px;font-size:.72rem;font-weight:600;border-radius:6px;cursor:pointer;text-transform:uppercase;letter-spacing:.3px;transition:all .12s}
+.rs-btn:hover:not(:disabled){border-color:var(--gold);color:var(--gold-dark)}
+.rs-btn:disabled{opacity:.3;cursor:not-allowed}
+#respin-count{font-size:.7rem;color:var(--muted);text-align:center;letter-spacing:.3px}
+.rs-pip{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin:0 2px}
+.rs-pip.used{background:#d0c8b8}
 
 /* ACTION BAR */
-#act{display:none;gap:8px;margin-bottom:16px}
-#pick-btn{background:#2d5a1b;color:#c8e6c9;border:none;padding:10px 18px;font-family:"DM Mono",monospace;font-size:11px;letter-spacing:.5px;border-radius:7px;cursor:pointer;text-transform:uppercase;flex:1;transition:background .12s}
-#pick-btn:hover{background:#3a7a24}
-#pick-btn:disabled{background:#ccc;color:#999;cursor:not-allowed}
-#skip-btn{background:transparent;color:#6b5d47;border:1.5px solid #d8ccb4;padding:10px 16px;font-family:"DM Mono",monospace;font-size:10px;border-radius:7px;cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:all .12s}
-#skip-btn:hover{border-color:#c9a227;color:#a07010}
+#act{display:none;gap:7px;margin-bottom:12px}
+#btn-pick{background:var(--green-dark);color:#c8e6c9;border:none;padding:10px 16px;font-size:.78rem;font-weight:700;border-radius:7px;cursor:pointer;text-transform:uppercase;letter-spacing:.3px;flex:1;transition:background .12s}
+#btn-pick:hover{background:var(--green)}
+#btn-pick:disabled{background:#ccc;color:#999;cursor:not-allowed}
+#btn-skip{background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:10px 14px;font-size:.72rem;border-radius:7px;cursor:pointer;text-transform:uppercase;white-space:nowrap;transition:all .12s}
+#btn-skip:hover{border-color:var(--gold);color:var(--gold-dark)}
 
-/* XI STRIP */
-.xi-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
-.xi-hdr span{font-size:10px;color:#6b5d47;letter-spacing:.5px;text-transform:uppercase}
-.xi-grid{display:grid;grid-template-columns:repeat(11,1fr);gap:4px;margin-bottom:10px}
-.xs{border-radius:7px;padding:7px 4px;min-height:62px;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;border:1.5px dashed #d8ccb4;background:#fefcf7}
-.xs.on{border-style:solid}
-.xs.bat.on{border-color:#3a5fc0;background:#f0f4ff}
-.xs.ar.on {border-color:#c07a1a;background:#fff8f0}
-.xs.wk.on {border-color:#8a3ab5;background:#f8f0ff}
-.xs.bowl.on{border-color:#2a8a48;background:#f0fbf4}
-.xs .xn{font-size:9px;font-weight:500;color:#1a1208;line-height:1.3;word-break:break-word}
-.xs .xl{font-size:7px;color:#9a8c78;margin-top:2px}
-.xs .xr{font-size:10px;font-weight:500;color:#6b5d47;margin-top:1px}
-.xs .xi{font-size:8px;color:#c8bfb0}
+/* ── RIGHT: TEAM PANEL ── */
+#team-panel{position:sticky;top:16px}
+#role-tracker{display:grid;grid-template-columns:repeat(2,1fr);gap:5px;margin-bottom:10px}
+.rtb{background:var(--paper);border:1.5px solid var(--border);border-radius:8px;padding:8px;text-align:center;transition:border-color .2s,background .2s}
+.rtb .rl{font-size:.62rem;color:var(--light);letter-spacing:.8px;text-transform:uppercase;margin-bottom:4px}
+.rtb .rd{display:flex;gap:3px;justify-content:center;flex-wrap:wrap;margin-bottom:3px}
+.dot{width:9px;height:9px;border-radius:50%;border:1.5px solid #d0c4b0;background:transparent;transition:all .2s}
+.dot.on{border-color:transparent}
+.rtb.bat .dot.on{background:#3a5fc0}.rtb.ar .dot.on{background:#c07a1a}
+.rtb.wk .dot.on{background:#8a3ab5}.rtb.bowl .dot.on{background:#2a8a48}
+.rtb.full{border-color:var(--gold);background:#fffbf0}
+.rtb.full .rl{color:var(--gold-dark)}
+.rtc{font-size:.68rem;color:var(--muted)}
 
-/* SQUAD GRADE */
-#squad-grade{display:none;background:#152408;border-radius:10px;padding:14px 18px;margin-bottom:10px;display:none}
-#squad-grade .sg-row{display:flex;align-items:center;justify-content:space-between}
-#squad-grade .sg-letter{font-family:"Playfair Display",serif;font-size:42px;line-height:1}
-.sg-S{color:#e8c547}.sg-A{color:#7aab6a}.sg-B{color:#5a9cc0}.sg-C{color:#c9a227}.sg-D{color:#c07a1a}
-#squad-grade .sg-label{font-size:9px;color:#7aab6a;letter-spacing:1.5px;text-transform:uppercase;margin-top:3px}
-#squad-grade .sg-breakdown{font-size:10px;color:#a8c8a0;margin-top:6px;line-height:1.8;border-top:1px solid #2a4a15;padding-top:8px}
-#squad-grade .sg-avg{font-size:9px;color:#7aab6a;letter-spacing:.5px}
+#slots-list{margin-bottom:8px}
+.slot{display:flex;align-items:center;gap:7px;padding:6px 8px;border-radius:7px;background:var(--paper);border:1px solid var(--border);margin-bottom:3px;font-size:.76rem;min-height:36px}
+.slot.empty{color:var(--light);font-style:italic}
+.slot-num{width:18px;height:18px;border-radius:50%;background:var(--green-dark);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.slot.empty .slot-num{background:#ccc}
+.slot-name{font-weight:600;flex:1}
+.slot-role{font-size:.6rem;font-weight:700;padding:1px 4px;border-radius:3px}
+.slot-era{font-size:.6rem;color:var(--muted)}
+.slot-v{font-size:.7rem;font-weight:700;color:var(--green-dark)}
 
-/* MISSED PICK TOAST */
-#missed-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(60px);background:#1d3310;color:#c9a227;border:1px solid #2a4a15;padding:10px 18px;border-radius:30px;font-size:10px;letter-spacing:.5px;transition:transform .3s ease;z-index:999;white-space:nowrap;pointer-events:none}
-#missed-toast.show{transform:translateX(-50%) translateY(0)}
+#team-strength{padding:8px 10px;border-top:1px solid var(--border);margin-bottom:6px}
+.str-row{display:flex;justify-content:space-between;font-size:.7rem;color:var(--muted);margin-bottom:3px}
+.str-bar-bg{height:6px;background:#eee;border-radius:3px;overflow:hidden}
+.str-bar{height:6px;border-radius:3px;background:linear-gradient(90deg,#2ecc71,var(--green-dark));transition:width .4s}
 
-/* MOMENTUM BAR */
-#momentum{margin-bottom:12px;padding:10px 14px;background:#fefcf7;border:1px solid #e8dcc8;border-radius:9px}
-#momentum .mo-label{font-size:9px;color:#9a8c78;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
-#momentum .mo-dots{display:flex;gap:5px}
-.mo-dot{width:24px;height:8px;border-radius:4px;background:#e8dcc8;transition:background .3s}
-.mo-dot.W{background:#2a8a48}.mo-dot.L{background:#c02020}.mo-dot.upcoming{background:#e8dcc8;border:1px dashed #c8bfb0}
+/* Squad grade */
+#squad-grade{display:none;background:var(--green-dark);border-radius:9px;padding:12px 14px;margin-bottom:8px;color:#fff}
+.sg-row{display:flex;align-items:center;justify-content:space-between}
+.sg-letter{font-size:2.6rem;font-weight:900;line-height:1}
+.sg-S{color:#e8c547}.sg-A{color:#7aab6a}.sg-B{color:#5a9cc0}.sg-C{color:var(--gold)}.sg-D{color:#e8a040}
+.sg-tag{font-size:.8rem;color:rgba(255,255,255,.85)}
+.sg-avg{font-size:.65rem;color:rgba(255,255,255,.5);margin-top:2px}
+.sg-break{font-size:.68rem;color:rgba(255,255,255,.55);margin-top:7px;border-top:1px solid rgba(255,255,255,.12);padding-top:7px;line-height:1.8}
 
-/* PLAYER OF MATCH */
-.potm-badge{display:inline-flex;align-items:center;gap:5px;background:#fffbf0;border:1px solid #c9a227;border-radius:5px;padding:4px 8px;font-size:9px;color:#8a6010;margin-top:6px;letter-spacing:.3px}
-.potm-badge strong{color:#6a4008}
-
-/* MATCH MOMENT */
-.match-moment{background:#152408;border-radius:7px;padding:10px 12px;margin:8px 0;font-size:10px;color:#7aab6a;line-height:1.7;font-style:italic}
-.match-moment strong{color:#c9a227;font-style:normal}
-
-#go-sim{display:none;background:#c9a227;color:#152408;border:none;padding:12px;font-family:"DM Mono",monospace;font-size:12px;font-weight:500;letter-spacing:1.5px;border-radius:8px;cursor:pointer;width:100%;text-transform:uppercase;transition:all .15s;margin-top:4px}
-#go-sim:hover{background:#e8c547}
+#btn-sim{display:none;background:linear-gradient(135deg,var(--green),var(--green-dark));color:#fff;border:none;border-radius:8px;padding:12px;font-size:.85rem;font-weight:700;cursor:pointer;width:100%;text-transform:uppercase;letter-spacing:.5px;transition:opacity .15s}
+#btn-sim:hover{opacity:.88}
 
 /* ── SIM PHASE ── */
-.team-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid #e8dcc8}
+.team-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border)}
 .tc_{border-radius:7px;padding:7px 8px;text-align:center}
-.tc_ .tn{font-size:10px;font-weight:500;color:#1a1208;line-height:1.3}
-.tc_ .ts{font-size:9px;color:#6b5d47;margin-top:1px}
-.tc_ .tr{font-size:11px;font-weight:500;margin-top:2px}
-.tc_.bat{background:#f0f4ff;border:1px solid #aabce0}
-.tc_.ar {background:#fff8f0;border:1px solid #e0c090}
-.tc_.wk {background:#f8f0ff;border:1px solid #c090e0}
-.tc_.bowl{background:#f0fbf4;border:1px solid #90c8a8}
+.tc_.bat{background:#f0f4ff;border:1px solid #aabce0}.tc_.ar{background:#fff8f0;border:1px solid #e0c090}
+.tc_.wk{background:#f8f0ff;border:1px solid #c090e0}.tc_.bowl{background:#f0fbf4;border:1px solid #90c8a8}
+.tc_ .tn{font-size:.72rem;font-weight:600;color:var(--text);line-height:1.25}
+.tc_ .ts{font-size:.65rem;color:var(--muted);margin-top:1px}
+.tc_ .tv{font-size:.8rem;font-weight:700;margin-top:2px}
 
 .smry{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
-.sc_{background:#152408;border-radius:8px;padding:10px;text-align:center}
-.sc_ .sv{font-family:"Playfair Display",serif;font-size:20px;color:#e8c547}
-.sc_ .sl{font-size:9px;color:#7aab6a;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.sc_{background:var(--green-dark);border-radius:8px;padding:10px;text-align:center}
+.sc_ .sv{font-size:1.5rem;font-weight:800;color:var(--gold)}
+.sc_ .sl{font-size:.65rem;color:rgba(255,255,255,.6);letter-spacing:.8px;text-transform:uppercase;margin-top:2px}
 
-/* MATCH CARDS (rich) */
-.mc{background:#fefcf7;border:1px solid #e8dcc8;border-radius:10px;margin-bottom:10px;overflow:hidden}
-.mc-head{padding:12px 16px;background:#152408;display:flex;align-items:flex-start;justify-content:space-between}
-.mc-head .mt{font-family:"Playfair Display",serif;font-size:15px;font-weight:700;color:#c9a227}
-.mc-head .ms{font-size:9px;color:#7aab6a;letter-spacing:1px;text-transform:uppercase;text-align:right;line-height:1.8}
-.mc-scores{display:flex;align-items:center;gap:16px;padding:10px 16px;background:#1d3310;border-bottom:1px solid #2a4a1a}
-.mc-scores .ms-team{text-align:center}
-.mc-scores .ms-r{font-family:"Playfair Display",serif;font-size:22px;color:#e8c547;line-height:1}
-.mc-scores .ms-l{font-size:8px;color:#7aab6a;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
-.mc-scores .ms-vs{color:#3a6a28;font-size:11px;flex:1;text-align:center}
+/* Momentum */
+#momentum{margin-bottom:12px;padding:10px 14px;background:var(--paper);border:1px solid var(--border);border-radius:9px}
+#momentum .mo-lbl{font-size:.65rem;color:var(--light);letter-spacing:.8px;text-transform:uppercase;margin-bottom:6px}
+#momentum .mo-dots{display:flex;gap:6px;align-items:center}
+.mo-dot{flex:1;height:8px;border-radius:4px;background:#e8dcc8;transition:background .3s}
+.mo-dot.W{background:#2a8a48}.mo-dot.L{background:#c02020}.mo-dot.ahead{background:#e8dcc8;border:1px dashed #c8bfb0}
+
+/* Match nav */
+.match-nav{display:flex;gap:8px;align-items:center;margin-bottom:12px}
+.match-nav-step{font-size:.7rem;color:var(--muted);letter-spacing:.4px;flex:1;text-align:center}
+#nav-prev,#nav-next{background:transparent;border:1.5px solid var(--border);padding:8px 14px;font-size:.72rem;font-weight:600;border-radius:6px;cursor:pointer;color:var(--muted);text-transform:uppercase;transition:all .12s}
+#nav-prev:hover,#nav-next:hover{border-color:var(--gold);color:var(--gold-dark)}
+#nav-prev:disabled{opacity:.3;cursor:not-allowed}
+#nav-next.primary{background:var(--gold);color:#000;border-color:var(--gold)}
+#nav-next.primary:hover{background:var(--gold-dark)}
+
+/* Match card */
+.mc{background:var(--paper);border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden}
+.mc-head{padding:12px 16px;background:var(--green-dark);display:flex;align-items:flex-start;justify-content:space-between}
+.mc-head .mt{font-size:.95rem;font-weight:700;color:var(--gold)}
+.mc-head .ms{font-size:.65rem;color:rgba(255,255,255,.55);letter-spacing:.8px;text-transform:uppercase;text-align:right;line-height:1.8}
+.mc-scores{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--green-mid);border-bottom:1px solid #2a4a1a}
+.ms-team{text-align:center}
+.ms-r{font-size:1.6rem;font-weight:800;color:var(--gold);line-height:1}
+.ms-l{font-size:.62rem;color:rgba(255,255,255,.6);letter-spacing:.8px;text-transform:uppercase;margin-top:2px}
+.ms-vs{color:rgba(255,255,255,.25);font-size:.8rem;flex:1;text-align:center}
 .mc-body{padding:12px 16px}
-.mc-section{margin-bottom:10px}
-.mc-section-title{font-size:8px;color:#9a8c78;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;border-bottom:1px solid #ede5d5;padding-bottom:4px}
-.bat-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f0ece4;font-size:10px}
-.bat-row:last-child{border-bottom:none}
-.bat-row .bn{flex:1;color:#1a1208;font-weight:500}
-.bat-row .br{font-family:"Playfair Display",serif;font-size:14px;color:#1a1208;min-width:28px;text-align:right}
-.bat-row .bb{color:#9a8c78;min-width:32px;text-align:right}
-.bat-row .bsr{font-size:9px;color:#6b5d47;min-width:36px;text-align:right}
-.bat-row .bx{font-size:11px;width:18px;text-align:center}
-.bowl-row{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid #f0ece4;font-size:10px}
-.bowl-row:last-child{border-bottom:none}
-.bowl-row .bwn{flex:1;color:#1a1208;font-weight:500}
-.bowl-row .bwo{color:#9a8c78;min-width:22px;text-align:right}
-.bowl-row .bww{font-family:"Playfair Display",serif;font-size:14px;color:#1a1208;min-width:16px;text-align:right}
-.bowl-row .bwr{color:#6b5d47;min-width:24px;text-align:right}
-.bowl-row .bwe{font-size:9px;min-width:34px;text-align:right}
-.opp-row{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #f0ece4;font-size:10px;color:#6b5d47}
-.opp-row:last-child{border-bottom:none}
-.opp-row strong{color:#1a1208}
-.mc-result{padding:8px 16px;text-align:right;font-size:10px;font-weight:500;letter-spacing:.3px}
-.mc-result.win{background:#e8f5e9;color:#256625}
-.mc-result.loss{background:#ffebee;color:#c02020}
+.mc-sec{margin-bottom:10px}
+.mc-sec-title{font-size:.6rem;color:var(--light);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px;border-bottom:1px solid #ede5d5;padding-bottom:3px}
+table.sc-tbl{width:100%;border-collapse:collapse;font-size:.76rem}
+table.sc-tbl th{font-size:.6rem;color:var(--light);font-weight:500;padding:3px 4px;text-align:right;letter-spacing:.5px;text-transform:uppercase}
+table.sc-tbl th:first-child{text-align:left}
+table.sc-tbl td{padding:4px 4px;border-bottom:1px solid #f0ece4;color:var(--text)}
+table.sc-tbl td:first-child{font-weight:500}
+table.sc-tbl td:not(:first-child){text-align:right;color:var(--muted)}
+table.sc-tbl td.bold{font-weight:700;color:var(--text)}
+table.sc-tbl td.good{color:#2a6b2a}
+table.sc-tbl td.bad{color:#a02020}
+table.sc-tbl tr.hi{background:#fffde7}
+table.sc-tbl tr.hi-bowl{background:#f5f8f0}
+.mc-total{font-size:.7rem;color:var(--muted);padding:5px 0 0;border-top:1px solid #ede5d5;margin-top:3px}
+.mc-total strong{color:var(--text)}
+.match-moment{background:var(--green-dark);border-radius:7px;padding:9px 12px;margin:8px 0;font-size:.76rem;color:#7aab6a;line-height:1.7;font-style:italic}
+.match-moment strong{color:var(--gold);font-style:normal}
+.potm-badge{display:inline-flex;align-items:center;gap:5px;background:#fffbf0;border:1px solid var(--gold);border-radius:5px;padding:3px 8px;font-size:.7rem;color:#8a6010}
+.potm-badge strong{color:#6a4008}
+.mc-result{padding:8px 16px;text-align:right;font-size:.76rem;font-weight:700;letter-spacing:.3px}
+.mc-result.win{background:#e8f5e9;color:#256625}.mc-result.loss{background:#ffebee;color:#c02020}
 
-/* MATCH NAV */
-.match-nav{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
-.match-nav-step{font-size:9px;color:#9a8c78;letter-spacing:1px;text-transform:uppercase}
-#nav-prev,#nav-next{background:transparent;border:1.5px solid #d8ccb4;padding:8px 14px;font-family:"DM Mono",monospace;font-size:10px;border-radius:6px;cursor:pointer;color:#6b5d47;text-transform:uppercase;transition:all .12s}
-#nav-prev:hover,#nav-next:hover{border-color:#c9a227;color:#a07010}
-#nav-prev:disabled,#nav-next:disabled{opacity:.3;cursor:not-allowed}
-#nav-next.primary{background:#c9a227;color:#152408;border-color:#c9a227}
-#nav-next.primary:hover{background:#e8c547}
+/* Final banner */
+#fin-banner{display:none;background:var(--green-dark);border-radius:11px;padding:22px;text-align:center;margin-bottom:14px}
+#fin-banner .fi{font-size:3rem;margin-bottom:8px}
+#fin-banner .ft{font-size:1.3rem;font-weight:800;color:var(--gold)}
+#fin-banner .fs{font-size:.78rem;color:rgba(255,255,255,.65);margin-top:5px;line-height:1.7}
+#fin-banner .fr{font-size:.78rem;color:var(--gold);margin-top:10px;border-top:1px solid rgba(255,255,255,.12);padding-top:10px}
 
-/* FINAL BANNER */
-#fin{display:none;background:#152408;border-radius:11px;padding:24px;text-align:center;margin-bottom:14px}
-#fin .fi{font-size:38px;margin-bottom:8px}
-#fin .ft{font-family:"Playfair Display",serif;font-size:20px;color:#c9a227}
-#fin .fs{font-size:10px;color:#7aab6a;margin-top:6px;line-height:1.7}
-#fin .fr{font-size:11px;color:#c9a227;margin-top:10px;border-top:1px solid #2a4a15;padding-top:10px}
-
-/* SHARE */
-#share-section{background:#fefcf7;border:1px solid #e8dcc8;border-radius:10px;padding:14px;margin-bottom:10px}
-#share-section .sh{font-size:9px;color:#9a8c78;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:10px}
+/* Share */
+#share-card{display:none;background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:14px;margin-bottom:10px}
+#share-card .sh-title{font-size:.65rem;color:var(--light);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
 .share-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.sh-btn{padding:10px;font-family:"DM Mono",monospace;font-size:10px;letter-spacing:.5px;border-radius:7px;cursor:pointer;text-transform:uppercase;border:1.5px solid #d8ccb4;color:#6b5d47;background:transparent;transition:all .12s}
-.sh-btn:hover{border-color:#c9a227;color:#a07010}
-.sh-btn.primary{background:#c9a227;color:#152408;border-color:#c9a227}
-.sh-btn.primary:hover{background:#e8c547}
+.sh-btn{padding:10px;font-size:.72rem;font-weight:600;border-radius:7px;cursor:pointer;text-transform:uppercase;border:1.5px solid var(--border);color:var(--muted);background:transparent;transition:all .12s;letter-spacing:.3px}
+.sh-btn:hover{border-color:var(--gold);color:var(--gold-dark)}
+.sh-btn.primary{background:var(--gold);color:#000;border-color:var(--gold)}
+.sh-btn.primary:hover{background:var(--gold-dark)}
 #share-preview{margin-top:10px;display:none}
 #share-preview img{width:100%;border-radius:8px;display:block}
 #share-dl-row{display:none;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 canvas#sc{display:none}
 
-#back-btn{background:transparent;color:#6b5d47;border:1.5px solid #d8ccb4;padding:9px;font-family:"DM Mono",monospace;font-size:10px;border-radius:6px;cursor:pointer;width:100%;text-transform:uppercase;margin-top:8px}
-#back-btn:hover{border-color:#6b5d47;color:#1a1208}
+#btn-back{background:transparent;color:var(--muted);border:1.5px solid var(--border);padding:9px;font-size:.72rem;border-radius:6px;cursor:pointer;width:100%;text-transform:uppercase;margin-top:8px}
+#btn-back:hover{border-color:var(--muted);color:var(--text)}
+
+/* Toast */
+#missed-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(70px);background:var(--green-dark);color:var(--gold);border:1px solid rgba(255,255,255,.12);padding:9px 18px;border-radius:30px;font-size:.75rem;letter-spacing:.3px;transition:transform .3s ease;z-index:999;white-space:nowrap;pointer-events:none;font-weight:600}
+#missed-toast.show{transform:translateX(-50%) translateY(0)}
+
+@keyframes reel-in{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.reel-in{animation:reel-in .25s ease}
 </style>
 </head>
 <body>
 <div id="missed-toast"></div>
 <div id="app">
   <div id="hdr">
-    <div><h1>World Cup XI</h1><div class="sub">Draft The Greatest ODI Team</div></div>
-    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
-      <div class="hct"><div class="num" id="hdr-count">0/11</div><div class="lbl">Drafted</div></div>
+    <div>
+      <h1>🏏 World Cup XI</h1>
+      <div class="sub">Draft the greatest ODI team across eras</div>
+    </div>
+    <div id="hdr-right">
+      <div>
+        <div id="hdr-count">0/11</div>
+        <div id="hdr-clabel">Drafted</div>
+      </div>
       <button id="hard-toggle">Normal Mode</button>
     </div>
   </div>
+  <div id="prog"><div id="prog-fill"></div></div>
+
   <div id="main">
 
     <!-- ── DRAFT PHASE ── -->
     <div class="phase active" id="draft-phase">
-      <div id="rt">
-        <div class="rtb bat" id="rtb-bat"><div class="rl">Batsmen</div><div class="rd" id="rd-bat"></div><div class="rtc" id="rtc-bat">0 / 4</div></div>
-        <div class="rtb ar"  id="rtb-ar" ><div class="rl">All-rounders</div><div class="rd" id="rd-ar"></div><div class="rtc" id="rtc-ar">0 / 2</div></div>
-        <div class="rtb wk"  id="rtb-wk" ><div class="rl">Keeper</div><div class="rd" id="rd-wk"></div><div class="rtc" id="rtc-wk">0 / 1</div></div>
-        <div class="rtb bowl" id="rtb-bowl"><div class="rl">Bowlers</div><div class="rd" id="rd-bowl"></div><div class="rtc" id="rtc-bowl">0 / 4</div></div>
-      </div>
+      <div id="draft-cols">
 
-      <div id="draw-wrap">
-        <button id="draw-btn">Draw Squad</button>
-        <div id="draw-hint">A random World Cup squad will appear. Pick one player, then draw again.</div>
-      </div>
+        <!-- LEFT -->
+        <div id="spin-zone">
+          <div class="pick-label" id="pick-label">Spin to reveal a World Cup squad — pick any player</div>
 
-      <div id="respin-bar">
-        <button class="rs-btn" id="rs-team">🔄 New Team, Same Year</button>
-        <button class="rs-btn" id="rs-tourn">🌍 Same Team, New Year</button>
-        <div id="respin-count"></div>
-      </div>
+          <div id="reel-wrap">
+            <div id="reel"><div class="idle">Press Spin to start</div></div>
+          </div>
 
-      <div id="squad-panel">
-        <div class="sq-placeholder">Hit <strong>Draw Squad</strong> to reveal a random World Cup team.<br>Pick one player to add to your XI, then draw again.</div>
-      </div>
+          <button id="btn-spin">🎰 Spin</button>
 
-      <div id="act">
-        <button id="pick-btn" disabled>Select a player first</button>
-        <button id="skip-btn">Skip &rarr; Draw Another</button>
-      </div>
+          <div id="respin-bar">
+            <div id="respin-btn-row">
+              <button class="rs-btn" id="rs-team">🔄 New Team, Same Year</button>
+              <button class="rs-btn" id="rs-tourn">🌍 Same Team, New Year</button>
+            </div>
+            <div id="respin-count"></div>
+          </div>
 
-      <div class="xi-hdr"><span>Your XI</span><span id="tc-label">0 of 11</span></div>
-      <div class="xi-grid" id="xi-grid"></div>
-      <div id="squad-grade"></div>
-      <button id="go-sim">Simulate World Cup &rarr;</button>
+          <div id="squad-panel">
+            <div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Pick any player — in any order — to add to your XI.</div>
+          </div>
+
+          <div id="act">
+            <button id="btn-pick" disabled>Select a player first</button>
+            <button id="btn-skip">Skip → Spin Again</button>
+          </div>
+        </div>
+
+        <!-- RIGHT: TEAM PANEL -->
+        <div id="team-panel">
+          <div id="role-tracker">
+            <div class="rtb bat" id="rtb-bat"><div class="rl">Batsmen</div><div class="rd" id="rd-bat"></div><div class="rtc" id="rtc-bat">0 / 4</div></div>
+            <div class="rtb ar"  id="rtb-ar" ><div class="rl">All-rounders</div><div class="rd" id="rd-ar"></div><div class="rtc" id="rtc-ar">0 / 2</div></div>
+            <div class="rtb wk"  id="rtb-wk" ><div class="rl">Keeper</div><div class="rd" id="rd-wk"></div><div class="rtc" id="rtc-wk">0 / 1</div></div>
+            <div class="rtb bowl" id="rtb-bowl"><div class="rl">Bowlers</div><div class="rd" id="rd-bowl"></div><div class="rtc" id="rtc-bowl">0 / 4</div></div>
+          </div>
+
+          <div id="slots-list"></div>
+
+          <div id="team-strength">
+            <div class="str-row"><span>Team Rating</span><span id="str-val">—</span></div>
+            <div class="str-bar-bg"><div class="str-bar" id="str-bar" style="width:0%"></div></div>
+          </div>
+
+          <div id="squad-grade"></div>
+          <button id="btn-sim">Simulate World Cup →</button>
+        </div>
+      </div>
     </div>
 
     <!-- ── SIM PHASE ── -->
     <div class="phase" id="sim-phase">
-      <div class="team-cards" id="team-cards"></div>
+      <div class="team-strip" id="team-strip"></div>
       <div class="smry" id="smry"></div>
-      <div id="fin"></div>
+      <div id="fin-banner"></div>
 
       <div id="momentum" style="display:none">
-        <div class="mo-label">Tournament Momentum</div>
+        <div class="mo-lbl">Tournament Momentum</div>
         <div class="mo-dots" id="mo-dots"></div>
       </div>
 
       <div class="match-nav">
-        <button id="nav-prev" disabled>&larr; Prev</button>
+        <button id="nav-prev" disabled>← Prev</button>
         <div class="match-nav-step" id="nav-step">Match 1 of 7</div>
-        <button id="nav-next" class="primary">Next &rarr;</button>
+        <button id="nav-next" class="primary">Next →</button>
       </div>
 
       <div id="match-display"></div>
 
-      <div id="share-section" style="display:none">
-        <div class="sh">📤 Share Your XI</div>
+      <div id="share-card">
+        <div class="sh-title">📤 Share Your XI</div>
         <div class="share-btns">
           <button class="sh-btn primary" id="btn-gen">🎨 Generate Card</button>
           <button class="sh-btn" id="btn-copy">📋 Copy Results</button>
@@ -307,10 +347,11 @@ canvas#sc{display:none}
         <canvas id="sc"></canvas>
       </div>
 
-      <button id="back-btn">&#8592; Back to Draft</button>
+      <button id="btn-back">← Back to Draft</button>
     </div>
   </div>
 </div>
+
 <script>
 // ══════════════════════════════════════════════════════
 //  DATA
@@ -320,316 +361,394 @@ const RL={bat:"Batsman",ar:"All-rounder",wk:"Keeper",bowl:"Bowler"};
 const RC={bat:"BAT",ar:"AR",wk:"WK",bowl:"BOWL"};
 const ROLE_COLOR={bat:"#3a5fc0",ar:"#c07a1a",wk:"#8a3ab5",bowl:"#2a8a48"};
 
-// v = rating 1–10, bat/bowl = 0–100 for simulation
 const SQUADS=[
   {t:"Australia",y:2023,ev:"ODI World Cup",host:"India",p:[
-    {n:"David Warner",    r:"bat", v:8.1, bat:88, bowl:10, s:"ODI avg 45.3"},
-    {n:"Travis Head",     r:"bat", v:7.4, bat:82, bowl:20, s:"Century in the Final"},
-    {n:"Steve Smith",     r:"bat", v:8.4, bat:88, bowl:30, s:"ODI avg 43.5"},
-    {n:"Marnus Labuschagne",r:"bat",v:7.9,bat:84,bowl:30, s:"ODI avg 57.9"},
-    {n:"Mitchell Marsh",  r:"ar",  v:7.8, bat:78, bowl:72, s:"Powerful striker"},
-    {n:"Glenn Maxwell",   r:"ar",  v:8.7, bat:84, bowl:68, s:"201* vs Afghanistan"},
-    {n:"Josh Inglis",     r:"wk",  v:6.8, bat:72, bowl:0,  s:"WK-Batsman"},
-    {n:"Pat Cummins",     r:"bowl",v:8.5, bat:45, bowl:88, s:"Captain · 24 wkts"},
-    {n:"Mitchell Starc",  r:"bowl",v:8.8, bat:20, bowl:92, s:"22 wkts in tournament"},
-    {n:"Adam Zampa",      r:"bowl",v:7.9, bat:10, bowl:82, s:"23 wkts in tournament"},
-    {n:"Josh Hazlewood",  r:"bowl",v:7.8, bat:10, bowl:86, s:"ODI avg 25.8"},
-    {n:"Cameron Green",   r:"ar",  v:7.0, bat:72, bowl:65, s:""},
-    {n:"Sean Abbott",     r:"bowl",v:6.5, bat:12, bowl:70, s:""},
-    {n:"Matthew Short",   r:"ar",  v:6.2, bat:65, bowl:58, s:""},
+    {n:"David Warner",    r:"bat",v:8.1,bat:88,bowl:10,s:"ODI avg 45.3"},
+    {n:"Travis Head",     r:"bat",v:7.4,bat:82,bowl:20,s:"Century in the Final"},
+    {n:"Steve Smith",     r:"bat",v:8.4,bat:88,bowl:30,s:"ODI avg 43.5"},
+    {n:"Marnus Labuschagne",r:"bat",v:7.9,bat:84,bowl:30,s:"ODI avg 57.9"},
+    {n:"Mitchell Marsh",  r:"ar", v:7.8,bat:78,bowl:72,s:"Powerful striker"},
+    {n:"Glenn Maxwell",   r:"ar", v:8.7,bat:84,bowl:68,s:"201* vs Afghanistan"},
+    {n:"Josh Inglis",     r:"wk", v:6.8,bat:72,bowl:0, s:"WK-Batsman"},
+    {n:"Pat Cummins",     r:"bowl",v:8.5,bat:45,bowl:88,s:"Captain · 24 wkts"},
+    {n:"Mitchell Starc",  r:"bowl",v:8.8,bat:20,bowl:92,s:"22 wkts in tournament"},
+    {n:"Adam Zampa",      r:"bowl",v:7.9,bat:10,bowl:82,s:"23 wkts in tournament"},
+    {n:"Josh Hazlewood",  r:"bowl",v:7.8,bat:10,bowl:86,s:"ODI avg 25.8"},
+    {n:"Cameron Green",   r:"ar", v:7.0,bat:72,bowl:65,s:""},
+    {n:"Sean Abbott",     r:"bowl",v:6.5,bat:12,bowl:70,s:""},
   ]},
   {t:"India",y:2023,ev:"ODI World Cup",host:"India",p:[
-    {n:"Rohit Sharma",    r:"bat", v:8.8, bat:90, bowl:15, s:"9 sixes in QF"},
-    {n:"Shubman Gill",    r:"bat", v:8.0, bat:84, bowl:10, s:"ODI avg 58.8"},
-    {n:"Virat Kohli",     r:"bat", v:9.5, bat:98, bowl:15, s:"765 runs · Player of Tournament"},
-    {n:"Shreyas Iyer",    r:"bat", v:7.6, bat:80, bowl:10, s:"ODI avg 47.0"},
-    {n:"KL Rahul",        r:"wk",  v:7.9, bat:84, bowl:0,  s:"WK · ODI avg 46.0"},
-    {n:"Hardik Pandya",   r:"ar",  v:7.5, bat:76, bowl:72, s:"All-round powerhouse"},
-    {n:"Ravindra Jadeja", r:"ar",  v:8.2, bat:70, bowl:84, s:"2531 runs + 220 wkts"},
-    {n:"Kuldeep Yadav",   r:"bowl",v:8.1, bat:12, bowl:84, s:"ODI avg 23.7"},
-    {n:"Jasprit Bumrah",  r:"bowl",v:9.2, bat:10, bowl:97, s:"ODI avg 24.4"},
-    {n:"Mohammed Shami",  r:"bowl",v:8.9, bat:14, bowl:93, s:"24 wkts in tournament"},
-    {n:"Mohammed Siraj",  r:"bowl",v:7.8, bat:10, bowl:82, s:"ODI avg 30.0"},
-    {n:"Ishan Kishan",    r:"wk",  v:7.0, bat:76, bowl:0,  s:"WK-Batsman"},
-    {n:"Suryakumar Yadav",r:"bat", v:7.8, bat:82, bowl:10, s:"ODI sr 118"},
-    {n:"Shardul Thakur",  r:"ar",  v:6.8, bat:58, bowl:68, s:""},
+    {n:"Rohit Sharma",    r:"bat",v:8.8,bat:90,bowl:15,s:"9 sixes in QF"},
+    {n:"Shubman Gill",    r:"bat",v:8.0,bat:84,bowl:10,s:"ODI avg 58.8"},
+    {n:"Virat Kohli",     r:"bat",v:9.5,bat:98,bowl:15,s:"765 runs · Player of Tournament"},
+    {n:"Shreyas Iyer",    r:"bat",v:7.6,bat:80,bowl:10,s:"ODI avg 47.0"},
+    {n:"KL Rahul",        r:"wk", v:7.9,bat:84,bowl:0, s:"WK · ODI avg 46.0"},
+    {n:"Hardik Pandya",   r:"ar", v:7.5,bat:76,bowl:72,s:"All-round powerhouse"},
+    {n:"Ravindra Jadeja", r:"ar", v:8.2,bat:70,bowl:84,s:"2531 runs + 220 wkts"},
+    {n:"Kuldeep Yadav",   r:"bowl",v:8.1,bat:12,bowl:84,s:"ODI avg 23.7"},
+    {n:"Jasprit Bumrah",  r:"bowl",v:9.2,bat:10,bowl:97,s:"ODI avg 24.4"},
+    {n:"Mohammed Shami",  r:"bowl",v:8.9,bat:14,bowl:93,s:"24 wkts in tournament"},
+    {n:"Mohammed Siraj",  r:"bowl",v:7.8,bat:10,bowl:82,s:"ODI avg 30.0"},
+    {n:"Suryakumar Yadav",r:"bat",v:7.8,bat:82,bowl:10,s:"ODI sr 118"},
+    {n:"Shardul Thakur",  r:"ar", v:6.8,bat:58,bowl:68,s:""},
   ]},
   {t:"West Indies",y:1975,ev:"ODI World Cup",host:"England",p:[
-    {n:"Roy Fredericks",  r:"bat", v:7.8, bat:80, bowl:10, s:"Iconic hook off Lillee"},
-    {n:"Gordon Greenidge",r:"bat", v:8.4, bat:88, bowl:10, s:"ODI avg 45.0"},
-    {n:"Alvin Kallicharran",r:"bat",v:7.5,bat:78,bowl:10, s:""},
-    {n:"Rohan Kanhai",    r:"bat", v:7.2, bat:74, bowl:10, s:""},
-    {n:"Clive Lloyd",     r:"bat", v:8.9, bat:88, bowl:30, s:"102 in the Final"},
-    {n:"Viv Richards",    r:"bat", v:8.8, bat:92, bowl:28, s:"138* in the Final · no helmet"},
-    {n:"Deryck Murray",   r:"wk",  v:7.2, bat:62, bowl:0,  s:"WK"},
-    {n:"Bernard Julien",  r:"ar",  v:7.0, bat:58, bowl:68, s:""},
-    {n:"Keith Boyce",     r:"ar",  v:7.2, bat:62, bowl:70, s:""},
-    {n:"Andy Roberts",    r:"bowl",v:8.8, bat:18, bowl:90, s:"Pioneered short-ball"},
-    {n:"Vanburn Holder",  r:"bowl",v:6.8, bat:12, bowl:70, s:""},
-    {n:"Lance Gibbs",     r:"bowl",v:7.6, bat:10, bowl:76, s:"Off-spin"},
+    {n:"Roy Fredericks",  r:"bat",v:7.8,bat:80,bowl:10,s:"Iconic hook off Lillee"},
+    {n:"Gordon Greenidge",r:"bat",v:8.4,bat:88,bowl:10,s:"ODI avg 45.0"},
+    {n:"Alvin Kallicharran",r:"bat",v:7.5,bat:78,bowl:10,s:""},
+    {n:"Rohan Kanhai",    r:"bat",v:7.2,bat:74,bowl:10,s:""},
+    {n:"Clive Lloyd",     r:"bat",v:8.9,bat:88,bowl:30,s:"102 in the Final"},
+    {n:"Viv Richards",    r:"bat",v:8.8,bat:92,bowl:28,s:"138* in the Final · no helmet"},
+    {n:"Deryck Murray",   r:"wk", v:7.2,bat:62,bowl:0, s:"WK"},
+    {n:"Bernard Julien",  r:"ar", v:7.0,bat:58,bowl:68,s:""},
+    {n:"Keith Boyce",     r:"ar", v:7.2,bat:62,bowl:70,s:""},
+    {n:"Andy Roberts",    r:"bowl",v:8.8,bat:18,bowl:90,s:"Pioneered short-ball"},
+    {n:"Vanburn Holder",  r:"bowl",v:6.8,bat:12,bowl:70,s:""},
+    {n:"Lance Gibbs",     r:"bowl",v:7.6,bat:10,bowl:76,s:"Off-spin"},
   ]},
   {t:"West Indies",y:1979,ev:"ODI World Cup",host:"England",p:[
-    {n:"Gordon Greenidge",r:"bat", v:8.6, bat:90, bowl:10, s:"ODI avg 45.0"},
-    {n:"Desmond Haynes",  r:"bat", v:8.0, bat:84, bowl:10, s:"ODI avg 41.4"},
-    {n:"Viv Richards",    r:"bat", v:9.6, bat:98, bowl:30, s:"Never wore a helmet · ODI avg 47"},
-    {n:"Alvin Kallicharran",r:"bat",v:7.4,bat:76,bowl:10, s:""},
-    {n:"Clive Lloyd",     r:"bat", v:8.5, bat:84, bowl:28, s:"Captain"},
-    {n:"Collis King",     r:"ar",  v:7.8, bat:76, bowl:66, s:"86 in the Final"},
-    {n:"Deryck Murray",   r:"wk",  v:7.3, bat:64, bowl:0,  s:"WK"},
-    {n:"Derek Parry",     r:"ar",  v:6.5, bat:52, bowl:62, s:""},
-    {n:"Andy Roberts",    r:"bowl",v:9.0, bat:18, bowl:92, s:"Fastest of his era"},
-    {n:"Michael Holding", r:"bowl",v:9.2, bat:14, bowl:94, s:"Whispering Death · ODI avg 21.4"},
-    {n:"Joel Garner",     r:"bowl",v:9.0, bat:12, bowl:92, s:"6 foot 8 · ODI avg 18.8"},
-    {n:"Colin Croft",     r:"bowl",v:8.5, bat:12, bowl:86, s:"Vicious angles"},
+    {n:"Gordon Greenidge",r:"bat",v:8.6,bat:90,bowl:10,s:"ODI avg 45.0"},
+    {n:"Desmond Haynes",  r:"bat",v:8.0,bat:84,bowl:10,s:"ODI avg 41.4"},
+    {n:"Viv Richards",    r:"bat",v:9.6,bat:98,bowl:30,s:"Never wore a helmet"},
+    {n:"Alvin Kallicharran",r:"bat",v:7.4,bat:76,bowl:10,s:""},
+    {n:"Clive Lloyd",     r:"bat",v:8.5,bat:84,bowl:28,s:"Captain"},
+    {n:"Collis King",     r:"ar", v:7.8,bat:76,bowl:66,s:"86 in the Final"},
+    {n:"Deryck Murray",   r:"wk", v:7.3,bat:64,bowl:0, s:"WK"},
+    {n:"Derek Parry",     r:"ar", v:6.5,bat:52,bowl:62,s:""},
+    {n:"Andy Roberts",    r:"bowl",v:9.0,bat:18,bowl:92,s:"Fastest of his era"},
+    {n:"Michael Holding", r:"bowl",v:9.2,bat:14,bowl:94,s:"Whispering Death"},
+    {n:"Joel Garner",     r:"bowl",v:9.0,bat:12,bowl:92,s:"6 foot 8 · ODI avg 18.8"},
+    {n:"Colin Croft",     r:"bowl",v:8.5,bat:12,bowl:86,s:"Vicious angles"},
   ]},
   {t:"India",y:1983,ev:"ODI World Cup",host:"England",p:[
-    {n:"Sunil Gavaskar",  r:"bat", v:8.8, bat:90, bowl:10, s:"ODI avg 35.1"},
-    {n:"Kris Srikkanth",  r:"bat", v:7.5, bat:78, bowl:18, s:"Fearless opener"},
-    {n:"Mohinder Amarnath",r:"bat",v:8.0,bat:82, bowl:48, s:"Player of Tournament"},
-    {n:"Yashpal Sharma",  r:"bat", v:7.2, bat:74, bowl:10, s:""},
-    {n:"Sandeep Patil",   r:"bat", v:7.0, bat:72, bowl:22, s:""},
-    {n:"Kapil Dev",       r:"ar",  v:9.5, bat:80, bowl:88, s:"175* vs Zimbabwe"},
-    {n:"Madan Lal",       r:"ar",  v:7.5, bat:52, bowl:72, s:"Dismissed Richards in Final"},
-    {n:"Roger Binny",     r:"ar",  v:7.2, bat:50, bowl:70, s:"18 wkts in tournament"},
-    {n:"Ravi Shastri",    r:"ar",  v:7.3, bat:58, bowl:66, s:""},
-    {n:"Balwinder Sandhu",r:"bowl",v:7.0, bat:16, bowl:70, s:"Dismissed Greenidge in Final"},
-    {n:"Kirti Azad",      r:"bowl",v:6.5, bat:12, bowl:65, s:""},
-    {n:"Syed Kirmani",    r:"wk",  v:7.0, bat:60, bowl:0,  s:"WK"},
+    {n:"Sunil Gavaskar",  r:"bat",v:8.8,bat:90,bowl:10,s:"ODI avg 35.1"},
+    {n:"Kris Srikkanth",  r:"bat",v:7.5,bat:78,bowl:18,s:"Fearless opener"},
+    {n:"Mohinder Amarnath",r:"bat",v:8.0,bat:82,bowl:48,s:"Player of Tournament"},
+    {n:"Yashpal Sharma",  r:"bat",v:7.2,bat:74,bowl:10,s:""},
+    {n:"Sandeep Patil",   r:"bat",v:7.0,bat:72,bowl:22,s:""},
+    {n:"Kapil Dev",       r:"ar", v:9.5,bat:80,bowl:88,s:"175* vs Zimbabwe"},
+    {n:"Madan Lal",       r:"ar", v:7.5,bat:52,bowl:72,s:"Dismissed Richards in Final"},
+    {n:"Roger Binny",     r:"ar", v:7.2,bat:50,bowl:70,s:"18 wkts in tournament"},
+    {n:"Ravi Shastri",    r:"ar", v:7.3,bat:58,bowl:66,s:""},
+    {n:"Balwinder Sandhu",r:"bowl",v:7.0,bat:16,bowl:70,s:"Dismissed Greenidge in Final"},
+    {n:"Kirti Azad",      r:"bowl",v:6.5,bat:12,bowl:65,s:""},
+    {n:"Syed Kirmani",    r:"wk", v:7.0,bat:60,bowl:0, s:"WK"},
   ]},
   {t:"Pakistan",y:1992,ev:"ODI World Cup",host:"Aus / NZ",p:[
-    {n:"Aamir Sohail",    r:"bat", v:7.5, bat:76, bowl:38, s:"Aggressive opener"},
-    {n:"Rameez Raja",     r:"bat", v:7.0, bat:72, bowl:10, s:""},
-    {n:"Inzamam-ul-Haq",  r:"bat", v:8.2, bat:86, bowl:10, s:"Match-winner vs NZ semi"},
-    {n:"Javed Miandad",   r:"bat", v:8.8, bat:90, bowl:10, s:"ODI avg 41.7"},
-    {n:"Saleem Malik",    r:"bat", v:7.8, bat:80, bowl:22, s:""},
-    {n:"Ijaz Ahmed",      r:"bat", v:7.2, bat:74, bowl:10, s:""},
-    {n:"Imran Khan",      r:"ar",  v:9.4, bat:78, bowl:90, s:"Cornered tigers · Captain"},
-    {n:"Moin Khan",       r:"wk",  v:7.5, bat:70, bowl:0,  s:"WK"},
-    {n:"Wasim Akram",     r:"bowl",v:9.5, bat:55, bowl:97, s:"33 runs + 2 wkts in Final"},
-    {n:"Waqar Younis",    r:"bowl",v:9.2, bat:18, bowl:93, s:"Toe-crushing yorkers"},
-    {n:"Mushtaq Ahmed",   r:"bowl",v:8.0, bat:14, bowl:82, s:"Googly turned the tournament"},
-    {n:"Zahid Fazal",     r:"bowl",v:6.5, bat:10, bowl:65, s:""},
+    {n:"Aamir Sohail",    r:"bat",v:7.5,bat:76,bowl:38,s:"Aggressive opener"},
+    {n:"Rameez Raja",     r:"bat",v:7.0,bat:72,bowl:10,s:""},
+    {n:"Inzamam-ul-Haq",  r:"bat",v:8.2,bat:86,bowl:10,s:"Match-winner vs NZ semi"},
+    {n:"Javed Miandad",   r:"bat",v:8.8,bat:90,bowl:10,s:"ODI avg 41.7"},
+    {n:"Saleem Malik",    r:"bat",v:7.8,bat:80,bowl:22,s:""},
+    {n:"Imran Khan",      r:"ar", v:9.4,bat:78,bowl:90,s:"Cornered tigers · Captain"},
+    {n:"Moin Khan",       r:"wk", v:7.5,bat:70,bowl:0, s:"WK"},
+    {n:"Wasim Akram",     r:"bowl",v:9.5,bat:55,bowl:97,s:"33 runs + 2 wkts in Final"},
+    {n:"Waqar Younis",    r:"bowl",v:9.2,bat:18,bowl:93,s:"Toe-crushing yorkers"},
+    {n:"Mushtaq Ahmed",   r:"bowl",v:8.0,bat:14,bowl:82,s:"Googly turned the tournament"},
+    {n:"Zahid Fazal",     r:"bat",v:6.5,bat:65,bowl:10,s:""},
   ]},
   {t:"Sri Lanka",y:1996,ev:"ODI World Cup",host:"Asia",p:[
-    {n:"Sanath Jayasuriya",r:"ar", v:9.3, bat:90, bowl:68, s:"Transformed ODI batting"},
-    {n:"Romesh Kaluwitharana",r:"wk",v:7.8,bat:78,bowl:0, s:"WK · explosive opener"},
-    {n:"Asanka Gurusinha",r:"bat", v:7.4, bat:76, bowl:10, s:""},
-    {n:"Aravinda de Silva",r:"bat",v:9.2, bat:92, bowl:48, s:"107* in Final · Player of Tournament"},
-    {n:"Arjuna Ranatunga",r:"bat", v:8.0, bat:82, bowl:35, s:"Captain"},
+    {n:"Sanath Jayasuriya",r:"ar",v:9.3,bat:90,bowl:68,s:"Transformed ODI batting"},
+    {n:"Romesh Kaluwitharana",r:"wk",v:7.8,bat:78,bowl:0,s:"WK · explosive opener"},
+    {n:"Asanka Gurusinha",r:"bat",v:7.4,bat:76,bowl:10,s:""},
+    {n:"Aravinda de Silva",r:"bat",v:9.2,bat:92,bowl:48,s:"107* in Final · Player of Tournament"},
+    {n:"Arjuna Ranatunga",r:"bat",v:8.0,bat:82,bowl:35,s:"Captain"},
     {n:"Hashan Tillakaratne",r:"bat",v:7.3,bat:76,bowl:10,s:""},
-    {n:"Roshan Mahanama", r:"bat", v:7.1, bat:74, bowl:10, s:""},
-    {n:"Kumar Dharmasena",r:"ar",  v:7.2, bat:52, bowl:68, s:""},
-    {n:"Chaminda Vaas",   r:"bowl",v:8.2, bat:24, bowl:84, s:"ODI avg 27.4"},
-    {n:"Muttiah Muralitharan",r:"bowl",v:9.0,bat:8,bowl:95,s:"534 Test wkts · the doosra"},
-    {n:"Upul Chandana",   r:"bowl",v:6.8, bat:16, bowl:68, s:"Leg-spin"},
+    {n:"Roshan Mahanama", r:"bat",v:7.1,bat:74,bowl:10,s:""},
+    {n:"Kumar Dharmasena",r:"ar", v:7.2,bat:52,bowl:68,s:""},
+    {n:"Chaminda Vaas",   r:"bowl",v:8.2,bat:24,bowl:84,s:"ODI avg 27.4"},
+    {n:"Muttiah Muralitharan",r:"bowl",v:9.0,bat:8,bowl:95,s:"534 Test wkts"},
+    {n:"Upul Chandana",   r:"bowl",v:6.8,bat:16,bowl:68,s:"Leg-spin"},
     {n:"Pramodya Wickramasinghe",r:"bowl",v:7.0,bat:10,bowl:72,s:""},
   ]},
   {t:"Australia",y:1999,ev:"ODI World Cup",host:"England",p:[
-    {n:"Adam Gilchrist",  r:"wk",  v:9.2, bat:92, bowl:0,  s:"Redefined keeper batting"},
-    {n:"Mark Waugh",      r:"bat", v:8.2, bat:84, bowl:28, s:"ODI avg 39.3"},
-    {n:"Ricky Ponting",   r:"bat", v:8.8, bat:90, bowl:18, s:"ODI avg 42.0"},
-    {n:"Darren Lehmann",  r:"bat", v:7.5, bat:78, bowl:22, s:""},
-    {n:"Michael Bevan",   r:"bat", v:8.8, bat:88, bowl:28, s:"ODI avg 53.6 · greatest finisher"},
-    {n:"Steve Waugh",     r:"bat", v:8.5, bat:84, bowl:50, s:"Captain"},
-    {n:"Michael Slater",  r:"bat", v:7.8, bat:80, bowl:10, s:""},
-    {n:"Tom Moody",       r:"ar",  v:7.0, bat:60, bowl:65, s:""},
-    {n:"Shane Warne",     r:"bowl",v:9.4, bat:26, bowl:95, s:"Ball of the century"},
-    {n:"Glenn McGrath",   r:"bowl",v:9.3, bat:8,  bowl:96, s:"Relentless accuracy"},
-    {n:"Damien Fleming",  r:"bowl",v:7.5, bat:14, bowl:76, s:""},
-    {n:"Paul Reiffel",    r:"bowl",v:7.2, bat:16, bowl:74, s:""},
+    {n:"Adam Gilchrist",  r:"wk", v:9.2,bat:92,bowl:0, s:"Redefined keeper batting"},
+    {n:"Mark Waugh",      r:"bat",v:8.2,bat:84,bowl:28,s:"ODI avg 39.3"},
+    {n:"Ricky Ponting",   r:"bat",v:8.8,bat:90,bowl:18,s:"ODI avg 42.0"},
+    {n:"Darren Lehmann",  r:"bat",v:7.5,bat:78,bowl:22,s:""},
+    {n:"Michael Bevan",   r:"bat",v:8.8,bat:88,bowl:28,s:"ODI avg 53.6 · greatest finisher"},
+    {n:"Steve Waugh",     r:"bat",v:8.5,bat:84,bowl:50,s:"Captain"},
+    {n:"Tom Moody",       r:"ar", v:7.0,bat:60,bowl:65,s:""},
+    {n:"Shane Warne",     r:"bowl",v:9.4,bat:26,bowl:95,s:"Ball of the century"},
+    {n:"Glenn McGrath",   r:"bowl",v:9.3,bat:8, bowl:96,s:"Relentless accuracy"},
+    {n:"Damien Fleming",  r:"bowl",v:7.5,bat:14,bowl:76,s:""},
+    {n:"Paul Reiffel",    r:"bowl",v:7.2,bat:16,bowl:74,s:""},
+    {n:"Michael Slater",  r:"bat",v:7.8,bat:80,bowl:10,s:""},
   ]},
   {t:"Australia",y:2003,ev:"ODI World Cup",host:"South Africa",p:[
-    {n:"Adam Gilchrist",  r:"wk",  v:9.4, bat:94, bowl:0,  s:"204 in 212 balls in semi"},
-    {n:"Matthew Hayden",  r:"bat", v:8.6, bat:90, bowl:10, s:"ODI avg 43.8"},
-    {n:"Ricky Ponting",   r:"bat", v:9.5, bat:97, bowl:18, s:"140* in the Final"},
-    {n:"Damien Martyn",   r:"bat", v:8.2, bat:84, bowl:10, s:"ODI avg 40.4"},
-    {n:"Michael Bevan",   r:"bat", v:8.6, bat:86, bowl:26, s:"ODI avg 53.6"},
-    {n:"Andrew Symonds",  r:"ar",  v:8.0, bat:80, bowl:68, s:"143* vs Pakistan"},
-    {n:"Brad Hogg",       r:"ar",  v:7.2, bat:48, bowl:72, s:"Chinaman bowler"},
-    {n:"Shane Warne",     r:"bowl",v:9.2, bat:24, bowl:93, s:""},
-    {n:"Brett Lee",       r:"bowl",v:8.8, bat:22, bowl:90, s:"Extreme pace"},
-    {n:"Glenn McGrath",   r:"bowl",v:9.5, bat:8,  bowl:97, s:"71 WC wkts across 4 tournaments"},
-    {n:"Jason Gillespie", r:"bowl",v:7.8, bat:12, bowl:80, s:""},
-    {n:"Ian Harvey",      r:"ar",  v:7.0, bat:58, bowl:62, s:""},
+    {n:"Adam Gilchrist",  r:"wk", v:9.4,bat:94,bowl:0, s:"204 in 212 balls in semi"},
+    {n:"Matthew Hayden",  r:"bat",v:8.6,bat:90,bowl:10,s:"ODI avg 43.8"},
+    {n:"Ricky Ponting",   r:"bat",v:9.5,bat:97,bowl:18,s:"140* in the Final"},
+    {n:"Damien Martyn",   r:"bat",v:8.2,bat:84,bowl:10,s:"ODI avg 40.4"},
+    {n:"Michael Bevan",   r:"bat",v:8.6,bat:86,bowl:26,s:"ODI avg 53.6"},
+    {n:"Andrew Symonds",  r:"ar", v:8.0,bat:80,bowl:68,s:"143* vs Pakistan"},
+    {n:"Brad Hogg",       r:"ar", v:7.2,bat:48,bowl:72,s:"Chinaman bowler"},
+    {n:"Shane Warne",     r:"bowl",v:9.2,bat:24,bowl:93,s:""},
+    {n:"Brett Lee",       r:"bowl",v:8.8,bat:22,bowl:90,s:"Extreme pace"},
+    {n:"Glenn McGrath",   r:"bowl",v:9.5,bat:8, bowl:97,s:"71 WC wkts across 4 tournaments"},
+    {n:"Jason Gillespie", r:"bowl",v:7.8,bat:12,bowl:80,s:""},
+    {n:"Ian Harvey",      r:"ar", v:7.0,bat:58,bowl:62,s:""},
   ]},
   {t:"India",y:2011,ev:"ODI World Cup",host:"Asia",p:[
-    {n:"Sachin Tendulkar",r:"bat", v:9.0, bat:98, bowl:35, s:"18426 ODI runs · final World Cup"},
-    {n:"Virender Sehwag", r:"bat", v:8.5, bat:88, bowl:35, s:"Destroyer at the top"},
-    {n:"Virat Kohli",     r:"bat", v:8.8, bat:90, bowl:12, s:"ODI avg 57.3"},
-    {n:"Gautam Gambhir",  r:"bat", v:8.2, bat:84, bowl:10, s:"97 in the Final"},
-    {n:"Yuvraj Singh",    r:"ar",  v:9.2, bat:86, bowl:72, s:"Player of Tournament"},
-    {n:"MS Dhoni",        r:"wk",  v:9.5, bat:92, bowl:0,  s:"91* · helicopter finish · captain"},
-    {n:"Suresh Raina",    r:"ar",  v:7.8, bat:74, bowl:55, s:""},
-    {n:"Harbhajan Singh", r:"bowl",v:7.8, bat:22, bowl:80, s:"The Turbanator"},
-    {n:"Zaheer Khan",     r:"bowl",v:8.5, bat:16, bowl:88, s:"ODI avg 29.4"},
-    {n:"Munaf Patel",     r:"bowl",v:7.3, bat:10, bowl:74, s:""},
-    {n:"Ashish Nehra",    r:"bowl",v:7.5, bat:10, bowl:76, s:""},
-    {n:"S Sreesanth",     r:"bowl",v:7.2, bat:10, bowl:73, s:""},
+    {n:"Sachin Tendulkar",r:"bat",v:9.0,bat:98,bowl:35,s:"18426 ODI runs · final World Cup"},
+    {n:"Virender Sehwag", r:"bat",v:8.5,bat:88,bowl:35,s:"Destroyer at the top"},
+    {n:"Virat Kohli",     r:"bat",v:8.8,bat:90,bowl:12,s:"ODI avg 57.3"},
+    {n:"Gautam Gambhir",  r:"bat",v:8.2,bat:84,bowl:10,s:"97 in the Final"},
+    {n:"Yuvraj Singh",    r:"ar", v:9.2,bat:86,bowl:72,s:"Player of Tournament"},
+    {n:"MS Dhoni",        r:"wk", v:9.5,bat:92,bowl:0, s:"91* · helicopter finish · captain"},
+    {n:"Suresh Raina",    r:"ar", v:7.8,bat:74,bowl:55,s:""},
+    {n:"Harbhajan Singh", r:"bowl",v:7.8,bat:22,bowl:80,s:"The Turbanator"},
+    {n:"Zaheer Khan",     r:"bowl",v:8.5,bat:16,bowl:88,s:"ODI avg 29.4"},
+    {n:"Munaf Patel",     r:"bowl",v:7.3,bat:10,bowl:74,s:""},
+    {n:"Ashish Nehra",    r:"bowl",v:7.5,bat:10,bowl:76,s:""},
   ]},
   {t:"Australia",y:2015,ev:"ODI World Cup",host:"Aus / NZ",p:[
-    {n:"Aaron Finch",     r:"bat", v:7.8, bat:82, bowl:10, s:"ODI avg 38.8"},
-    {n:"David Warner",    r:"bat", v:8.5, bat:90, bowl:10, s:"ODI avg 45.3"},
-    {n:"Steven Smith",    r:"bat", v:8.6, bat:88, bowl:42, s:"ODI avg 43.5"},
-    {n:"Michael Clarke",  r:"bat", v:8.4, bat:84, bowl:46, s:"Captain · final tournament"},
-    {n:"Shane Watson",    r:"ar",  v:7.8, bat:74, bowl:70, s:""},
-    {n:"Glenn Maxwell",   r:"ar",  v:8.0, bat:80, bowl:62, s:"ODI sr 126"},
-    {n:"Brad Haddin",     r:"wk",  v:7.8, bat:76, bowl:0,  s:"WK"},
-    {n:"James Faulkner",  r:"ar",  v:7.5, bat:62, bowl:72, s:"3-36 in the Final"},
-    {n:"Mitchell Starc",  r:"bowl",v:9.2, bat:20, bowl:93, s:"Player of Tournament · 22 wkts"},
-    {n:"Mitchell Johnson",r:"bowl",v:8.8, bat:26, bowl:91, s:"Rapid left-arm pace"},
-    {n:"Josh Hazlewood",  r:"bowl",v:8.2, bat:10, bowl:84, s:""},
-    {n:"Pat Cummins",     r:"bowl",v:8.0, bat:18, bowl:83, s:""},
+    {n:"Aaron Finch",     r:"bat",v:7.8,bat:82,bowl:10,s:"ODI avg 38.8"},
+    {n:"David Warner",    r:"bat",v:8.5,bat:90,bowl:10,s:"ODI avg 45.3"},
+    {n:"Steven Smith",    r:"bat",v:8.6,bat:88,bowl:42,s:"ODI avg 43.5"},
+    {n:"Michael Clarke",  r:"bat",v:8.4,bat:84,bowl:46,s:"Captain · final tournament"},
+    {n:"Shane Watson",    r:"ar", v:7.8,bat:74,bowl:70,s:""},
+    {n:"Glenn Maxwell",   r:"ar", v:8.0,bat:80,bowl:62,s:"ODI sr 126"},
+    {n:"Brad Haddin",     r:"wk", v:7.8,bat:76,bowl:0, s:"WK"},
+    {n:"James Faulkner",  r:"ar", v:7.5,bat:62,bowl:72,s:"3-36 in the Final"},
+    {n:"Mitchell Starc",  r:"bowl",v:9.2,bat:20,bowl:93,s:"Player of Tournament · 22 wkts"},
+    {n:"Mitchell Johnson",r:"bowl",v:8.8,bat:26,bowl:91,s:"Rapid left-arm pace"},
+    {n:"Josh Hazlewood",  r:"bowl",v:8.2,bat:10,bowl:84,s:""},
+    {n:"Pat Cummins",     r:"bowl",v:8.0,bat:18,bowl:83,s:""},
   ]},
   {t:"England",y:2019,ev:"ODI World Cup",host:"England",p:[
-    {n:"Jason Roy",       r:"bat", v:8.2, bat:84, bowl:10, s:"ODI avg 40.1"},
-    {n:"Jonny Bairstow",  r:"bat", v:8.4, bat:88, bowl:10, s:"ODI avg 43.6"},
-    {n:"Joe Root",        r:"bat", v:8.8, bat:90, bowl:44, s:"ODI avg 51.4"},
-    {n:"Eoin Morgan",     r:"bat", v:8.5, bat:84, bowl:10, s:"148 vs Afghanistan"},
-    {n:"Ben Stokes",      r:"ar",  v:9.0, bat:84, bowl:82, s:"Winning runs in Super Over Final"},
-    {n:"Jos Buttler",     r:"wk",  v:9.0, bat:92, bowl:0,  s:"Super Over keeper-hero"},
-    {n:"Chris Woakes",    r:"ar",  v:7.8, bat:56, bowl:80, s:""},
-    {n:"Adil Rashid",     r:"bowl",v:7.8, bat:22, bowl:80, s:"Leg-spin"},
-    {n:"Mark Wood",       r:"bowl",v:7.8, bat:18, bowl:82, s:""},
-    {n:"Liam Plunkett",   r:"bowl",v:7.5, bat:26, bowl:78, s:""},
-    {n:"Jofra Archer",    r:"bowl",v:8.8, bat:24, bowl:90, s:"Super Over · extreme pace"},
-    {n:"James Vince",     r:"bat", v:7.0, bat:70, bowl:10, s:""},
+    {n:"Jason Roy",       r:"bat",v:8.2,bat:84,bowl:10,s:"ODI avg 40.1"},
+    {n:"Jonny Bairstow",  r:"bat",v:8.4,bat:88,bowl:10,s:"ODI avg 43.6"},
+    {n:"Joe Root",        r:"bat",v:8.8,bat:90,bowl:44,s:"ODI avg 51.4"},
+    {n:"Eoin Morgan",     r:"bat",v:8.5,bat:84,bowl:10,s:"148 vs Afghanistan"},
+    {n:"Ben Stokes",      r:"ar", v:9.0,bat:84,bowl:82,s:"Winning runs in Super Over Final"},
+    {n:"Jos Buttler",     r:"wk", v:9.0,bat:92,bowl:0, s:"Super Over keeper-hero"},
+    {n:"Chris Woakes",    r:"ar", v:7.8,bat:56,bowl:80,s:""},
+    {n:"Adil Rashid",     r:"bowl",v:7.8,bat:22,bowl:80,s:"Leg-spin"},
+    {n:"Mark Wood",       r:"bowl",v:7.8,bat:18,bowl:82,s:""},
+    {n:"Liam Plunkett",   r:"bowl",v:7.5,bat:26,bowl:78,s:""},
+    {n:"Jofra Archer",    r:"bowl",v:8.8,bat:24,bowl:90,s:"Super Over · extreme pace"},
+    {n:"James Vince",     r:"bat",v:7.0,bat:70,bowl:10,s:""},
   ]},
   {t:"New Zealand",y:2019,ev:"ODI World Cup",host:"England",p:[
-    {n:"Martin Guptill",  r:"bat", v:7.8, bat:80, bowl:10, s:"ODI avg 34.3"},
-    {n:"Henry Nicholls",  r:"bat", v:7.3, bat:74, bowl:10, s:""},
-    {n:"Kane Williamson", r:"bat", v:9.2, bat:94, bowl:44, s:"ODI avg 47.5 · tournament MVP"},
-    {n:"Ross Taylor",     r:"bat", v:8.5, bat:88, bowl:12, s:"ODI avg 48.2"},
-    {n:"Tom Latham",      r:"wk",  v:7.8, bat:80, bowl:0,  s:"WK"},
-    {n:"James Neesham",   r:"ar",  v:7.8, bat:70, bowl:70, s:"Sixes in the Super Over"},
-    {n:"Colin de Grandhomme",r:"ar",v:7.5,bat:66,bowl:72, s:""},
-    {n:"Trent Boult",     r:"bowl",v:8.8, bat:16, bowl:90, s:"Caught on boundary in Final"},
-    {n:"Tim Southee",     r:"bowl",v:8.0, bat:24, bowl:82, s:"ODI avg 32.5"},
-    {n:"Lockie Ferguson", r:"bowl",v:7.8, bat:8,  bowl:82, s:"Fastest in tournament"},
-    {n:"Mitchell Santner",r:"bowl",v:7.5, bat:42, bowl:76, s:"Left-arm spin"},
-    {n:"Matt Henry",      r:"bowl",v:7.5, bat:10, bowl:76, s:""},
+    {n:"Martin Guptill",  r:"bat",v:7.8,bat:80,bowl:10,s:"ODI avg 34.3"},
+    {n:"Henry Nicholls",  r:"bat",v:7.3,bat:74,bowl:10,s:""},
+    {n:"Kane Williamson", r:"bat",v:9.2,bat:94,bowl:44,s:"ODI avg 47.5 · tournament MVP"},
+    {n:"Ross Taylor",     r:"bat",v:8.5,bat:88,bowl:12,s:"ODI avg 48.2"},
+    {n:"Tom Latham",      r:"wk", v:7.8,bat:80,bowl:0, s:"WK"},
+    {n:"James Neesham",   r:"ar", v:7.8,bat:70,bowl:70,s:"Sixes in the Super Over"},
+    {n:"Colin de Grandhomme",r:"ar",v:7.5,bat:66,bowl:72,s:""},
+    {n:"Trent Boult",     r:"bowl",v:8.8,bat:16,bowl:90,s:"Caught on boundary in Final"},
+    {n:"Tim Southee",     r:"bowl",v:8.0,bat:24,bowl:82,s:"ODI avg 32.5"},
+    {n:"Lockie Ferguson", r:"bowl",v:7.8,bat:8, bowl:82,s:"Fastest in tournament"},
+    {n:"Mitchell Santner",r:"bowl",v:7.5,bat:42,bowl:76,s:"Left-arm spin"},
+    {n:"Matt Henry",      r:"bowl",v:7.5,bat:10,bowl:76,s:""},
   ]},
   {t:"South Africa",y:2007,ev:"ODI World Cup",host:"West Indies",p:[
-    {n:"Graeme Smith",    r:"bat", v:8.2, bat:82, bowl:10, s:"Captain · ODI avg 37.1"},
-    {n:"Herschelle Gibbs",r:"bat", v:8.4, bat:86, bowl:10, s:"6 sixes in an over"},
-    {n:"Jacques Kallis",  r:"ar",  v:9.4, bat:88, bowl:80, s:"11579 runs + 273 wkts"},
-    {n:"AB de Villiers",  r:"wk",  v:8.5, bat:90, bowl:0,  s:"Mr 360 · ODI avg 53.5"},
-    {n:"Shaun Pollock",   r:"ar",  v:8.5, bat:62, bowl:82, s:"Final ODI World Cup"},
-    {n:"Mark Boucher",    r:"wk",  v:7.8, bat:70, bowl:0,  s:"WK"},
-    {n:"Makhaya Ntini",   r:"bowl",v:8.2, bat:10, bowl:84, s:""},
-    {n:"Andre Nel",       r:"bowl",v:7.5, bat:10, bowl:76, s:""},
-    {n:"Robin Peterson",  r:"bowl",v:7.0, bat:18, bowl:70, s:"Left-arm spin"},
-    {n:"Andrew Hall",     r:"ar",  v:7.0, bat:58, bowl:64, s:""},
-    {n:"Johan van der Wath",r:"ar",v:6.8,bat:52, bowl:62, s:""},
-    {n:"Justin Kemp",     r:"bat", v:7.2, bat:72, bowl:38, s:""},
+    {n:"Graeme Smith",    r:"bat",v:8.2,bat:82,bowl:10,s:"Captain · ODI avg 37.1"},
+    {n:"Herschelle Gibbs",r:"bat",v:8.4,bat:86,bowl:10,s:"6 sixes in an over"},
+    {n:"Jacques Kallis",  r:"ar", v:9.4,bat:88,bowl:80,s:"11579 runs + 273 wkts"},
+    {n:"AB de Villiers",  r:"wk", v:8.5,bat:90,bowl:0, s:"Mr 360 · ODI avg 53.5"},
+    {n:"Shaun Pollock",   r:"ar", v:8.5,bat:62,bowl:82,s:"Final ODI World Cup"},
+    {n:"Mark Boucher",    r:"wk", v:7.8,bat:70,bowl:0, s:"WK"},
+    {n:"Makhaya Ntini",   r:"bowl",v:8.2,bat:10,bowl:84,s:""},
+    {n:"Andre Nel",       r:"bowl",v:7.5,bat:10,bowl:76,s:""},
+    {n:"Robin Peterson",  r:"bowl",v:7.0,bat:18,bowl:70,s:"Left-arm spin"},
+    {n:"Andrew Hall",     r:"ar", v:7.0,bat:58,bowl:64,s:""},
+    {n:"Justin Kemp",     r:"bat",v:7.2,bat:72,bowl:38,s:""},
   ]},
   {t:"Pakistan",y:2017,ev:"Champions Trophy",host:"England",p:[
-    {n:"Fakhar Zaman",    r:"bat", v:8.2, bat:84, bowl:10, s:"114 in the Final"},
-    {n:"Azhar Ali",       r:"bat", v:7.5, bat:76, bowl:10, s:""},
-    {n:"Babar Azam",      r:"bat", v:8.8, bat:90, bowl:10, s:"ODI avg 56.1"},
-    {n:"Shoaib Malik",    r:"bat", v:7.8, bat:78, bowl:42, s:"Veteran match-winner"},
-    {n:"Mohammad Hafeez", r:"ar",  v:7.8, bat:72, bowl:70, s:""},
-    {n:"Imad Wasim",      r:"ar",  v:7.5, bat:60, bowl:72, s:""},
-    {n:"Sarfaraz Ahmed",  r:"wk",  v:7.8, bat:72, bowl:0,  s:"WK-Captain"},
-    {n:"Hasan Ali",       r:"bowl",v:8.5, bat:16, bowl:86, s:"Player of Tournament"},
-    {n:"Mohammad Amir",   r:"bowl",v:8.8, bat:20, bowl:90, s:"Swung it in the Final"},
-    {n:"Shadab Khan",     r:"bowl",v:8.0, bat:28, bowl:82, s:"Googly leg-spinner"},
-    {n:"Junaid Khan",     r:"bowl",v:7.5, bat:10, bowl:76, s:""},
-    {n:"Rumman Raees",    r:"bowl",v:6.8, bat:8,  bowl:68, s:""},
+    {n:"Fakhar Zaman",    r:"bat",v:8.2,bat:84,bowl:10,s:"114 in the Final"},
+    {n:"Azhar Ali",       r:"bat",v:7.5,bat:76,bowl:10,s:""},
+    {n:"Babar Azam",      r:"bat",v:8.8,bat:90,bowl:10,s:"ODI avg 56.1"},
+    {n:"Shoaib Malik",    r:"bat",v:7.8,bat:78,bowl:42,s:"Veteran match-winner"},
+    {n:"Mohammad Hafeez", r:"ar", v:7.8,bat:72,bowl:70,s:""},
+    {n:"Imad Wasim",      r:"ar", v:7.5,bat:60,bowl:72,s:""},
+    {n:"Sarfaraz Ahmed",  r:"wk", v:7.8,bat:72,bowl:0, s:"WK-Captain"},
+    {n:"Hasan Ali",       r:"bowl",v:8.5,bat:16,bowl:86,s:"Player of Tournament"},
+    {n:"Mohammad Amir",   r:"bowl",v:8.8,bat:20,bowl:90,s:"Swung it in the Final"},
+    {n:"Shadab Khan",     r:"bowl",v:8.0,bat:28,bowl:82,s:"Googly leg-spinner"},
+    {n:"Junaid Khan",     r:"bowl",v:7.5,bat:10,bowl:76,s:""},
   ]},
   {t:"West Indies",y:2004,ev:"Champions Trophy",host:"England",p:[
-    {n:"Chris Gayle",     r:"bat", v:8.5, bat:88, bowl:42, s:"Future record-breaker"},
-    {n:"Wavell Hinds",    r:"bat", v:7.2, bat:72, bowl:35, s:""},
-    {n:"Brian Lara",      r:"bat", v:9.6, bat:98, bowl:10, s:"10405 ODI runs · Captain"},
-    {n:"Ramnaresh Sarwan",r:"bat", v:7.8, bat:78, bowl:28, s:""},
+    {n:"Chris Gayle",     r:"bat",v:8.5,bat:88,bowl:42,s:"Future record-breaker"},
+    {n:"Wavell Hinds",    r:"bat",v:7.2,bat:72,bowl:35,s:""},
+    {n:"Brian Lara",      r:"bat",v:9.6,bat:98,bowl:10,s:"10405 ODI runs · Captain"},
+    {n:"Ramnaresh Sarwan",r:"bat",v:7.8,bat:78,bowl:28,s:""},
     {n:"Shivnarine Chanderpaul",r:"bat",v:8.5,bat:86,bowl:10,s:"The Wall · ODI avg 41.6"},
-    {n:"Dwayne Bravo",    r:"ar",  v:7.8, bat:70, bowl:68, s:""},
-    {n:"Ian Bradshaw",    r:"ar",  v:7.0, bat:52, bowl:66, s:""},
-    {n:"Ridley Jacobs",   r:"wk",  v:7.2, bat:62, bowl:0,  s:"WK"},
-    {n:"Tino Best",       r:"bowl",v:7.5, bat:10, bowl:76, s:""},
-    {n:"Vasbert Drakes",  r:"bowl",v:7.5, bat:10, bowl:76, s:""},
-    {n:"Pedro Collins",   r:"bowl",v:7.3, bat:8,  bowl:74, s:"Left-arm pace"},
-    {n:"Omari Banks",     r:"ar",  v:6.5, bat:48, bowl:58, s:""},
+    {n:"Dwayne Bravo",    r:"ar", v:7.8,bat:70,bowl:68,s:""},
+    {n:"Ian Bradshaw",    r:"ar", v:7.0,bat:52,bowl:66,s:""},
+    {n:"Ridley Jacobs",   r:"wk", v:7.2,bat:62,bowl:0, s:"WK"},
+    {n:"Tino Best",       r:"bowl",v:7.5,bat:10,bowl:76,s:""},
+    {n:"Vasbert Drakes",  r:"bowl",v:7.5,bat:10,bowl:76,s:""},
+    {n:"Pedro Collins",   r:"bowl",v:7.3,bat:8, bowl:74,s:"Left-arm pace"},
+    {n:"Omari Banks",     r:"ar", v:6.5,bat:48,bowl:58,s:""},
   ]},
 ];
 
-// Fixed opposition player names for scorecard
 const OPP_PLAYERS={
   "England":["Z. Crawley","B. Duckett","J. Root","H. Brook","B. Stokes","J. Buttler","C. Woakes","M. Wood","J. Anderson","A. Rashid","J. Archer"],
   "Australia":["D. Warner","T. Head","S. Smith","M. Labuschagne","G. Maxwell","A. Finch","M. Marsh","P. Cummins","M. Starc","A. Zampa","J. Hazlewood"],
   "New Zealand":["D. Conway","K. Williamson","R. Taylor","D. Mitchell","G. Phillips","T. Latham","M. Santner","M. Henry","T. Southee","T. Boult","L. Ferguson"],
-  "Bangladesh":["L. Das","N. Shanto","S. Al Hasan","T. Hridoy","M. Hossain","T. Ahmed","M. Rahman","H. Miraz","N. Ahmed","S. Islam","T. Hasan"],
-  "Pakistan":["B. Azam","I. Ahmed","S. Shakeel","A. Shafique","S. Khan","H. Rauf","S. Afridi","M. Nawaz","N. Haq","I. Wasim","W. Younis"],
+  "Bangladesh":["L. Das","N. Shanto","S. Al Hasan","T. Hridoy","T. Ahmed","M. Rahman","H. Miraz","N. Ahmed","S. Islam","T. Hasan","M. Hossain"],
+  "Pakistan":["B. Azam","S. Shakeel","A. Shafique","I. Ahmed","S. Khan","H. Rauf","S. Afridi","M. Nawaz","N. Haq","I. Wasim","W. Younis"],
   "South Africa":["Q. de Kock","T. Bavuma","R. van der Dussen","A. Markram","D. Miller","H. Klaasen","M. Jansen","K. Maharaj","K. Rabada","L. Ngidi","T. Shamsi"],
   "India":["R. Sharma","V. Kohli","S. Gill","S. Iyer","K. Rahul","H. Pandya","R. Jadeja","M. Shami","J. Bumrah","K. Yadav","M. Siraj"],
 };
 
 const FIXTURES=[
-  {stage:"Group Stage", opp:"England",      venue:"Lord's, London",             oppStr:82},
-  {stage:"Group Stage", opp:"Bangladesh",   venue:"Eden Gardens, Kolkata",      oppStr:67},
-  {stage:"Group Stage", opp:"New Zealand",  venue:"Eden Park, Auckland",        oppStr:80},
-  {stage:"Group Stage", opp:"Pakistan",     venue:"Gaddafi Stadium, Lahore",    oppStr:83},
-  {stage:"Quarter-Final",opp:"South Africa",venue:"Newlands, Cape Town",        oppStr:85},
-  {stage:"Semi-Final",  opp:"Australia",    venue:"MCG, Melbourne",             oppStr:87},
-  {stage:"Final",       opp:"India",        venue:"Narendra Modi Stadium",      oppStr:88},
+  {stage:"Group Stage",   opp:"England",      venue:"Lord's, London",          oppStr:82},
+  {stage:"Group Stage",   opp:"Bangladesh",   venue:"Eden Gardens, Kolkata",   oppStr:67},
+  {stage:"Group Stage",   opp:"New Zealand",  venue:"Eden Park, Auckland",     oppStr:80},
+  {stage:"Group Stage",   opp:"Pakistan",     venue:"Gaddafi Stadium, Lahore", oppStr:83},
+  {stage:"Quarter-Final", opp:"South Africa", venue:"Newlands, Cape Town",     oppStr:85},
+  {stage:"Semi-Final",    opp:"Australia",    venue:"MCG, Melbourne",          oppStr:87},
+  {stage:"Final",         opp:"India",        venue:"Narendra Modi Stadium",   oppStr:88},
 ];
 
 // ══════════════════════════════════════════════════════
-//  DRAFT STATE
+//  STATE
 // ══════════════════════════════════════════════════════
 let team=[], taken=new Set(), sq=null, sel=null, pickedThisDraw=false;
 let hardMode=false, reSpinsLeft=3, lastSquadDrawn=null;
+let results=[], currentMatch=0;
 
+// ══════════════════════════════════════════════════════
+//  DRAFT HELPERS
+// ══════════════════════════════════════════════════════
 function cntR(r){return team.filter(p=>p.r===r).length;}
 function fullR(r){return cntR(r)>=Q[r];}
 function fullTeam(){return team.length>=11;}
 function avgV(){return team.length?team.reduce((s,p)=>s+p.v,0)/team.length:0;}
+function canPick(p){return !taken.has(p.n)&&!fullR(p.r);}
 
-function updateRT(){
+function updateHeader(){
+  document.getElementById("hdr-count").textContent=team.length+"/11";
+  document.getElementById("prog-fill").style.width=(team.length/11*100)+"%";
+}
+
+function updateRoleTracker(){
   ["bat","ar","wk","bowl"].forEach(r=>{
     const n=cntR(r),q=Q[r];
     document.getElementById("rd-"+r).innerHTML=Array.from({length:q},(_,i)=>`<div class="dot${i<n?" on":""}"></div>`).join("");
     document.getElementById("rtc-"+r).textContent=n+" / "+q;
     document.getElementById("rtb-"+r).classList.toggle("full",n>=q);
   });
-  document.getElementById("hdr-count").textContent=team.length+"/11";
-  document.getElementById("tc-label").textContent=team.length+" of 11";
 }
 
-function renderXI(){
-  const g=document.getElementById("xi-grid"); g.innerHTML="";
+function updateSlots(){
+  const list=document.getElementById("slots-list");
+  list.innerHTML="";
   const ord=[...team.filter(p=>p.r==="bat"),...team.filter(p=>p.r==="ar"),...team.filter(p=>p.r==="wk"),...team.filter(p=>p.r==="bowl")];
   for(let i=0;i<11;i++){
-    const p=ord[i],d=document.createElement("div");
-    d.className="xs"+(p?" on "+p.r:"");
-    d.innerHTML=p?`<div class="xn">${p.n.split(" ").slice(-1)[0]}</div><div class="xl">${RL[p.r]}</div><div class="xr">${p.v}</div>`:`<div class="xi">${String(i+1).padStart(2,"0")}</div>`;
-    g.appendChild(d);
+    const p=ord[i],div=document.createElement("div");
+    if(p){
+      div.className="slot";
+      div.innerHTML=`<div class="slot-num">${i+1}</div>
+        <div class="slot-name">${p.n}</div>
+        <span class="slot-role role-tag ${p.r}">${RC[p.r]}</span>
+        <span class="slot-era">${p.sq||""}</span>
+        <span class="slot-v">${p.v}</span>`;
+    }else{
+      div.className="slot empty";
+      div.innerHTML=`<div class="slot-num">${i+1}</div><em>Empty</em>`;
+    }
+    list.appendChild(div);
   }
-  updateRT();
-  document.getElementById("go-sim").style.display=fullTeam()?"block":"none";
+  // Strength bar
+  const avg=avgV();
+  const pct=((avg-6)/4)*100;
+  document.getElementById("str-val").textContent=avg?avg.toFixed(2):"—";
+  document.getElementById("str-bar").style.width=avg?Math.max(0,Math.min(100,pct))+"%":"0%";
 }
-renderXI();
 
+function renderUI(){
+  updateHeader();
+  updateRoleTracker();
+  updateSlots();
+  document.getElementById("btn-sim").style.display=fullTeam()?"block":"none";
+}
+renderUI();
+
+// ══════════════════════════════════════════════════════
+//  SPIN REEL
+// ══════════════════════════════════════════════════════
+let spinning=false, spinDone=false;
+
+function setReel(s,final=false){
+  const reel=document.getElementById("reel");
+  reel.style.opacity="0";
+  setTimeout(()=>{
+    reel.innerHTML=`<div class="yr">${s.y}${s.ev.includes("Champions")?" CT":""}</div>
+      <div class="flag">${flagFor(s.t)}</div>
+      <div class="tname">${s.t}</div>
+      <div class="thost">📍 ${s.host}</div>`;
+    reel.style.opacity="1";
+    if(final) reel.classList.add("reel-in");
+    setTimeout(()=>reel.classList.remove("reel-in"),300);
+  },80);
+}
+
+const FLAGS={Australia:"🇦🇺",India:"🇮🇳","West Indies":"🇼🇮",Pakistan:"🇵🇰","Sri Lanka":"🇱🇰",England:"🏴󠁧󠁢󠁥󠁮󠁧󠁿","New Zealand":"🇳🇿","South Africa":"🇿🇦","Bangladesh":"🇧🇩",Afghanistan:"🇦🇫"};
+function flagFor(t){return FLAGS[t]||"🏏";}
+
+function doSpin(){
+  if(spinning||spinDone||fullTeam())return;
+  spinning=true;
+  document.getElementById("btn-spin").disabled=true;
+  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle" style="opacity:.5">Spinning…</div>`;
+  document.getElementById("respin-bar").style.display="none";
+
+  let ticks=0,total=Math.floor(Math.random()*10)+12;
+  const iv=setInterval(()=>{
+    ticks++;
+    setReel(SQUADS[Math.floor(Math.random()*SQUADS.length)]);
+    if(ticks>=total){
+      clearInterval(iv);
+      const chosen=SQUADS[Math.floor(Math.random()*SQUADS.length)];
+      setTimeout(()=>{
+        setReel(chosen,true);
+        lastSquadDrawn=chosen;
+        spinning=false; spinDone=true;
+        renderSquad(chosen);
+        updateRespinUI();
+      },200);
+    }
+  },110);
+}
+
+document.getElementById("btn-spin").addEventListener("click",doSpin);
+
+// ══════════════════════════════════════════════════════
+//  SQUAD RENDERING — any role, no ordering
+// ══════════════════════════════════════════════════════
 function renderSquad(s){
   sq=s; sel=null;
+  document.getElementById("pick-btn").disabled=true;
+  document.getElementById("pick-btn").textContent="Select a player first";
+  document.getElementById("act").style.display="flex";
 
-  // Find next unfilled role
-  const needRole=["bat","ar","wk","bowl"].find(r=>!fullR(r));
+  // Figure out which roles still need filling
+  const needed=["bat","ar","wk","bowl"].filter(r=>!fullR(r));
+  const neededStr=needed.map(r=>RL[r]).join(", ");
 
   document.getElementById("squad-panel").innerHTML=`
-    <div class="sq-title">${s.t} &mdash; ${s.y}</div>
-    <div class="sq-sub">${s.ev} &middot; ${s.host}</div>
-    <div class="role-need">Filling: <strong>${RL[needRole]}</strong> — pick a highlighted player, or skip for another squad.</div>
+    <div class="sq-head">
+      <div class="sq-title">${s.t} — ${s.y}</div>
+      <div class="sq-sub">${s.ev} · ${s.host}</div>
+    </div>
+    <div class="role-banner">Still need: <strong>${neededStr}</strong> — pick any eligible player</div>
     <div class="sq-grid" id="sq-grid">
       ${s.p.map((p,i)=>{
         const tk=taken.has(p.n);
-        const wrongRole=p.r!==needRole;
-        const cls=tk?"taken":wrongRole?"locked":"selectable";
-        const ratingColor=p.v>=9?"#b5560e":p.v>=8?"#2a6b2a":p.v>=7?"#2a4a9a":"#888";
-        return `<div class="pc ${cls}" data-i="${i}">
+        const qf=!tk&&fullR(p.r);
+        const ok=!tk&&!qf;
+        const rcolor=p.v>=9?"#b5560e":p.v>=8?"#2a6b2a":p.v>=7?"#2a4a9a":"#888";
+        return`<div class="pc ${tk?"taken":qf?"quota-full":ok?"selectable":""}" data-i="${i}">
           <div class="pn">${p.n}</div>
-          <span class="pt ${p.r}">${RC[p.r]}</span>
-          <div class="pr" style="color:${ratingColor}">${p.v}</div>
-          ${p.s?`<div class="ps">${p.s}</div>`:""}
+          <span class="role-tag ${p.r}">${RC[p.r]}</span>
+          <div class="prating" style="color:${rcolor}">${p.v}</div>
+          ${p.s?`<div class="pstat">${p.s}</div>`:""}
         </div>`;
       }).join("")}
     </div>`;
@@ -639,21 +758,54 @@ function renderSquad(s){
       if(pickedThisDraw)return;
       document.querySelectorAll("#sq-grid .pc").forEach(x=>x.classList.remove("sel"));
       c.classList.add("sel");
-      sel={...s.p[+c.dataset.i], sq:`${s.t} '${String(s.y).slice(-2)}`};
+      sel={...s.p[+c.dataset.i],sq:`${s.t} '${String(s.y).slice(-2)}`};
       document.getElementById("pick-btn").disabled=false;
-      document.getElementById("pick-btn").textContent="Add "+sel.n+" →";
+      document.getElementById("pick-btn").textContent=`Add ${sel.n} →`;
     });
   });
-
-  document.getElementById("act").style.display="flex";
-  document.getElementById("pick-btn").disabled=true;
-  document.getElementById("pick-btn").textContent="Select a player first";
-  document.getElementById("draw-btn").disabled=false;
-  document.getElementById("draw-hint").textContent="Pick a highlighted player, or skip for a different squad.";
-  updateRespinUI();
 }
 
-// ── Hard mode ──
+// ══════════════════════════════════════════════════════
+//  PICK / SKIP
+// ══════════════════════════════════════════════════════
+document.getElementById("btn-pick").addEventListener("click",()=>{
+  if(!sel||fullTeam())return;
+  const picked={...sel};
+  team.push(picked); taken.add(picked.n);
+  pickedThisDraw=true;
+  document.querySelectorAll("#sq-grid .pc.sel").forEach(c=>{c.classList.remove("sel");c.classList.add("taken");});
+  document.getElementById("pick-btn").disabled=true;
+  document.getElementById("pick-btn").textContent="✓ Added";
+  document.getElementById("respin-bar").style.display="none";
+  if(lastSquadDrawn) setTimeout(()=>showMissedToast(picked,lastSquadDrawn),600);
+  renderUI();
+  if(fullTeam()){
+    calcSquadGrade();
+    document.getElementById("btn-spin").disabled=true;
+    document.getElementById("btn-spin").textContent="XI Complete — Simulate!";
+    document.getElementById("act").style.display="none";
+  } else {
+    spinDone=false;
+    document.getElementById("btn-spin").disabled=false;
+    document.getElementById("btn-spin").textContent="🎰 Spin Again";
+    document.getElementById("pick-label").innerHTML=`<strong>${11-team.length}</strong> spots left — spin for the next squad`;
+    pickedThisDraw=false;
+  }
+});
+
+document.getElementById("btn-skip").addEventListener("click",()=>{
+  sel=null; pickedThisDraw=false; spinDone=false;
+  document.getElementById("btn-spin").disabled=false;
+  document.getElementById("act").style.display="none";
+  document.getElementById("respin-bar").style.display="none";
+  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle">Squad skipped — hit Spin for another one.</div>`;
+  document.getElementById("reel").innerHTML=`<div class="idle">Spin for another squad</div>`;
+  document.getElementById("reel").style.opacity="1";
+});
+
+// ══════════════════════════════════════════════════════
+//  HARD MODE
+// ══════════════════════════════════════════════════════
 document.getElementById("hard-toggle").addEventListener("click",()=>{
   hardMode=!hardMode;
   document.body.classList.toggle("hard-mode",hardMode);
@@ -662,311 +814,221 @@ document.getElementById("hard-toggle").addEventListener("click",()=>{
   btn.classList.toggle("on",hardMode);
 });
 
-// ── Re-spin helpers ──
+// ══════════════════════════════════════════════════════
+//  RE-SPINS
+// ══════════════════════════════════════════════════════
 function updateRespinUI(){
   const bar=document.getElementById("respin-bar");
-  const count=document.getElementById("respin-count");
+  if(!sq||pickedThisDraw){bar.style.display="none";return;}
+  bar.style.display="flex";
   const pips=Array.from({length:3},(_,i)=>`<span class="rs-pip${i>=reSpinsLeft?" used":""}"></span>`).join("");
-  count.innerHTML=`Re-spins remaining: ${pips}`;
+  document.getElementById("respin-count").innerHTML=`Re-spins remaining: ${pips}`;
   const noLeft=reSpinsLeft<=0;
-  document.getElementById("rs-team").disabled=noLeft;
-  document.getElementById("rs-tourn").disabled=noLeft;
-  if(sq){
-    const sameYear=SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t);
-    const sameTeam=SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y);
-    document.getElementById("rs-team").disabled=noLeft||sameYear.length===0;
-    document.getElementById("rs-tourn").disabled=noLeft||sameTeam.length===0;
-  }
-  bar.style.display=sq&&!pickedThisDraw?"flex":"none";
+  const sameYear=SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t);
+  const sameTeam=SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y);
+  document.getElementById("rs-team").disabled=noLeft||sameYear.length===0;
+  document.getElementById("rs-tourn").disabled=noLeft||sameTeam.length===0;
 }
 
 function doRespin(candidates){
   if(reSpinsLeft<=0||!candidates.length)return;
   reSpinsLeft--;
-  const choice=candidates[Math.floor(Math.random()*candidates.length)];
-  renderSquad(choice);
+  const chosen=candidates[Math.floor(Math.random()*candidates.length)];
+  lastSquadDrawn=chosen;
+  setReel(chosen,true);
+  renderSquad(chosen);
   updateRespinUI();
 }
 
 document.getElementById("rs-team").addEventListener("click",()=>{
-  const same=SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t);
-  doRespin(same);
+  doRespin(SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t));
 });
 document.getElementById("rs-tourn").addEventListener("click",()=>{
-  const same=SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y);
-  doRespin(same);
+  doRespin(SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y));
 });
 
-// ── Squad grade ──
+// ══════════════════════════════════════════════════════
+//  SQUAD GRADE + MISSED TOAST
+// ══════════════════════════════════════════════════════
 function calcSquadGrade(){
   const avg=avgV();
-  const bat=team.filter(p=>p.r==="bat").reduce((s,p)=>s+p.v,0)/4;
-  const ar=team.filter(p=>p.r==="ar").reduce((s,p)=>s+p.v,0)/2;
+  const bat=team.filter(p=>p.r==="bat").reduce((s,p)=>s+p.v,0)/Q.bat;
+  const ar=team.filter(p=>p.r==="ar").reduce((s,p)=>s+p.v,0)/Q.ar;
   const wk=(team.find(p=>p.r==="wk")||{v:0}).v;
-  const bowl=team.filter(p=>p.r==="bowl").reduce((s,p)=>s+p.v,0)/4;
+  const bowl=team.filter(p=>p.r==="bowl").reduce((s,p)=>s+p.v,0)/Q.bowl;
   const letter=avg>=9?"S":avg>=8.4?"A":avg>=7.8?"B":avg>=7.2?"C":"D";
-  const tagline=letter==="S"?"All-time legendary XI":letter==="A"?"Elite draft — formidable team":letter==="B"?"Solid XI with match-winners":letter==="C"?"Respectable — room for improvement":"Needs work";
-  document.getElementById("squad-grade").style.display="block";
-  document.getElementById("squad-grade").innerHTML=`
-    <div class="sg-row">
-      <div><div class="sg-letter sg-${letter}">${letter}</div><div class="sg-label">Squad Rating</div></div>
-      <div style="text-align:right">
-        <div style="color:#c9a227;font-family:'Playfair Display',serif;font-size:16px">${tagline}</div>
-        <div class="sg-avg">Avg rating ${avg.toFixed(2)} / 10</div>
-      </div>
-    </div>
-    <div class="sg-breakdown">
-      🏏 Batting ${bat.toFixed(1)} &nbsp;·&nbsp; ⚡ All-rounders ${ar.toFixed(1)} &nbsp;·&nbsp; 🧤 Keeper ${wk.toFixed(1)} &nbsp;·&nbsp; 🎯 Bowling ${bowl.toFixed(1)}
-    </div>`;
+  const tag=letter==="S"?"All-time legendary XI":letter==="A"?"Elite — formidable squad":letter==="B"?"Solid with match-winners":letter==="C"?"Respectably balanced":"Needs reinforcements";
+  const el=document.getElementById("squad-grade");
+  el.style.display="block";
+  el.innerHTML=`<div class="sg-row">
+    <div><div class="sg-letter sg-${letter}">${letter}</div></div>
+    <div style="text-align:right"><div class="sg-tag">${tag}</div><div class="sg-avg">Avg ${avg.toFixed(2)} / 10</div></div>
+  </div>
+  <div class="sg-break">🏏 Batting ${bat.toFixed(1)} &nbsp;·&nbsp; ⚡ All-rounders ${ar.toFixed(1)} &nbsp;·&nbsp; 🧤 Keeper ${wk.toFixed(1)} &nbsp;·&nbsp; 🎯 Bowling ${bowl.toFixed(1)}</div>`;
 }
 
-// ── Missed pick toast ──
-function showMissedToast(pickedPlayer, squad){
-  const missed=squad.p.filter(p=>p.r===pickedPlayer.r&&p.n!==pickedPlayer.n&&!taken.has(p.n))
-    .sort((a,b)=>b.v-a.v)[0];
-  if(!missed||missed.v<=pickedPlayer.v) return;
+function showMissedToast(picked,squad){
+  const missed=squad.p.filter(p=>p.r===picked.r&&p.n!==picked.n&&!taken.has(p.n)).sort((a,b)=>b.v-a.v)[0];
+  if(!missed||missed.v<=picked.v)return;
   const t=document.getElementById("missed-toast");
-  t.textContent=`You could have had ${missed.n} (${missed.v}) instead`;
+  t.textContent=`You could've had ${missed.n} (${missed.v}) instead`;
   t.classList.add("show");
   setTimeout(()=>t.classList.remove("show"),3200);
 }
-
-document.getElementById("draw-btn").addEventListener("click",()=>{
-  if(fullTeam()||pickedThisDraw)return;
-  pickedThisDraw=false; sel=null;
-  lastSquadDrawn=SQUADS[Math.floor(Math.random()*SQUADS.length)];
-  renderSquad(lastSquadDrawn);
-});
-
-document.getElementById("pick-btn").addEventListener("click",()=>{
-  if(!sel||fullTeam())return;
-  const pickedCopy={...sel};
-  team.push(pickedCopy); taken.add(pickedCopy.n);
-  pickedThisDraw=true; renderXI();
-  document.querySelectorAll("#sq-grid .pc.sel").forEach(c=>{c.classList.remove("sel");c.classList.add("taken");});
-  document.getElementById("pick-btn").disabled=true;
-  document.getElementById("pick-btn").textContent="✓ Added";
-  // show missed pick after a short delay
-  if(lastSquadDrawn) setTimeout(()=>showMissedToast(pickedCopy,lastSquadDrawn),600);
-  document.getElementById("respin-bar").style.display="none";
-  if(fullTeam()){
-    calcSquadGrade();
-    document.getElementById("draw-btn").disabled=true;
-    document.getElementById("draw-btn").textContent="XI Complete";
-    document.getElementById("draw-hint").textContent="Your XI is ready. Simulate the World Cup!";
-    document.getElementById("act").style.display="none";
-  } else {
-    document.getElementById("draw-btn").disabled=false;
-    document.getElementById("draw-btn").textContent="Draw Next Squad";
-    document.getElementById("draw-hint").textContent="Draw another squad to keep building your XI.";
-    pickedThisDraw=false;
-  }
-});
-
-document.getElementById("skip-btn").addEventListener("click",()=>{
-  sel=null; pickedThisDraw=false;
-  lastSquadDrawn=SQUADS[Math.floor(Math.random()*SQUADS.length)];
-  renderSquad(lastSquadDrawn);
-  updateRespinUI();
-});
 
 // ══════════════════════════════════════════════════════
 //  SIMULATION
 // ══════════════════════════════════════════════════════
 function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 
-function simBatter(player, position, oppBowlStr){
-  const posFactor=position<=2?1.0:position<=4?.82:position<=6?.58:position<=8?.32:.15;
-  const duckP=.07+(position-1)*.025;
-  if(Math.random()<duckP)return{runs:0,balls:1,out:true};
-  const cap=player.bat*1.6*posFactor;
-  const u=Math.random();
-  const rawRuns=Math.round(cap*Math.pow(u,.65));
-  const adj=Math.max(0, Math.round(rawRuns*(1-(oppBowlStr-65)/280)));
+function simBatter(player,position,oppBowl){
+  const pf=position<=2?1.0:position<=4?.82:position<=6?.58:position<=8?.32:.15;
+  if(Math.random()<.07+(position-1)*.025)return{runs:0,balls:1,out:true};
+  const cap=player.bat*1.6*pf;
+  const raw=Math.round(cap*Math.pow(Math.random(),.65));
+  const adj=Math.max(0,Math.round(raw*(1-(oppBowl-65)/280)));
   const sr=72+Math.random()*62;
-  const balls=Math.max(1, Math.round(adj/sr*100));
-  return{runs:Math.min(adj,185), balls, out:Math.random()<.84};
+  return{runs:Math.min(adj,185),balls:Math.max(1,Math.round(adj/sr*100)),out:Math.random()<.84};
 }
 
-function simBowler(player, oppBatStr){
-  const overs=rand(8,10);
-  const balls=overs*6;
-  const wkChance=(player.bowl/(player.bowl+oppBatStr))*.13;
-  let wickets=0;
-  for(let b=0;b<balls;b++) if(Math.random()<wkChance) wickets++;
-  wickets=Math.min(wickets,5);
-  const econ=4.2+Math.random()*4.8;
-  return{overs, wickets, runs:Math.round(econ*overs)};
+function simBowler(player,oppBat){
+  const overs=rand(8,10),balls=overs*6;
+  const wkC=(player.bowl/(player.bowl+oppBat))*.13;
+  let w=0;for(let b=0;b<balls;b++)if(Math.random()<wkC)w++;
+  return{overs,wickets:Math.min(w,5),runs:Math.round((4.2+Math.random()*4.8)*overs)};
 }
 
-function genOppScorecard(names, oppBatStr, total){
-  let rem=total, out=[];
+function genOppSc(names,total){
+  let rem=total,out=[];
   names.slice(0,8).forEach((name,i)=>{
     if(rem<=0){out.push({name,runs:0,balls:rand(0,8)});return;}
     const share=i<2?rand(15,65):i<5?rand(5,40):rand(0,22);
-    const runs=Math.min(share,rem);
-    rem-=runs;
+    const runs=Math.min(share,rem); rem-=runs;
     out.push({name,runs:Math.max(0,runs),balls:rand(runs,runs+28)});
   });
   return out;
 }
 
 function simulateMatch(fixture){
-  const oppStr=fixture.oppStr;
-  const oppBatStr=oppStr*1.0;
-  const oppBowlStr=oppStr*0.95;
-
-  // Batting order
-  const order=[
+  const os=fixture.oppStr;
+  // Batting order — any arrangement the player built
+  const batOrder=[
     ...team.filter(p=>p.r==="bat"),
     team.find(p=>p.r==="wk"),
     ...team.filter(p=>p.r==="ar"),
     ...team.filter(p=>p.r==="bowl"),
   ].filter(Boolean);
 
-  let totalRuns=0, wickets=0, extras=rand(5,18);
-  const scorecard=order.map((p,i)=>{
-    if(wickets>=9)return{...p,runs:0,balls:0,out:false,dnb:true};
-    const res=simBatter(p,i+1,oppBowlStr);
-    totalRuns+=res.runs;
-    if(res.out)wickets++;
-    return{...p,...res,dnb:false};
+  let total=0,wk=0,extras=rand(5,18);
+  const sc=batOrder.map((p,i)=>{
+    if(wk>=9)return{...p,runs:0,balls:0,out:false,dnb:true};
+    const r=simBatter(p,i+1,os*.95);
+    total+=r.runs; if(r.out)wk++;
+    return{...p,...r,dnb:false};
   });
-  totalRuns+=extras;
-  totalRuns=Math.max(totalRuns,90);
+  total=Math.max(total+extras,90);
 
-  // Bowling
   const bowlers=[...team.filter(p=>p.r==="bowl"),...team.filter(p=>p.r==="ar")];
-  const bowling=bowlers.map(p=>({...p,...simBowler(p,oppBatStr)}));
+  const bowling=bowlers.map(p=>({...p,...simBowler(p,os)}));
 
-  // Win probability
-  const myAvgV=avgV();
-  const oppAvgV=oppStr/10;
-  const winP=Math.max(.15,Math.min(.83,.5+(myAvgV-oppAvgV)/3*.35));
+  const winP=Math.max(.15,Math.min(.83,.5+(avgV()-os/10)/3*.35));
   const won=Math.random()<winP;
-
-  // Opposition total
-  let oppTotal=Math.round(oppStr*2.1+rand(-20,30));
-  if(won&&oppTotal>=totalRuns) oppTotal=totalRuns-rand(8,48);
-  if(!won&&oppTotal<=totalRuns) oppTotal=totalRuns+rand(8,42);
+  let oppTotal=Math.round(os*2.1+rand(-20,30));
+  if(won&&oppTotal>=total)oppTotal=total-rand(8,48);
+  if(!won&&oppTotal<=total)oppTotal=total+rand(8,42);
   oppTotal=Math.max(oppTotal,88);
-  const oppWickets=rand(5,10);
-
-  // Distribute opposition runs
+  const oppWk=rand(5,10);
   const oppNames=OPP_PLAYERS[fixture.opp]||Array.from({length:8},(_,i)=>`Player ${i+1}`);
-  const oppScorecard=genOppScorecard(oppNames,oppBatStr,oppTotal-rand(5,15));
+  const oppSc=genOppSc(oppNames,oppTotal-rand(5,15));
 
-  // Spread wickets across your bowlers
-  let wLeft=oppWickets;
-  bowling.forEach((b,i)=>{
-    const share=i===bowling.length-1?wLeft:Math.min(rand(0,3),wLeft);
-    b.wickets=Math.min(b.wickets,share);
-    wLeft=Math.max(0,wLeft-b.wickets);
-  });
+  let wLeft=oppWk;
+  bowling.forEach((b,i)=>{const share=i===bowling.length-1?wLeft:Math.min(rand(0,3),wLeft);b.wickets=Math.min(b.wickets,share);wLeft=Math.max(0,wLeft-b.wickets);});
 
-  const margin=won?`Won by ${rand(1,8)} wickets`:`Lost by ${rand(8,52)} runs`;
-
-  return{fixture,won,margin,yourTotal:totalRuns,yourWickets:wickets,extras,scorecard,bowling,oppTotal,oppWickets,oppScorecard};
+  return{fixture,won,margin:won?`Won by ${rand(1,8)} wickets`:`Lost by ${rand(8,52)} runs`,yourTotal:total,yourWickets:wk,extras,scorecard:sc,bowling,oppTotal,oppWickets:oppWk,oppScorecard:oppSc};
 }
 
 // ══════════════════════════════════════════════════════
-//  TOURNAMENT + NAV
+//  TOURNAMENT
 // ══════════════════════════════════════════════════════
-let results=[], currentMatch=0;
-
-document.getElementById("go-sim").addEventListener("click",()=>{
+document.getElementById("btn-sim").addEventListener("click",()=>{
   document.getElementById("draft-phase").classList.remove("active");
   document.getElementById("sim-phase").classList.add("active");
-  buildTeamCards();
+
+  // Team strip
+  document.getElementById("team-strip").innerHTML=team.map(p=>`
+    <div class="tc_ ${p.r}">
+      <div class="tn">${p.n}</div>
+      <div class="ts">${p.sq||""}</div>
+      <div class="tv" style="color:${ROLE_COLOR[p.r]}">${p.v}</div>
+    </div>`).join("");
+
+  // Run simulation
   results=[]; currentMatch=0;
   let knocked=false;
   for(let i=0;i<FIXTURES.length;i++){
     if(knocked)break;
     const r=simulateMatch(FIXTURES[i]);
     results.push(r);
-    if(!r.won&&r.fixture.stage!=="Group Stage") knocked=true;
+    if(!r.won&&r.fixture.stage!=="Group Stage")knocked=true;
   }
-  buildSummary();
-  buildFinalBanner();
-  showMatch(0);
-  document.getElementById("share-section").style.display="none";
-});
 
-function buildTeamCards(){
-  document.getElementById("team-cards").innerHTML=team.map(p=>`
-    <div class="tc_ ${p.r}">
-      <div class="tn">${p.n}</div>
-      <div class="ts">${p.sq}</div>
-      <div class="tr" style="color:${ROLE_COLOR[p.r]}">${p.v}</div>
-    </div>`).join("");
-}
-
-function buildSummary(){
-  const w=results.filter(r=>r.won).length;
-  const p=results.length;
-  const avgR=p?Math.round(results.reduce((a,r)=>a+r.yourTotal,0)/p):0;
-  // Total wickets across all matches
+  // Summary stats
+  const wins=results.filter(r=>r.won).length;
+  const avgR=Math.round(results.reduce((a,r)=>a+r.yourTotal,0)/results.length);
   const tw=results.reduce((a,r)=>a+r.bowling.reduce((b,bw)=>b+bw.wickets,0),0);
   document.getElementById("smry").innerHTML=`
-    <div class="sc_"><div class="sv">${p}</div><div class="sl">Played</div></div>
-    <div class="sc_"><div class="sv">${w}</div><div class="sl">Won</div></div>
+    <div class="sc_"><div class="sv">${results.length}</div><div class="sl">Played</div></div>
+    <div class="sc_"><div class="sv">${wins}</div><div class="sl">Won</div></div>
     <div class="sc_"><div class="sv">${avgR}</div><div class="sl">Avg Score</div></div>
     <div class="sc_"><div class="sv">${tw}</div><div class="sl">Wkts Taken</div></div>`;
-}
 
-function buildFinalBanner(){
+  // Final banner
   const last=results[results.length-1];
-  const w=results.filter(r=>r.won).length;
-  // Top run scorer and top wicket taker across tournament
-  const runMap={}, wktMap={};
-  team.forEach(p=>{runMap[p.n]=0; wktMap[p.n]=0;});
+  const champion=wins===results.length&&last.fixture.stage==="Final"&&last.won;
+  const runMap={},wktMap={};
+  team.forEach(p=>{runMap[p.n]=0;wktMap[p.n]=0;});
   results.forEach(m=>{
     m.scorecard.filter(b=>!b.dnb).forEach(b=>{runMap[b.n]=(runMap[b.n]||0)+b.runs;});
     m.bowling.forEach(b=>{wktMap[b.n]=(wktMap[b.n]||0)+b.wickets;});
   });
   const topBat=Object.entries(runMap).sort((a,b)=>b[1]-a[1])[0];
   const topBowl=Object.entries(wktMap).sort((a,b)=>b[1]-a[1])[0];
-
-  const fin=document.getElementById("fin");
-  const champion=w===results.length&&last.fixture.stage==="Final"&&last.won;
+  const stats={topBat,topBowl};
+  const fin=document.getElementById("fin-banner");
   if(champion)
-    fin.innerHTML=`<div class="fi">&#127942;</div><div class="ft">World Cup Champions!</div><div class="fs">An all-time XI for the ages.</div><div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
+    fin.innerHTML=`<div class="fi">🏆</div><div class="ft">World Cup Champions!</div><div class="fs">An all-time XI for the ages.</div><div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
   else if(!last.won&&last.fixture.stage!=="Group Stage")
-    fin.innerHTML=`<div class="fi">&#128148;</div><div class="ft">Knocked Out &mdash; ${last.fixture.stage}</div><div class="fs">Beaten by ${last.fixture.opp} at ${last.fixture.venue}.</div><div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
+    fin.innerHTML=`<div class="fi">💔</div><div class="ft">Knocked Out — ${last.fixture.stage}</div><div class="fs">Beaten by ${last.fixture.opp} at ${last.fixture.venue}.</div><div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
   else
-    fin.innerHTML=`<div class="fi">&#129352;</div><div class="ft">Runners-Up</div><div class="fs">Made the Final but couldn't close it out.</div><div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
+    fin.innerHTML=`<div class="fi">🥈</div><div class="ft">Runners-Up</div><div class="fs">Made the Final — couldn't close it out.</div><div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
   fin.style.display="block";
+
+  document.getElementById("share-card").style.display="none";
+  // store for share
+  window._tournStats=stats;
+  showMatch(0);
+});
+
+// ══════════════════════════════════════════════════════
+//  MATCH MOMENTS
+// ══════════════════════════════════════════════════════
+const MOMENTS_W=[(b,bw)=>`<strong>${b.n}</strong> produces a masterclass — ${b.runs} off ${b.balls} balls leaves the crowd stunned.`,(b,bw)=>`<strong>${bw.n}</strong> rips through the top order. ${bw.wickets} wickets in a devastating spell.`,(b,bw)=>`Trailing at the drinks break, <strong>${b.n}</strong> digs in and turns the game on its head.`,(b,bw)=>`A yorker of outrageous quality from <strong>${bw.n}</strong> seals it in the final over.`,(b,bw)=>`<strong>${b.n}</strong>'s measured innings gives the XI the platform they desperately needed.`];
+const MOMENTS_L=[(b,bw)=>`A poor start with the bat sets the tone. <strong>${b.n}</strong> can't rescue the innings alone.`,(b,bw)=>`<strong>${bw.n}</strong> is expensive — the target proves well out of reach.`,(b,bw)=>`They needed 60 off 4 overs. The innings collapses. The dressing room is silent.`,(b,bw)=>`A crucial dropped catch changes the game — the opposition capitalise ruthlessly.`,(b,bw)=>`<strong>${b.n}</strong> fights hard but the lower order can't hold on.`];
+function matchMoment(m){
+  const b=m.scorecard.filter(x=>!x.dnb).sort((a,c)=>c.runs-a.runs)[0]||{n:"No.11",runs:0,balls:0};
+  const bw=[...m.bowling].sort((a,c)=>c.wickets-a.wickets)[0]||{n:"No-one",wickets:0};
+  const pool=m.won?MOMENTS_W:MOMENTS_L;
+  return pool[Math.floor(Math.random()*pool.length)](b,bw);
 }
 
-// ── Match moment quotes ──
-const MOMENTS_WIN=[
-  (b,bo)=>`<strong>${b.n}</strong> produces a masterclass — ${b.runs} off ${b.balls} balls leaves the crowd stunned.`,
-  (b,bo)=>`<strong>${bo.n}</strong> rips through the top order. ${bo.wickets} wickets in a spell of pure devastation.`,
-  (b,bo)=>`Trailing badly at the drinks break, <strong>${b.n}</strong> digs in and turns the match on its head.`,
-  (b,bo)=>`A yorker of outrageous quality from <strong>${bo.n}</strong> seals the deal in the final over.`,
-  (b,bo)=>`<strong>${b.n}</strong>'s measured innings gives the XI the platform they desperately needed.`,
-  (b,bo)=>`The pitch offers help for the seamers. <strong>${bo.n}</strong> exploits it mercilessly.`,
-];
-const MOMENTS_LOSS=[
-  (b,bo)=>`A poor start with the bat sets the tone. <strong>${b.n}</strong> can't rescue the innings alone.`,
-  (b,bo)=>`<strong>${bo.n}</strong> is expensive, going for over 8 an over. The total proves well short.`,
-  (b,bo)=>`They needed 60 off 4 overs. The innings collapses. The dressing room is silent.`,
-  (b,bo)=>`A crucial dropped catch changes the game — the opposition capitalise ruthlessly.`,
-  (b,bo)=>`<strong>${b.n}</strong> fights hard, but the lower order can't support. 3 wickets fall in 2 overs.`,
-];
-function getMatchMoment(m){
-  const topBat=m.scorecard.filter(b=>!b.dnb).sort((a,b_)=>b_.runs-a.runs)[0]||{n:"No.11",runs:0,balls:0};
-  const topBowl=[...m.bowling].sort((a,b_)=>b_.wickets-a.wickets)[0]||{n:"No-one",wickets:0};
-  const pool=m.won?MOMENTS_WIN:MOMENTS_LOSS;
-  return pool[Math.floor(Math.random()*pool.length)](topBat,topBowl);
-}
-
-// ── Momentum bar ──
-function renderMomentum(upToIdx){
+// ══════════════════════════════════════════════════════
+//  SHOW MATCH
+// ══════════════════════════════════════════════════════
+function renderMomentum(idx){
   const el=document.getElementById("mo-dots");
   el.innerHTML=FIXTURES.map((_,i)=>{
     const r=results[i];
-    if(i>upToIdx||!r) return`<div class="mo-dot upcoming" title="${FIXTURES[i].stage}"></div>`;
+    if(!r)return`<div class="mo-dot ahead" title="${FIXTURES[i].stage}"></div>`;
     return`<div class="mo-dot ${r.won?"W":"L"}" title="${r.won?"Won":"Lost"} vs ${r.fixture.opp}"></div>`;
   }).join("");
   document.getElementById("momentum").style.display="block";
@@ -976,229 +1038,161 @@ function showMatch(idx){
   currentMatch=idx;
   const m=results[idx];
   const total=results.length;
-
   renderMomentum(idx);
 
-  // Nav
   document.getElementById("nav-prev").disabled=idx===0;
   const isLast=idx===total-1;
-  const nextBtn=document.getElementById("nav-next");
-  nextBtn.textContent=isLast?"View Summary →":"Next →";
-  nextBtn.className=isLast?"primary":"";
-  nextBtn.disabled=false;
+  const nb=document.getElementById("nav-next");
+  nb.textContent=isLast?"View Summary →":"Next →";
+  nb.className=isLast?"primary":"";
+  nb.disabled=false;
   document.getElementById("nav-step").textContent=`Match ${idx+1} of ${total}`;
 
-  // Top batting (exclude DNB, sort by runs)
-  const topBat=m.scorecard.filter(b=>!b.dnb).sort((a,b_)=>b_.runs-a.runs).slice(0,5);
-  // All bowling sorted
-  const bowlingSort=[...m.bowling].sort((a,b_)=>b_.wickets-a.wickets||a.runs-b_.runs).slice(0,5);
-  // Opp top 3
-  const topOpp=[...m.oppScorecard].sort((a,b_)=>b_.runs-a.runs).slice(0,3);
-
-  // Player of the match
-  const potm=topBat[0]&&topBat[0].runs>=40?topBat[0]:bowlingSort[0]?.wickets>=3?bowlingSort[0]:topBat[0]||bowlingSort[0];
-  const potmStat=potm?.runs!=null&&potm.runs>0?`${potm.runs} runs (${potm.balls}b)`:`${potm?.wickets||0}-${potm?.runs||0}`;
-
-  // Match moment quote
-  const moment=getMatchMoment(m);
+  const topBat=m.scorecard.filter(b=>!b.dnb).sort((a,b)=>b.runs-a.runs).slice(0,5);
+  const bowlSort=[...m.bowling].sort((a,b)=>b.wickets-a.wickets||a.runs-b.runs).slice(0,5);
+  const topOpp=[...m.oppScorecard].sort((a,b)=>b.runs-a.runs).slice(0,3);
+  const potm=topBat[0]?.runs>=40?topBat[0]:bowlSort[0]?.wickets>=3?bowlSort[0]:topBat[0]||bowlSort[0];
+  const potmStat=potm?.balls!=null&&potm.balls>0&&potm.runs!=null?`${potm.runs} runs (${potm.balls}b)`:`${potm?.wickets||0}/${potm?.runs||0}`;
 
   document.getElementById("match-display").innerHTML=`
     <div class="mc">
       <div class="mc-head">
-        <div>
-          <div class="mt">World XI vs ${m.fixture.opp}</div>
-          <div style="font-size:9px;color:#7aab6a;margin-top:3px;letter-spacing:.5px">${m.fixture.venue}</div>
-        </div>
+        <div><div class="mt">World XI vs ${m.fixture.opp}</div><div style="font-size:.65rem;color:rgba(255,255,255,.45);margin-top:3px">${m.fixture.venue}</div></div>
         <div class="ms">${m.fixture.stage}</div>
       </div>
       <div class="mc-scores">
-        <div class="ms-team">
-          <div class="ms-r">${m.yourTotal}/${m.yourWickets}</div>
-          <div class="ms-l">Your XI</div>
-        </div>
+        <div class="ms-team"><div class="ms-r">${m.yourTotal}/${m.yourWickets}</div><div class="ms-l">Your XI</div></div>
         <div class="ms-vs">vs</div>
-        <div class="ms-team">
-          <div class="ms-r" style="color:${m.won?"#6aaa6a":"#e87070"}">${m.oppTotal}/${m.oppWickets}</div>
-          <div class="ms-l">${m.fixture.opp}</div>
-        </div>
+        <div class="ms-team"><div class="ms-r" style="color:${m.won?"#7aab6a":"#e87070"}">${m.oppTotal}/${m.oppWickets}</div><div class="ms-l">${m.fixture.opp}</div></div>
       </div>
       <div class="mc-body">
-        <div class="mc-section">
-          <div class="mc-section-title">Your Batting</div>
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 20px;font-size:8px;color:#9a8c78;padding:0 0 4px;letter-spacing:.5px;text-transform:uppercase">
-            <span>Batter</span><span style="text-align:right">R</span><span style="text-align:right">B</span><span style="text-align:right">SR</span><span></span>
-          </div>
-          ${topBat.map(b=>{
-            const sr=b.balls>0?((b.runs/b.balls)*100).toFixed(0):"—";
-            const icon=b.runs>=100?"💯":b.runs>=50?"⭐":b.runs===0?"🦆":"";
-            const hi=b.runs>=50?"font-weight:500":"";
-            return`<div class="bat-row" style="${b.runs>=50?'background:#fffdf0;':''}">
-              <div class="bn" style="${hi}">${b.n}</div>
-              <div class="br">${b.runs}</div>
-              <div class="bb">${b.balls}</div>
-              <div class="bsr">${sr}</div>
-              <div class="bx">${icon}</div>
-            </div>`;
-          }).join("")}
-          <div style="font-size:9px;color:#9a8c78;padding:5px 0 0;border-top:1px solid #ede5d5;margin-top:4px">Extras ${m.extras} · Total <strong>${m.yourTotal}/${m.yourWickets}</strong></div>
+        <div class="mc-sec">
+          <div class="mc-sec-title">Your Batting</div>
+          <table class="sc-tbl">
+            <tr><th>Batter</th><th>R</th><th>B</th><th>SR</th><th></th></tr>
+            ${topBat.map(b=>{
+              const sr=b.balls>0?((b.runs/b.balls)*100).toFixed(0):"—";
+              const icon=b.runs>=100?"💯":b.runs>=50?"⭐":b.runs===0?"🦆":"";
+              return`<tr class="${b.runs>=50?"hi":""}"><td>${b.n}</td><td class="bold">${b.runs}</td><td>${b.balls}</td><td>${sr}</td><td>${icon}</td></tr>`;
+            }).join("")}
+          </table>
+          <div class="mc-total">Extras ${m.extras} · Total <strong>${m.yourTotal}/${m.yourWickets}</strong></div>
         </div>
-
-        <div class="mc-section">
-          <div class="mc-section-title">Your Bowling</div>
-          <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr;font-size:8px;color:#9a8c78;padding:0 0 4px;letter-spacing:.5px;text-transform:uppercase">
-            <span>Bowler</span><span style="text-align:right">O</span><span style="text-align:right">W</span><span style="text-align:right">R</span><span style="text-align:right">Econ</span>
-          </div>
-          ${bowlingSort.map(b=>{
-            const econ=(b.runs/b.overs).toFixed(1);
-            const badge=b.wickets>=5?"🌟":b.wickets>=3?"🔥":"";
-            const econColor=econ<6?"#2a6b2a":econ>8?"#a02020":"#6b5d47";
-            return`<div class="bowl-row" style="${b.wickets>=3?'background:#f5f8f0;':''}">
-              <div class="bwn">${b.n} ${badge}</div>
-              <div class="bwo">${b.overs}</div>
-              <div class="bww">${b.wickets}</div>
-              <div class="bwr">${b.runs}</div>
-              <div class="bwe" style="color:${econColor}">${econ}</div>
-            </div>`;
-          }).join("")}
+        <div class="mc-sec">
+          <div class="mc-sec-title">Your Bowling</div>
+          <table class="sc-tbl">
+            <tr><th>Bowler</th><th>O</th><th>W</th><th>R</th><th>Econ</th></tr>
+            ${bowlSort.map(b=>{
+              const econ=(b.runs/b.overs).toFixed(1);
+              const badge=b.wickets>=5?"🌟":b.wickets>=3?"🔥":"";
+              return`<tr class="${b.wickets>=3?"hi-bowl":""}"><td>${b.n} ${badge}</td><td>${b.overs}</td><td class="bold">${b.wickets}</td><td>${b.runs}</td><td class="${+econ<6?"good":+econ>8?"bad":""}">${econ}</td></tr>`;
+            }).join("")}
+          </table>
         </div>
-
-        <div class="mc-section">
-          <div class="mc-section-title">${m.fixture.opp} — Top Scores</div>
-          ${topOpp.map(b=>`
-            <div class="opp-row"><span><strong>${b.name}</strong></span><span>${b.runs} (${b.balls}b)</span></div>
-          `).join("")}
-          <div style="font-size:9px;color:#9a8c78;padding:5px 0 0;border-top:1px solid #ede5d5;margin-top:4px">Total <strong>${m.oppTotal}/${m.oppWickets}</strong></div>
+        <div class="mc-sec">
+          <div class="mc-sec-title">${m.fixture.opp} — Top Scores</div>
+          <table class="sc-tbl">
+            <tr><th>Batter</th><th>R</th><th>B</th></tr>
+            ${topOpp.map(b=>`<tr><td>${b.name}</td><td class="bold">${b.runs}</td><td>${b.balls}</td></tr>`).join("")}
+          </table>
+          <div class="mc-total">Total <strong>${m.oppTotal}/${m.oppWickets}</strong></div>
         </div>
-      </div>
-      <div class="mc-body" style="padding-top:0">
-        <div class="match-moment">${moment}</div>
-        ${potm?`<div class="potm-badge">⭐ Player of the Match &nbsp; <strong>${potm.n}</strong> &nbsp; ${potmStat}</div>`:""}
+        <div class="match-moment">${matchMoment(m)}</div>
+        ${potm?`<div class="potm-badge">⭐ Player of the Match &nbsp;<strong>${potm.n}</strong>&nbsp; ${potmStat}</div>`:""}
       </div>
       <div class="mc-result ${m.won?"win":"loss"}">${m.margin}</div>
     </div>`;
 
-  window.scrollTo({top:document.getElementById("match-display").offsetTop-20,behavior:"smooth"});
+  window.scrollTo({top:document.getElementById("match-display").offsetTop-16,behavior:"smooth"});
 }
 
 document.getElementById("nav-prev").addEventListener("click",()=>{if(currentMatch>0)showMatch(currentMatch-1);});
 document.getElementById("nav-next").addEventListener("click",()=>{
-  if(currentMatch<results.length-1) showMatch(currentMatch+1);
-  else showSummaryView();
+  if(currentMatch<results.length-1)showMatch(currentMatch+1);
+  else{
+    document.getElementById("match-display").innerHTML="";
+    document.getElementById("nav-prev").disabled=true;
+    document.getElementById("nav-next").disabled=true;
+    document.getElementById("nav-step").textContent="Tournament complete";
+    document.getElementById("share-card").style.display="block";
+    window.scrollTo({top:0,behavior:"smooth"});
+  }
 });
-
-function showSummaryView(){
-  document.getElementById("match-display").innerHTML="";
-  document.getElementById("nav-prev").disabled=true;
-  document.getElementById("nav-next").disabled=true;
-  document.getElementById("nav-step").textContent="Tournament complete";
-  document.getElementById("share-section").style.display="block";
-  window.scrollTo({top:0,behavior:"smooth"});
-}
 
 // ══════════════════════════════════════════════════════
 //  SHARE CARD
 // ══════════════════════════════════════════════════════
-function getTournamentStats(){
-  const runMap={}, wktMap={};
-  team.forEach(p=>{runMap[p.n]=0;wktMap[p.n]=0;});
-  results.forEach(m=>{
-    m.scorecard.filter(b=>!b.dnb).forEach(b=>{runMap[b.n]=(runMap[b.n]||0)+b.runs;});
-    m.bowling.forEach(b=>{wktMap[b.n]=(wktMap[b.n]||0)+b.wickets;});
-  });
-  const topBat=Object.entries(runMap).sort((a,b)=>b[1]-a[1]);
-  const topBowl=Object.entries(wktMap).sort((a,b)=>b[1]-a[1]);
-  return{topBat,topBowl};
-}
-
 document.getElementById("btn-gen").addEventListener("click",()=>{
-  const W=560,H=860;
-  const canvas=document.getElementById("sc");
+  const W=560,H=860,canvas=document.getElementById("sc");
   canvas.width=W; canvas.height=H;
   const ctx=canvas.getContext("2d");
   const wins=results.filter(r=>r.won).length;
-  const stats=getTournamentStats();
+  const stats=window._tournStats||{topBat:["—",0],topBowl:["—",0]};
 
-  // BG
   const bg=ctx.createLinearGradient(0,0,W,H);
   bg.addColorStop(0,"#0d2b08"); bg.addColorStop(.5,"#152408"); bg.addColorStop(1,"#0d2b08");
   ctx.fillStyle=bg; ctx.fillRect(0,0,W,H);
-  // subtle grid lines
   ctx.strokeStyle="rgba(255,255,255,0.03)"; ctx.lineWidth=1;
   for(let y=0;y<H;y+=28){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
-  // gold bars
   const gbar=ctx.createLinearGradient(0,0,W,0);
   gbar.addColorStop(0,"#8a620a"); gbar.addColorStop(.5,"#c9a227"); gbar.addColorStop(1,"#8a620a");
   ctx.fillStyle=gbar; ctx.fillRect(0,0,W,5); ctx.fillRect(0,H-5,W,5);
 
   ctx.textAlign="center";
-  // Title
-  ctx.fillStyle="#7aab6a"; ctx.font="500 11px 'DM Mono',monospace";
-  ctx.fillText("WORLD CUP XI  ·  DREAM TEAM BUILDER",W/2,38);
-  // Record
-  ctx.fillStyle="#e8c547"; ctx.font="bold 64px 'Playfair Display',Georgia,serif";
-  ctx.fillText(`${wins}–${results.length-wins}`,W/2,120);
+  ctx.fillStyle="#7aab6a"; ctx.font="500 11px system-ui";
+  ctx.fillText("WORLD CUP XI  ·  DREAM TEAM",W/2,38);
+  ctx.fillStyle="#e8c547"; ctx.font="bold 64px system-ui";
+  ctx.fillText(`${wins}–${results.length-wins}`,W/2,118);
   const last=results[results.length-1];
   const champion=wins===results.length&&last.won&&last.fixture.stage==="Final";
   const verdict=champion?"World Cup Champions 🏆":!last.won&&last.fixture.stage!=="Group Stage"?`Out — ${last.fixture.stage}`:"Runners-Up";
-  ctx.fillStyle="#c9a227"; ctx.font="500 14px 'DM Mono',monospace";
-  ctx.fillText(verdict.toUpperCase(),W/2,150);
-  // divider
+  ctx.fillStyle="#c9a227"; ctx.font="500 13px system-ui";
+  ctx.fillText(verdict.toUpperCase(),W/2,148);
   const dv=ctx.createLinearGradient(40,0,W-40,0);
   dv.addColorStop(0,"transparent"); dv.addColorStop(.5,"#c9a227"); dv.addColorStop(1,"transparent");
   ctx.strokeStyle=dv; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(40,168); ctx.lineTo(W-40,168); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(40,165); ctx.lineTo(W-40,165); ctx.stroke();
 
-  // Player list
-  const roleCol={bat:"#3a5fc0",ar:"#c07a1a",wk:"#8a3ab5",bowl:"#2a8a48"};
+  const rc={bat:"#3a5fc0",ar:"#c07a1a",wk:"#8a3ab5",bowl:"#2a8a48"};
   const ord=[...team.filter(p=>p.r==="bat"),...team.filter(p=>p.r==="ar"),...team.filter(p=>p.r==="wk"),...team.filter(p=>p.r==="bowl")];
-  const startY=182, rowH=52;
+  const sy=178,rh=52;
   ord.forEach((p,i)=>{
-    const y=startY+i*rowH;
-    if(i%2===0){ctx.fillStyle="rgba(255,255,255,0.03)";ctx.beginPath();ctx.roundRect(20,y+2,W-40,rowH-3,5);ctx.fill();}
-    // number
-    ctx.fillStyle="#c9a227"; ctx.font="500 11px 'DM Mono',monospace"; ctx.textAlign="left";
-    ctx.fillText(String(i+1).padStart(2,"0"),30,y+25);
-    // role badge
-    const rc2=roleCol[p.r]||"#aaa";
-    ctx.fillStyle=rc2+"33"; ctx.beginPath(); ctx.roundRect(50,y+12,32,16,3); ctx.fill();
-    ctx.fillStyle=rc2; ctx.font="bold 9px 'DM Mono',monospace"; ctx.textAlign="center";
-    ctx.fillText(RC[p.r],66,y+24);
-    // name
-    ctx.fillStyle="#f5f0e8"; ctx.font=`${p.v>=9?"bold ":"500 "}14px 'DM Mono',monospace`; ctx.textAlign="left";
-    ctx.fillText(p.n,92,y+22);
-    // era
-    ctx.fillStyle="rgba(255,255,255,.38)"; ctx.font="10px 'DM Mono',monospace";
-    ctx.fillText(`${p.sq}`,92,y+37);
-    // rating pill
-    ctx.fillStyle="#c9a22728"; ctx.beginPath(); ctx.roundRect(W-62,y+12,40,18,9); ctx.fill();
-    ctx.fillStyle="#c9a227"; ctx.font="bold 12px 'DM Mono',monospace"; ctx.textAlign="center";
-    ctx.fillText(p.v,W-42,y+25);
+    const y=sy+i*rh;
+    if(i%2===0){ctx.fillStyle="rgba(255,255,255,0.03)";ctx.beginPath();ctx.roundRect(18,y+2,W-36,rh-3,5);ctx.fill();}
+    ctx.fillStyle="#c9a227"; ctx.font="500 10px system-ui"; ctx.textAlign="left";
+    ctx.fillText(String(i+1).padStart(2,"0"),28,y+24);
+    const c2=rc[p.r]||"#aaa";
+    ctx.fillStyle=c2+"33"; ctx.beginPath(); ctx.roundRect(48,y+11,30,16,3); ctx.fill();
+    ctx.fillStyle=c2; ctx.font="bold 9px system-ui"; ctx.textAlign="center";
+    ctx.fillText(RC[p.r],63,y+23);
+    ctx.fillStyle="#f5f0e8"; ctx.font=`${p.v>=9?"bold ":"500 "}13px system-ui`; ctx.textAlign="left";
+    ctx.fillText(p.n,88,y+21);
+    ctx.fillStyle="rgba(255,255,255,.35)"; ctx.font="10px system-ui";
+    ctx.fillText(p.sq||"",88,y+36);
+    ctx.fillStyle="#c9a22726"; ctx.beginPath(); ctx.roundRect(W-58,y+11,38,18,9); ctx.fill();
+    ctx.fillStyle="#c9a227"; ctx.font="bold 12px system-ui"; ctx.textAlign="center";
+    ctx.fillText(p.v,W-39,y+24);
   });
 
-  // Bottom stats
-  const bY=startY+ord.length*rowH+12;
+  const bY=sy+ord.length*rh+10;
   ctx.strokeStyle=dv; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(40,bY); ctx.lineTo(W-40,bY); ctx.stroke();
-  ctx.fillStyle="#7aab6a"; ctx.font="500 9px 'DM Mono',monospace"; ctx.textAlign="left";
-  ctx.fillText("TOP SCORER",30,bY+20);
-  ctx.fillStyle="#f5f0e8"; ctx.font="bold 13px 'DM Mono',monospace";
-  ctx.fillText(`${stats.topBat[0]?.[0]||"—"}  ·  ${stats.topBat[0]?.[1]||0} runs`,30,bY+38);
-  ctx.fillStyle="#7aab6a"; ctx.font="500 9px 'DM Mono',monospace"; ctx.textAlign="right";
-  ctx.fillText("TOP BOWLER",W-30,bY+20);
-  ctx.fillStyle="#f5f0e8"; ctx.font="bold 13px 'DM Mono',monospace";
-  ctx.fillText(`${stats.topBowl[0]?.[0]||"—"}  ·  ${stats.topBowl[0]?.[1]||0} wkts`,W-30,bY+38);
-  // branding
-  ctx.fillStyle="rgba(255,255,255,.2)"; ctx.font="10px 'DM Mono',monospace"; ctx.textAlign="center";
-  ctx.fillText("World Cup XI Builder",W/2,H-16);
+  ctx.fillStyle="#7aab6a"; ctx.font="500 9px system-ui"; ctx.textAlign="left";
+  ctx.fillText("TOP SCORER",28,bY+20);
+  ctx.fillStyle="#f5f0e8"; ctx.font="bold 12px system-ui";
+  ctx.fillText(`${stats.topBat?.[0]||"—"}  ·  ${stats.topBat?.[1]||0} runs`,28,bY+36);
+  ctx.fillStyle="#7aab6a"; ctx.font="500 9px system-ui"; ctx.textAlign="right";
+  ctx.fillText("TOP BOWLER",W-28,bY+20);
+  ctx.fillStyle="#f5f0e8"; ctx.font="bold 12px system-ui";
+  ctx.fillText(`${stats.topBowl?.[0]||"—"}  ·  ${stats.topBowl?.[1]||0} wkts`,W-28,bY+36);
+  ctx.fillStyle="rgba(255,255,255,.18)"; ctx.font="10px system-ui"; ctx.textAlign="center";
+  ctx.fillText("🏏 World Cup XI Builder",W/2,H-16);
 
   const url=canvas.toDataURL("image/png");
   document.getElementById("share-img").src=url;
   document.getElementById("share-preview").style.display="block";
   document.getElementById("share-dl-row").style.display="grid";
-
-  document.getElementById("btn-dl").onclick=()=>{
-    const a=document.createElement("a"); a.download="worldcup-xi.png"; a.href=url; a.click();
-  };
+  document.getElementById("btn-dl").onclick=()=>{const a=document.createElement("a");a.download="worldcup-xi.png";a.href=url;a.click();};
   document.getElementById("btn-share").onclick=async()=>{
     if(navigator.share&&navigator.canShare){
       const blob=await(await fetch(url)).blob();
@@ -1212,28 +1206,27 @@ document.getElementById("btn-gen").addEventListener("click",()=>{
 document.getElementById("btn-copy").addEventListener("click",copyText);
 function copyText(){
   const wins=results.filter(r=>r.won).length;
-  const stats=getTournamentStats();
-  const lines=[
-    "🏏 World Cup XI Dream Team",
-    `Record: ${wins}–${results.length-wins}`,"",...team.map((p,i)=>`${i+1}. ${p.n} (${RL[p.r]}) — ${p.sq} [${p.v}]`),
-    `\n🏏 Top scorer: ${stats.topBat[0]?.[0]} ${stats.topBat[0]?.[1]} runs`,
-    `🎯 Top bowler: ${stats.topBowl[0]?.[0]} ${stats.topBowl[0]?.[1]} wkts`,
-  ];
+  const s=window._tournStats||{};
+  const lines=["🏏 World Cup XI Dream Team",`Record: ${wins}–${results.length-wins}`,"",...team.map((p,i)=>`${i+1}. ${p.n} (${RL[p.r]}) — ${p.sq||""} [${p.v}]`),`\n🏏 Top scorer: ${s.topBat?.[0]} ${s.topBat?.[1]} runs`,`🎯 Top bowler: ${s.topBowl?.[0]} ${s.topBowl?.[1]} wkts`];
   navigator.clipboard?.writeText(lines.join("\n")).then(()=>alert("Copied!")).catch(()=>alert("Copy not supported"));
 }
 
-document.getElementById("back-btn").addEventListener("click",()=>{
-  // full reset
+// ══════════════════════════════════════════════════════
+//  BACK / RESET
+// ══════════════════════════════════════════════════════
+document.getElementById("btn-back").addEventListener("click",()=>{
   team=[]; taken=new Set(); sq=null; sel=null; pickedThisDraw=false;
-  reSpinsLeft=3; lastSquadDrawn=null;
-  renderXI();
-  document.getElementById("squad-panel").innerHTML=`<div class="sq-placeholder">Hit <strong>Draw Squad</strong> to reveal a random World Cup team.<br>Pick one player to add to your XI, then draw again.</div>`;
+  spinning=false; spinDone=false; reSpinsLeft=3; lastSquadDrawn=null;
+  document.getElementById("reel").innerHTML=`<div class="idle">Press Spin to start</div>`;
+  document.getElementById("reel").style.opacity="1";
+  document.getElementById("squad-panel").innerHTML=`<div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Pick any player — in any order — to add to your XI.</div>`;
   document.getElementById("act").style.display="none";
   document.getElementById("respin-bar").style.display="none";
   document.getElementById("squad-grade").style.display="none";
-  document.getElementById("draw-btn").disabled=false;
-  document.getElementById("draw-btn").textContent="Draw Squad";
-  document.getElementById("draw-hint").textContent="A random World Cup squad will appear. Pick one player, then draw again.";
+  document.getElementById("pick-label").innerHTML="Spin to reveal a World Cup squad — pick any player";
+  document.getElementById("btn-spin").disabled=false;
+  document.getElementById("btn-spin").textContent="🎰 Spin";
+  renderUI();
   document.getElementById("sim-phase").classList.remove("active");
   document.getElementById("draft-phase").classList.add("active");
 });
