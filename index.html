@@ -35,12 +35,30 @@ body{background:#d8d0be;font-family:"DM Mono",monospace;min-height:100vh;display
 .rtb.full .rl{color:#c9a227}
 .rtc{font-size:10px;color:#6b5d47}
 
+/* HARD MODE TOGGLE */
+#hard-toggle{background:transparent;border:1.5px solid #3a5a28;color:#7aab6a;padding:5px 12px;font-family:"DM Mono",monospace;font-size:9px;letter-spacing:1px;border-radius:5px;cursor:pointer;text-transform:uppercase;transition:all .15s}
+#hard-toggle:hover{border-color:#c9a227;color:#c9a227}
+#hard-toggle.on{background:#3a1a08;border-color:#c07a1a;color:#e8a040}
+/* Hide stats in hard mode */
+body.hard-mode .pc .pr{visibility:hidden}
+body.hard-mode .pc .ps{display:none}
+body.hard-mode .pc.selectable .pr{visibility:hidden}
+
 /* DRAW BUTTON */
-#draw-wrap{text-align:center;margin-bottom:16px}
+#draw-wrap{text-align:center;margin-bottom:10px}
 #draw-btn{background:#c9a227;color:#152408;border:none;padding:12px 36px;font-family:"DM Mono",monospace;font-size:13px;font-weight:500;letter-spacing:1.5px;border-radius:8px;cursor:pointer;text-transform:uppercase;transition:all .15s}
 #draw-btn:hover{background:#e8c547;letter-spacing:2px}
 #draw-btn:disabled{background:#bbb;color:#888;cursor:not-allowed;letter-spacing:1.5px}
 #draw-hint{font-size:10px;color:#9a8c78;margin-top:7px;letter-spacing:0.3px}
+
+/* RE-SPIN BAR */
+#respin-bar{display:none;gap:6px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.rs-btn{background:transparent;border:1.5px solid #d8ccb4;color:#6b5d47;padding:7px 12px;font-family:"DM Mono",monospace;font-size:9px;letter-spacing:.5px;border-radius:6px;cursor:pointer;text-transform:uppercase;transition:all .12s;flex:1;min-width:0;white-space:nowrap}
+.rs-btn:hover:not(:disabled){border-color:#c9a227;color:#a07010}
+.rs-btn:disabled{opacity:.3;cursor:not-allowed}
+#respin-count{font-size:9px;color:#9a8c78;letter-spacing:.5px;white-space:nowrap;text-align:center;width:100%}
+.rs-pip{display:inline-block;width:8px;height:8px;border-radius:50%;background:#c9a227;margin:0 2px;transition:background .2s}
+.rs-pip.used{background:#d8ccb4}
 
 /* SQUAD PANEL */
 #squad-panel{background:#fefcf7;border:1.5px solid #e8dcc8;border-radius:11px;padding:16px;margin-bottom:14px;min-height:80px}
@@ -214,7 +232,10 @@ canvas#sc{display:none}
 <div id="app">
   <div id="hdr">
     <div><h1>World Cup XI</h1><div class="sub">Draft The Greatest ODI Team</div></div>
-    <div class="hct"><div class="num" id="hdr-count">0/11</div><div class="lbl">Drafted</div></div>
+    <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+      <div class="hct"><div class="num" id="hdr-count">0/11</div><div class="lbl">Drafted</div></div>
+      <button id="hard-toggle">Normal Mode</button>
+    </div>
   </div>
   <div id="main">
 
@@ -230,6 +251,12 @@ canvas#sc{display:none}
       <div id="draw-wrap">
         <button id="draw-btn">Draw Squad</button>
         <div id="draw-hint">A random World Cup squad will appear. Pick one player, then draw again.</div>
+      </div>
+
+      <div id="respin-bar">
+        <button class="rs-btn" id="rs-team">🔄 New Team, Same Year</button>
+        <button class="rs-btn" id="rs-tourn">🌍 Same Team, New Year</button>
+        <div id="respin-count"></div>
       </div>
 
       <div id="squad-panel">
@@ -550,6 +577,7 @@ const FIXTURES=[
 //  DRAFT STATE
 // ══════════════════════════════════════════════════════
 let team=[], taken=new Set(), sq=null, sel=null, pickedThisDraw=false;
+let hardMode=false, reSpinsLeft=3, lastSquadDrawn=null;
 
 function cntR(r){return team.filter(p=>p.r===r).length;}
 function fullR(r){return cntR(r)>=Q[r];}
@@ -622,7 +650,52 @@ function renderSquad(s){
   document.getElementById("pick-btn").textContent="Select a player first";
   document.getElementById("draw-btn").disabled=false;
   document.getElementById("draw-hint").textContent="Pick a highlighted player, or skip for a different squad.";
+  updateRespinUI();
 }
+
+// ── Hard mode ──
+document.getElementById("hard-toggle").addEventListener("click",()=>{
+  hardMode=!hardMode;
+  document.body.classList.toggle("hard-mode",hardMode);
+  const btn=document.getElementById("hard-toggle");
+  btn.textContent=hardMode?"Hard Mode 🔒":"Normal Mode";
+  btn.classList.toggle("on",hardMode);
+});
+
+// ── Re-spin helpers ──
+function updateRespinUI(){
+  const bar=document.getElementById("respin-bar");
+  const count=document.getElementById("respin-count");
+  const pips=Array.from({length:3},(_,i)=>`<span class="rs-pip${i>=reSpinsLeft?" used":""}"></span>`).join("");
+  count.innerHTML=`Re-spins remaining: ${pips}`;
+  const noLeft=reSpinsLeft<=0;
+  document.getElementById("rs-team").disabled=noLeft;
+  document.getElementById("rs-tourn").disabled=noLeft;
+  if(sq){
+    const sameYear=SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t);
+    const sameTeam=SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y);
+    document.getElementById("rs-team").disabled=noLeft||sameYear.length===0;
+    document.getElementById("rs-tourn").disabled=noLeft||sameTeam.length===0;
+  }
+  bar.style.display=sq&&!pickedThisDraw?"flex":"none";
+}
+
+function doRespin(candidates){
+  if(reSpinsLeft<=0||!candidates.length)return;
+  reSpinsLeft--;
+  const choice=candidates[Math.floor(Math.random()*candidates.length)];
+  renderSquad(choice);
+  updateRespinUI();
+}
+
+document.getElementById("rs-team").addEventListener("click",()=>{
+  const same=SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t);
+  doRespin(same);
+});
+document.getElementById("rs-tourn").addEventListener("click",()=>{
+  const same=SQUADS.filter(s=>s.t===sq.t&&s.y!==sq.y);
+  doRespin(same);
+});
 
 // ── Squad grade ──
 function calcSquadGrade(){
@@ -648,7 +721,6 @@ function calcSquadGrade(){
 }
 
 // ── Missed pick toast ──
-let lastSquadDrawn=null;
 function showMissedToast(pickedPlayer, squad){
   const missed=squad.p.filter(p=>p.r===pickedPlayer.r&&p.n!==pickedPlayer.n&&!taken.has(p.n))
     .sort((a,b)=>b.v-a.v)[0];
@@ -676,6 +748,7 @@ document.getElementById("pick-btn").addEventListener("click",()=>{
   document.getElementById("pick-btn").textContent="✓ Added";
   // show missed pick after a short delay
   if(lastSquadDrawn) setTimeout(()=>showMissedToast(pickedCopy,lastSquadDrawn),600);
+  document.getElementById("respin-bar").style.display="none";
   if(fullTeam()){
     calcSquadGrade();
     document.getElementById("draw-btn").disabled=true;
@@ -692,7 +765,9 @@ document.getElementById("pick-btn").addEventListener("click",()=>{
 
 document.getElementById("skip-btn").addEventListener("click",()=>{
   sel=null; pickedThisDraw=false;
-  renderSquad(SQUADS[Math.floor(Math.random()*SQUADS.length)]);
+  lastSquadDrawn=SQUADS[Math.floor(Math.random()*SQUADS.length)];
+  renderSquad(lastSquadDrawn);
+  updateRespinUI();
 });
 
 // ══════════════════════════════════════════════════════
@@ -1148,6 +1223,17 @@ function copyText(){
 }
 
 document.getElementById("back-btn").addEventListener("click",()=>{
+  // full reset
+  team=[]; taken=new Set(); sq=null; sel=null; pickedThisDraw=false;
+  reSpinsLeft=3; lastSquadDrawn=null;
+  renderXI();
+  document.getElementById("squad-panel").innerHTML=`<div class="sq-placeholder">Hit <strong>Draw Squad</strong> to reveal a random World Cup team.<br>Pick one player to add to your XI, then draw again.</div>`;
+  document.getElementById("act").style.display="none";
+  document.getElementById("respin-bar").style.display="none";
+  document.getElementById("squad-grade").style.display="none";
+  document.getElementById("draw-btn").disabled=false;
+  document.getElementById("draw-btn").textContent="Draw Squad";
+  document.getElementById("draw-hint").textContent="A random World Cup squad will appear. Pick one player, then draw again.";
   document.getElementById("sim-phase").classList.remove("active");
   document.getElementById("draft-phase").classList.add("active");
 });
