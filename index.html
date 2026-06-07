@@ -27,9 +27,27 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-hei
 #hdr-right{display:flex;align-items:center;gap:10px}
 #hdr-count{font-size:1.8rem;font-weight:900;color:var(--gold);line-height:1;min-width:48px;text-align:right}
 #hdr-clabel{font-size:.6rem;color:var(--faint);letter-spacing:.5px;text-transform:uppercase;text-align:right}
-#hard-toggle{background:transparent;border:1px solid var(--border);color:var(--muted);padding:5px 10px;font-size:.68rem;letter-spacing:.4px;border-radius:20px;cursor:pointer;text-transform:uppercase;transition:all .15s;white-space:nowrap}
-#hard-toggle:hover{border-color:var(--gold);color:var(--gold)}
-#hard-toggle.on{border-color:#f0a050;color:#f0a050}
+#mode-badge{font-size:.6rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;padding:3px 9px;border-radius:20px;border:1px solid var(--border);color:var(--muted);white-space:nowrap}
+#mode-badge.easy{border-color:#22a03c;color:#4ade80}
+#mode-badge.normal{border-color:var(--gold-d);color:var(--gold)}
+#mode-badge.hard{border-color:#f0a050;color:#f0a050}
+/* Mode select screen */
+#mode-phase{text-align:center;padding:32px 16px 40px}
+#mode-phase h2{font-size:1.4rem;font-weight:800;color:var(--cream);margin-bottom:6px}
+#mode-phase p{font-size:.78rem;color:var(--muted);margin-bottom:28px}
+.mode-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:600px;margin:0 auto}
+@media(max-width:520px){.mode-cards{grid-template-columns:1fr}}
+.mode-card{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:20px 14px 18px;cursor:pointer;transition:all .18s;text-align:center}
+.mode-card:hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.mode-card.easy:hover,.mode-card.easy:focus{border-color:#22a03c;box-shadow:0 8px 24px rgba(34,160,60,.25)}
+.mode-card.normal:hover,.mode-card.normal:focus{border-color:var(--gold);box-shadow:0 8px 24px rgba(201,162,39,.25)}
+.mode-card.hard:hover,.mode-card.hard:focus{border-color:#f0a050;box-shadow:0 8px 24px rgba(240,160,80,.25)}
+.mode-icon{font-size:2rem;margin-bottom:10px}
+.mode-name{font-size:.95rem;font-weight:800;letter-spacing:.4px;text-transform:uppercase;margin-bottom:8px}
+.mode-card.easy .mode-name{color:#4ade80}
+.mode-card.normal .mode-name{color:var(--gold)}
+.mode-card.hard .mode-name{color:#f0a050}
+.mode-desc{font-size:.7rem;color:var(--muted);line-height:1.5}
 
 #prog{height:3px;background:var(--border);border-radius:2px;margin-bottom:10px;overflow:hidden}
 #prog-fill{height:3px;background:var(--gold);transition:width .4s ease;width:0%;border-radius:2px}
@@ -259,7 +277,7 @@ canvas#sc{display:none}
       </div>
     </div>
     <div id="hdr-right">
-      <button id="hard-toggle">Normal Mode</button>
+      <div id="mode-badge" class="normal">Normal</div>
       <div style="text-align:right">
         <div id="hdr-count">0/11</div>
         <div id="hdr-clabel">Drafted</div>
@@ -268,8 +286,31 @@ canvas#sc{display:none}
   </div>
   <div id="prog"><div id="prog-fill"></div></div>
 
+  <!-- ── MODE SELECT PHASE ── -->
+  <div class="phase active" id="mode-phase">
+    <h2>Choose Your Difficulty</h2>
+    <p>Pick a mode before you start drafting your XI</p>
+    <div class="mode-cards">
+      <div class="mode-card easy" data-mode="easy" tabindex="0">
+        <div class="mode-icon">🟢</div>
+        <div class="mode-name">Easy</div>
+        <div class="mode-desc">Ratings shown<br>3 skips available</div>
+      </div>
+      <div class="mode-card normal" data-mode="normal" tabindex="0">
+        <div class="mode-icon">🟡</div>
+        <div class="mode-name">Normal</div>
+        <div class="mode-desc">Ratings shown<br>1 skip available</div>
+      </div>
+      <div class="mode-card hard" data-mode="hard" tabindex="0">
+        <div class="mode-icon">🔴</div>
+        <div class="mode-name">Hard</div>
+        <div class="mode-desc">Ratings hidden<br>No skips</div>
+      </div>
+    </div>
+  </div>
+
   <!-- ── DRAFT PHASE ── -->
-  <div class="phase active" id="draft-phase">
+  <div class="phase" id="draft-phase">
     <div id="draft-cols">
 
       <!-- LEFT -->
@@ -1563,7 +1604,7 @@ const FIXTURES=[
 //  STATE
 // ══════════════════════════════════════════════════════
 let team=new Array(11).fill(null), taken=new Set(), sq=null, sel=null;
-let hardMode=false, reSpinsLeft=3, lastSquadDrawn=null;
+let hardMode=false, reSpinsLeft=1, lastSquadDrawn=null;
 let results=[], currentMatch=0;
 
 // ══════════════════════════════════════════════════════
@@ -1781,13 +1822,21 @@ function placePlayer(position){
 // ══════════════════════════════════════════════════════
 //  HARD MODE
 // ══════════════════════════════════════════════════════
-document.getElementById("hard-toggle").addEventListener("click",()=>{
-  hardMode=!hardMode;
-  document.body.classList.toggle("hard-mode",hardMode);
-  const btn=document.getElementById("hard-toggle");
-  btn.textContent=hardMode?"Hard Mode 🔒":"Normal Mode";
-  btn.classList.toggle("on",hardMode);
-  if(sq) renderSquad(sq);
+// ── MODE SELECT ─────────────────────────────────────────
+const MODE_CFG={easy:{skips:3,hard:false},normal:{skips:1,hard:false},hard:{skips:0,hard:true}};
+document.querySelectorAll(".mode-card").forEach(card=>{
+  const activate=()=>{
+    const cfg=MODE_CFG[card.dataset.mode];
+    hardMode=cfg.hard; reSpinsLeft=cfg.skips;
+    document.body.classList.toggle("hard-mode",hardMode);
+    const badge=document.getElementById("mode-badge");
+    badge.textContent=card.dataset.mode.charAt(0).toUpperCase()+card.dataset.mode.slice(1);
+    badge.className=""; badge.classList.add("mode-badge",card.dataset.mode);
+    document.getElementById("mode-phase").classList.remove("active");
+    document.getElementById("draft-phase").classList.add("active");
+  };
+  card.addEventListener("click",activate);
+  card.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" ")activate();});
 });
 
 // ══════════════════════════════════════════════════════
@@ -1797,7 +1846,8 @@ function updateRespinUI(){
   if(!sq||fullTeam()){document.getElementById("respin-bar").style.display="none";return;}
   const bar=document.getElementById("respin-bar");
   bar.style.display="flex";
-  const pips=Array.from({length:3},(_,i)=>`<span class="rs-pip${i>=reSpinsLeft?" used":""}"></span>`).join("");
+  const maxSkips=hardMode?0:reSpinsLeft<=1?1:3;
+  const pips=Array.from({length:maxSkips},(_,i)=>`<span class="rs-pip${i>=reSpinsLeft?" used":""}"></span>`).join("");
   document.getElementById("respin-count").innerHTML=`Re-spins: ${pips}`;
   const noLeft=reSpinsLeft<=0;
   document.getElementById("rs-team").disabled=noLeft||SQUADS.filter(s=>s.y===sq.y&&s.t!==sq.t).length===0;
@@ -2271,7 +2321,8 @@ function copyText(){
 // ══════════════════════════════════════════════════════
 document.getElementById("btn-back").addEventListener("click",()=>{
   team=new Array(11).fill(null); taken=new Set(); sq=null; sel=null;
-  spinning=false; reSpinsLeft=3; lastSquadDrawn=null;
+  spinning=false; lastSquadDrawn=null;
+  hardMode=false; document.body.classList.remove("hard-mode");
   document.getElementById("reel").innerHTML=`<div class="idle">Press Spin to reveal a squad</div>`;
   document.getElementById("reel").style.opacity="1";
   document.getElementById("squad-panel").innerHTML=`<div class="sq-idle">Hit <strong>Spin</strong> to reveal a random World Cup squad.<br>Click any available player to draft them directly.</div>`;
@@ -2282,7 +2333,8 @@ document.getElementById("btn-back").addEventListener("click",()=>{
   document.getElementById("btn-spin-again").style.display="none";
   renderUI();
   document.getElementById("sim-phase").classList.remove("active");
-  document.getElementById("draft-phase").classList.add("active");
+  document.getElementById("draft-phase").classList.remove("active");
+  document.getElementById("mode-phase").classList.add("active");
 });
 </script>
 </body>
