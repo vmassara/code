@@ -2185,7 +2185,7 @@ function simulateMatch(fixture){
   const bowlers=[...team.filter(p=>p&&p.r==="bowl"),...team.filter(p=>p&&p.r==="ar")];
   const bowling=bowlers.map(p=>({...p,...simBowler(p,os)}));
 
-  const winP=Math.max(.15,Math.min(.83,.5+(effectiveAvgV()-os/10)/3*.35));
+  const winP=Math.max(.15,Math.min(.90,.5+(effectiveAvgV()-os/10)/2*.45));
   const won=Math.random()<winP;
   let oppTotal=Math.round(os*2.1+rand(-20,30));
   if(won&&oppTotal>=total)oppTotal=total-rand(8,48);
