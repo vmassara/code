@@ -2125,7 +2125,7 @@ function showMissedToast(picked,squad){
 function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
 
 // Natural batting ranges per role (1-indexed positions)
-const ROLE_RANGE={bat:[1,4],ar:[6,8],wk:[5,7],bowl:[9,11]};
+const ROLE_RANGE={bat:[1,4],ar:[6,8],wk:[5,7],bowl:[8,11]};
 function positionFit(role,pos){
   const [lo,hi]=ROLE_RANGE[role]||[1,11];
   if(pos>=lo&&pos<=hi)return 1.0;
