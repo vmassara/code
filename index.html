@@ -228,9 +228,35 @@
   }
 
   .player-card.selected-already {
-    opacity: .4;
+    opacity: .35;
     pointer-events: none;
   }
+
+  .player-card.wrong-role {
+    opacity: .45;
+    pointer-events: none;
+    filter: grayscale(.6);
+  }
+
+  .player-card.selectable {
+    border-color: var(--green);
+    box-shadow: 0 0 0 2px rgba(26,122,60,.18);
+  }
+  .player-card.selectable:hover {
+    border-color: var(--green-dark);
+    box-shadow: 0 4px 14px rgba(26,122,60,.3);
+  }
+
+  .role-banner {
+    margin: 0 14px 8px;
+    padding: 8px 12px;
+    background: linear-gradient(135deg, #e8f5e9, #f1f8e9);
+    border: 1px solid #c8e6c9;
+    border-radius: 8px;
+    font-size: .82rem;
+    color: #2e7d32;
+  }
+  .role-banner strong { color: #1a5e20; }
 
   /* ── TEAM PANEL ── */
   #team-panel { position: sticky; top: 16px; }
@@ -981,33 +1007,50 @@ function renderSquad(squad) {
   const grid = document.getElementById('squad-grid');
   const title = document.getElementById('squad-title');
   const role = currentNeededRole();
-  title.textContent = `${squad.flag} ${squad.team} — ${squad.year} World Cup · Pick a ${SLOT_LABELS[role]}`;
 
-  // Filter to only players matching the needed role
   const eligible = squad.players.filter(p => p.role === role);
 
-  grid.innerHTML = '';
-
   if (eligible.length === 0) {
-    grid.innerHTML = `<div style="padding:16px;color:#888;font-size:.88rem;">No ${role} in this squad — spin again for a different team.</div>`;
+    // No matching role in this squad — prompt re-spin without showing squad
+    title.textContent = `${squad.flag} ${squad.team} ${squad.year} — no ${role} available, spin again`;
+    grid.innerHTML = `<div style="padding:16px;color:#888;font-size:.88rem;">This squad has no ${SLOT_LABELS[role].split(' ')[1]}s — spin for a different team.</div>`;
     document.getElementById('btn-spin').disabled = false;
     state.spinDone = false;
     document.getElementById('squad-section').style.display = '';
     return;
   }
 
-  eligible.forEach(p => {
+  title.textContent = `${squad.flag} ${squad.team} — ${squad.year} World Cup`;
+
+  // Role banner above the grid
+  let banner = grid.previousElementSibling;
+  if (!banner || !banner.classList.contains('role-banner')) {
+    banner = document.createElement('div');
+    banner.className = 'role-banner';
+    grid.parentNode.insertBefore(banner, grid);
+  }
+  banner.innerHTML = `Picking a <strong>${SLOT_LABELS[role]}</strong> — highlighted players are selectable`;
+
+  grid.innerHTML = '';
+
+  // Show full squad; only the matching role is clickable
+  squad.players.forEach(p => {
     const id = `${squad.year}-${squad.team}-${p.name}`;
     const alreadyPicked = state.pickedIds.has(id);
+    const wrongRole = p.role !== role;
+    const disabled = alreadyPicked || wrongRole;
+
     const card = document.createElement('div');
-    card.className = 'player-card' + (alreadyPicked ? ' selected-already' : '');
+    card.className = 'player-card' + (alreadyPicked ? ' selected-already' : wrongRole ? ' wrong-role' : ' selectable');
     card.innerHTML = `
       <div class="player-name">${p.name}</div>
       <div class="player-role role-${p.role}">${p.role}</div>
       <div style="font-size:.72rem;color:#888;margin-bottom:2px;">${squad.year} era</div>
       <div class="rating-bar-wrap"><div class="rating-bar" style="width:${p.rating}%"></div></div>
-      <div class="rating-num">Rating: ${p.rating}</div>`;
-    if (!alreadyPicked) {
+      <div class="rating-num">Rating: ${p.rating}</div>
+      ${wrongRole ? `<div style="font-size:.68rem;color:#bbb;margin-top:3px;">Need ${role}</div>` : ''}`;
+
+    if (!disabled) {
       card.addEventListener('click', () => selectPlayer(p, squad, id));
     }
     grid.appendChild(card);
