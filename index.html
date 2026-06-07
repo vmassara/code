@@ -15,7 +15,7 @@
   --accent:#c9a227;
 }
 body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-height:100vh;display:flex;justify-content:center;align-items:flex-start;padding:16px 8px;color:var(--cream)}
-#app{width:100%;max-width:960px}
+#app{width:100%;max-width:960px;padding-bottom:60px}
 
 /* ── HEADER ── */
 #hdr{background:linear-gradient(135deg,#0e0e1c,#14142a);border:1px solid var(--gold-d);border-radius:12px;padding:12px 18px;display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;position:relative;overflow:hidden}
@@ -409,13 +409,10 @@ canvas#sc{display:none}
   </div>
 </div>
 
-<div style="text-align:center;padding:24px 0 28px;font-size:.68rem;color:rgba(255,255,255,.2);line-height:2">
-  <a href="https://buymeacoffee.com/11and0" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:7px;background:#ffdd00;color:#1a1a1a;font-size:.78rem;font-weight:700;padding:9px 18px;border-radius:20px;text-decoration:none;transition:opacity .15s;margin-bottom:12px" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">🍺 Buy me a beer</a><br>
-  Inspired by and with thanks to <a href="https://82-0.com" target="_blank" rel="noopener" style="color:rgba(255,255,255,.35);text-decoration:underline">82-0.com</a>
-  &nbsp;·&nbsp;
-  <a href="#" onclick="event.preventDefault();document.getElementById('pp-overlay').style.display='flex'" style="color:rgba(255,255,255,.2);text-decoration:none">Privacy Policy</a>
-  &nbsp;·&nbsp; 11-0.xyz
-</div>
+<footer style="position:fixed;bottom:0;left:0;right:0;background:#0c0c1e;border-top:1px solid rgba(201,162,39,.15);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;z-index:100">
+  <span style="font-size:.65rem;color:rgba(255,255,255,.22)">Inspired by and with thanks to <a href="https://82-0.com" target="_blank" rel="noopener" style="color:rgba(255,255,255,.35);text-decoration:underline">82-0.com</a> &nbsp;·&nbsp; <a href="#" onclick="event.preventDefault();document.getElementById('pp-overlay').style.display='flex'" style="color:rgba(255,255,255,.22);text-decoration:none">Privacy Policy</a> &nbsp;·&nbsp; 11-0.xyz</span>
+  <a href="https://buymeacoffee.com/11and0" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;background:#ffdd00;color:#1a1a1a;font-size:.72rem;font-weight:700;padding:6px 14px;border-radius:20px;text-decoration:none;white-space:nowrap;transition:opacity .15s" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">🍺 Buy me a beer</a>
+</footer>
 
 <script>
 // ══════════════════════════════════════════════════════
