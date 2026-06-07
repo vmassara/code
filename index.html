@@ -1586,12 +1586,244 @@ function showSummary() {
         </div>
       </div>
 
+      <!-- Share card -->
+      <div class="card" style="margin-bottom:12px;">
+        <div class="card-header">📤 Share Your XI</div>
+        <div style="padding:14px;">
+          <canvas id="share-canvas" style="display:none;"></canvas>
+          <div id="share-preview" style="margin-bottom:12px;border-radius:8px;overflow:hidden;display:none;">
+            <img id="share-img" style="width:100%;border-radius:8px;display:block;" alt="Your XI card">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+            <button id="btn-generate-card" style="padding:12px;background:linear-gradient(135deg,#f0b429,#c8941e);color:#000;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;">
+              🎨 Generate Card
+            </button>
+            <button id="btn-copy-text" style="padding:12px;background:#f7f7f7;color:#333;border:1px solid #ddd;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;">
+              📋 Copy Results
+            </button>
+          </div>
+          <div id="share-actions" style="display:none;margin-top:10px;display:none;grid-template-columns:1fr 1fr;gap:10px;">
+            <button id="btn-download" style="padding:12px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;">
+              💾 Save Image
+            </button>
+            <button id="btn-share-native" style="padding:12px;background:#1d9bf0;color:#fff;border:none;border-radius:8px;font-size:.9rem;font-weight:700;cursor:pointer;">
+              🔗 Share
+            </button>
+          </div>
+        </div>
+      </div>
+
       <button id="btn-restart" style="display:block;width:100%;padding:14px;background:var(--green-dark);color:#fff;border:none;border-radius:8px;font-size:1rem;font-weight:700;cursor:pointer;text-transform:uppercase;">🔄 Build Another XI</button>
     </div>
   `;
 
   screen.querySelector('#btn-restart').addEventListener('click', restartGame);
+
+  // Share card generation
+  const summaryData = { wins, total, verdict, trophy, stats, matches };
+  screen.querySelector('#btn-generate-card').addEventListener('click', () => generateShareCard(summaryData));
+  screen.querySelector('#btn-copy-text').addEventListener('click', () => copyResultsText(summaryData));
+
   window.scrollTo(0, 0);
+}
+
+// ══════════════════════════════════════════════════════
+//  SHARE CARD (Canvas)
+// ══════════════════════════════════════════════════════
+
+function generateShareCard(data) {
+  const { wins, total, verdict, stats } = data;
+  const W = 600, H = 900;
+  const canvas = document.getElementById('share-canvas');
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  // ── Background ──
+  const bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0, '#0d3d1e');
+  bgGrad.addColorStop(0.5, '#135a2c');
+  bgGrad.addColorStop(1, '#0d3d1e');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Subtle pitch lines
+  ctx.strokeStyle = 'rgba(255,255,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let y = 0; y < H; y += 30) {
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+  }
+
+  // ── Gold top bar ──
+  const goldGrad = ctx.createLinearGradient(0, 0, W, 0);
+  goldGrad.addColorStop(0, '#c8941e');
+  goldGrad.addColorStop(0.5, '#f0b429');
+  goldGrad.addColorStop(1, '#c8941e');
+  ctx.fillStyle = goldGrad;
+  ctx.fillRect(0, 0, W, 6);
+  ctx.fillRect(0, H - 6, W, 6);
+
+  // ── Title ──
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#f0b429';
+  ctx.font = 'bold 13px system-ui';
+  ctx.letterSpacing = '3px';
+  ctx.fillText('🏏  CRICKET WORLD CUP XI', W / 2, 46);
+
+  // ── Record ──
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 72px system-ui';
+  ctx.fillText(`${wins}–${total - wins}`, W / 2, 130);
+
+  ctx.fillStyle = '#f0b429';
+  ctx.font = 'bold 18px system-ui';
+  ctx.fillText(verdict.toUpperCase(), W / 2, 160);
+
+  // ── Divider ──
+  const divGrad = ctx.createLinearGradient(40, 0, W - 40, 0);
+  divGrad.addColorStop(0, 'transparent');
+  divGrad.addColorStop(0.5, '#f0b429');
+  divGrad.addColorStop(1, 'transparent');
+  ctx.strokeStyle = divGrad;
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40, 180); ctx.lineTo(W - 40, 180); ctx.stroke();
+
+  // ── Player list ──
+  const roleColors = { BAT: '#4caf50', BWL: '#ef5350', ALL: '#ff9800', WK: '#42a5f5' };
+  const startY = 200;
+  const rowH = 58;
+
+  state.team.forEach((p, i) => {
+    const y = startY + i * rowH;
+    const isEven = i % 2 === 0;
+
+    // Row background
+    if (isEven) {
+      ctx.fillStyle = 'rgba(255,255,255,0.04)';
+      ctx.beginPath();
+      ctx.roundRect(24, y + 4, W - 48, rowH - 6, 6);
+      ctx.fill();
+    }
+
+    // Number
+    ctx.fillStyle = '#f0b429';
+    ctx.font = 'bold 13px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(`${i + 1}`, 36, y + 30);
+
+    // Role badge
+    const roleColor = roleColors[p.role] || '#aaa';
+    ctx.fillStyle = roleColor + '33';
+    ctx.beginPath();
+    ctx.roundRect(54, y + 16, 36, 18, 4);
+    ctx.fill();
+    ctx.fillStyle = roleColor;
+    ctx.font = 'bold 10px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(p.role, 72, y + 29);
+
+    // Player name
+    ctx.fillStyle = '#ffffff';
+    ctx.font = 'bold 15px system-ui';
+    ctx.textAlign = 'left';
+    ctx.fillText(p.name, 100, y + 26);
+
+    // Era info
+    ctx.fillStyle = 'rgba(255,255,255,0.45)';
+    ctx.font = '11px system-ui';
+    ctx.fillText(`${p.flag} ${p.team} · ${p.year}`, 100, y + 43);
+
+    // Rating pill
+    const ratingX = W - 56;
+    ctx.fillStyle = '#f0b42933';
+    ctx.beginPath();
+    ctx.roundRect(ratingX - 16, y + 14, 48, 22, 11);
+    ctx.fill();
+    ctx.fillStyle = '#f0b429';
+    ctx.font = 'bold 13px system-ui';
+    ctx.textAlign = 'center';
+    ctx.fillText(p.rating, ratingX + 8, y + 30);
+  });
+
+  // ── Bottom stats ──
+  const statsY = startY + state.team.length * rowH + 16;
+
+  ctx.strokeStyle = divGrad;
+  ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40, statsY); ctx.lineTo(W - 40, statsY); ctx.stroke();
+
+  // Top bat
+  ctx.fillStyle = '#f0b429';
+  ctx.font = 'bold 11px system-ui';
+  ctx.textAlign = 'left';
+  ctx.fillText('🏏 TOP SCORER', 40, statsY + 24);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 14px system-ui';
+  ctx.fillText(`${stats.topBat[0]?.[0] ?? '—'}  ${stats.topBat[0]?.[1] ?? 0} runs`, 40, statsY + 44);
+
+  // Top bowl
+  ctx.fillStyle = '#f0b429';
+  ctx.font = 'bold 11px system-ui';
+  ctx.textAlign = 'right';
+  ctx.fillText('🎯 TOP BOWLER', W - 40, statsY + 24);
+  ctx.fillStyle = '#fff';
+  ctx.font = 'bold 14px system-ui';
+  ctx.fillText(`${stats.topBowl[0]?.[0] ?? '—'}  ${stats.topBowl[0]?.[1] ?? 0} wkts`, W - 40, statsY + 44);
+
+  // ── Branding ──
+  ctx.fillStyle = 'rgba(255,255,255,0.25)';
+  ctx.font = '12px system-ui';
+  ctx.textAlign = 'center';
+  ctx.fillText('🏏 Cricket World Cup XI', W / 2, H - 20);
+
+  // ── Show preview ──
+  const img = document.getElementById('share-img');
+  const dataUrl = canvas.toDataURL('image/png');
+  img.src = dataUrl;
+  document.getElementById('share-preview').style.display = 'block';
+
+  // Show action buttons
+  const actions = document.getElementById('share-actions');
+  actions.style.display = 'grid';
+
+  document.getElementById('btn-download').onclick = () => {
+    const a = document.createElement('a');
+    a.download = 'cricket-xi.png';
+    a.href = dataUrl;
+    a.click();
+  };
+
+  document.getElementById('btn-share-native').onclick = async () => {
+    if (navigator.share && navigator.canShare) {
+      const blob = await (await fetch(dataUrl)).blob();
+      const file = new File([blob], 'cricket-xi.png', { type: 'image/png' });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: 'My Cricket World Cup XI', text: `${wins}–${total - wins} · ${verdict}` });
+        return;
+      }
+    }
+    // Fallback: copy text
+    copyResultsText(data);
+    notify('Copied results to clipboard!');
+  };
+
+  notify('Card generated! Save or share below 👇', 3000);
+}
+
+function copyResultsText(data) {
+  const { wins, total, verdict } = data;
+  const lines = [
+    '🏏 My Cricket World Cup XI',
+    `Record: ${wins}–${total - wins} · ${verdict}`,
+    '',
+    ...state.team.map((p, i) => `${i+1}. ${p.name} (${p.role}) — ${p.team} ${p.year} [${p.rating}]`),
+    '',
+    `🏏 Top scorer: ${data.stats.topBat[0]?.[0]} ${data.stats.topBat[0]?.[1]} runs`,
+    `🎯 Top bowler: ${data.stats.topBowl[0]?.[0]} ${data.stats.topBowl[0]?.[1]} wkts`,
+  ];
+  navigator.clipboard.writeText(lines.join('\n'))
+    .then(() => notify('Results copied to clipboard! 📋', 2500))
+    .catch(() => notify('Could not copy — try the Save Image button'));
 }
 
 function findMVP() {
