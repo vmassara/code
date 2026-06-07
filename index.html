@@ -2182,112 +2182,146 @@ document.getElementById("nav-next").addEventListener("click",()=>{
 document.getElementById("btn-gen").addEventListener("click",generateShareCard);
 
 function generateShareCard(){
-  const W=560,H=900,canvas=document.getElementById("sc");
-  canvas.width=W*2; canvas.height=H*2; // retina
+  const W=600,H=980,S=2; // S = retina scale
+  const canvas=document.getElementById("sc");
+  canvas.width=W*S; canvas.height=H*S;
   const ctx=canvas.getContext("2d");
-  ctx.scale(2,2);
+  ctx.scale(S,S);
 
   const wins=results.filter(r=>r.won).length;
   const losses=results.length-wins;
   const last=results[results.length-1];
-  const champion=wins===results.length&&last.won&&last.fixture.stage==="Final";
+  const champion=last.fixture.stage==="Final"&&last.won;
+  const runnerUp=last.fixture.stage==="Final"&&!last.won;
+  const semiOut=last.fixture.stage==="Semi-Final"&&!last.won;
+  const groupOut=!champion&&!runnerUp&&!semiOut;
   const stats=window._tournStats||{topBat:["—",0],topBowl:["—",0]};
 
-  // ── Background ──────────────────────────────────────
-  ctx.fillStyle="#07070f";
-  ctx.fillRect(0,0,W,H);
+  const gold="#c9a227", goldL="#f5d76e", goldD="#6a520a";
+  const cream="#f0ead8", muted="rgba(255,255,255,.38)", faint="rgba(255,255,255,.10)";
+  const winCol="#4ade80", lossCol="#f05060";
+  const outcomeCol=champion?winCol:runnerUp||semiOut?"#f0a840":lossCol;
+  const outcomeText=champion?"WORLD CUP CHAMPIONS 🏆":runnerUp?"RUNNERS-UP 🥈":semiOut?"SEMI-FINAL EXIT 💔":"GROUP STAGE EXIT 🚪";
 
-  // subtle grid lines
-  ctx.strokeStyle="rgba(255,255,255,.025)"; ctx.lineWidth=1;
-  for(let y=0;y<H;y+=24){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+  // ── Background
+  const bgGrad=ctx.createLinearGradient(0,0,0,H);
+  bgGrad.addColorStop(0,"#0c0c1e"); bgGrad.addColorStop(1,"#07070f");
+  ctx.fillStyle=bgGrad; ctx.fillRect(0,0,W,H);
+
+  // subtle dot grid
+  ctx.fillStyle=faint;
+  for(let x=20;x<W;x+=28)for(let y=20;y<H;y+=28){ctx.beginPath();ctx.arc(x,y,1,0,Math.PI*2);ctx.fill();}
 
   // top gold bar
   const gbar=ctx.createLinearGradient(0,0,W,0);
-  gbar.addColorStop(0,"#6a520a"); gbar.addColorStop(.4,"#c9a227"); gbar.addColorStop(.6,"#e8c84a"); gbar.addColorStop(1,"#6a520a");
-  ctx.fillStyle=gbar; ctx.fillRect(0,0,W,4);
+  gbar.addColorStop(0,goldD); gbar.addColorStop(.35,gold); gbar.addColorStop(.65,goldL); gbar.addColorStop(1,goldD);
+  ctx.fillStyle=gbar; ctx.fillRect(0,0,W,5);
 
-  // ── Header: 7-0 branding ────────────────────────────
+  // ── Branding
   ctx.textAlign="center";
-  ctx.fillStyle="#c9a227"; ctx.font="700 11px system-ui";
-  ctx.fillText("11-0  ·  WORLD CUP DRAFT",W/2,26);
+  ctx.fillStyle=gold; ctx.font=`700 11px system-ui`;
+  ctx.fillText("11-0  ·  WORLD CUP DRAFT",W/2,30);
 
-  // ── BIG RECORD ──────────────────────────────────────
-  const recY=90;
-  const recGrad=ctx.createLinearGradient(W/2-80,recY-70,W/2+80,recY+10);
-  recGrad.addColorStop(0,"#f5d76e"); recGrad.addColorStop(.5,"#c9a227"); recGrad.addColorStop(1,"#8a6a0a");
+  // mode pill
+  const modeName=hardMode?"HARD":reSpinsLeft===3?"EASY":"NORMAL";
+  const modeCol=hardMode?"#f0a050":reSpinsLeft===3?"#4ade80":gold;
+  ctx.fillStyle=modeCol+"22";
+  ctx.beginPath(); ctx.roundRect(W/2-28,36,56,16,8); ctx.fill();
+  ctx.fillStyle=modeCol; ctx.font="700 9px system-ui";
+  ctx.fillText(modeName,W/2,48);
+
+  // ── BIG RECORD
+  const recY=110;
+  const recGrad=ctx.createLinearGradient(W/2-100,recY-80,W/2+100,recY+10);
+  recGrad.addColorStop(0,goldL); recGrad.addColorStop(.5,gold); recGrad.addColorStop(1,goldD);
   ctx.fillStyle=recGrad;
-  ctx.font="900 80px system-ui";
+  ctx.font=`900 88px system-ui`;
   ctx.fillText(`${wins}-${losses}`,W/2,recY);
 
-  // verdict label
-  const verdictColor=champion?"#4ade80":!last.won&&last.fixture.stage!=="Group Stage"?"#f05060":"#c9a227";
-  ctx.fillStyle=verdictColor; ctx.font="700 13px system-ui";
-  const verdict=champion?"WORLD CUP CHAMPIONS 🏆":!last.won&&last.fixture.stage!=="Group Stage"?`KNOCKED OUT — ${last.fixture.stage.toUpperCase()}`:"RUNNERS-UP 🥈";
-  ctx.fillText(verdict,W/2,112);
+  // outcome label
+  ctx.fillStyle=outcomeCol; ctx.font="700 12px system-ui";
+  ctx.fillText(outcomeText,W/2,128);
 
-  // divider
-  const dv=ctx.createLinearGradient(40,0,W-40,0);
-  dv.addColorStop(0,"transparent"); dv.addColorStop(.5,"#c9a22788"); dv.addColorStop(1,"transparent");
-  ctx.strokeStyle=dv; ctx.lineWidth=1;
-  ctx.beginPath(); ctx.moveTo(40,126); ctx.lineTo(W-40,126); ctx.stroke();
+  // ── Match timeline W/L dots
+  const dotY=150, dotW=Math.floor((W-80)/results.length), dotH=8, dotR=4;
+  results.forEach((r,i)=>{
+    const x=40+i*dotW+(dotW-Math.min(dotW-4,28))/2;
+    const dw=Math.min(dotW-4,28);
+    ctx.fillStyle=r.won?winCol:lossCol;
+    ctx.beginPath(); ctx.roundRect(x,dotY,dw,dotH,dotR); ctx.fill();
+    // stage marker above semi/final
+    if(r.fixture.stage!=="Group Stage"){
+      ctx.fillStyle=gold; ctx.font="700 7px system-ui"; ctx.textAlign="center";
+      ctx.fillText(r.fixture.stage==="Final"?"F":"SF",x+dw/2,dotY-3);
+    }
+  });
 
-  // ── Player list ─────────────────────────────────────
+  // ── Divider
+  const dvGrad=ctx.createLinearGradient(40,0,W-40,0);
+  dvGrad.addColorStop(0,"transparent"); dvGrad.addColorStop(.5,"#c9a22766"); dvGrad.addColorStop(1,"transparent");
+  ctx.strokeStyle=dvGrad; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(40,172); ctx.lineTo(W-40,172); ctx.stroke();
+
+  // ── Player list
   const rc={bat:"#5ba8f0",ar:"#e08838",wk:"#a060e0",bowl:"#38c878"};
-  const ord=team.filter(Boolean);
-  const sy=136, rh=68;
+  const ord=team.map((p,i)=>p?{...p,slot:i+1}:null).filter(Boolean);
+  const sy=180, rh=72;
 
   ord.forEach((p,i)=>{
     const y=sy+i*rh;
-    // row bg
-    ctx.fillStyle=i%2===0?"rgba(255,255,255,.03)":"rgba(0,0,0,.0)";
-    ctx.fillRect(0,y,W,rh);
+    // alt row bg
+    if(i%2===0){ctx.fillStyle="rgba(255,255,255,.025)";ctx.fillRect(0,y,W,rh);}
 
-    // position number
-    ctx.fillStyle="#c9a22799"; ctx.font="600 11px system-ui"; ctx.textAlign="left";
-    ctx.fillText(String(i+1).padStart(2,"0"),16,y+26);
+    // batting position
+    ctx.textAlign="left"; ctx.fillStyle="rgba(201,162,39,.55)"; ctx.font="600 11px system-ui";
+    ctx.fillText(String(p.slot).padStart(2,"0"),14,y+28);
 
     // role pill
-    const c2=rc[p.r]||"#aaa";
-    ctx.fillStyle=c2+"28";
-    ctx.beginPath(); ctx.roundRect(40,y+13,34,17,4); ctx.fill();
-    ctx.fillStyle=c2; ctx.font="700 9px system-ui"; ctx.textAlign="center";
-    ctx.fillText(RC[p.r],57,y+25);
+    const pc=rc[p.r]||"#aaa";
+    ctx.fillStyle=pc+"30";
+    ctx.beginPath(); ctx.roundRect(38,y+14,36,18,4); ctx.fill();
+    ctx.fillStyle=pc; ctx.font="700 9px system-ui"; ctx.textAlign="center";
+    ctx.fillText(RC[p.r],56,y+27);
 
     // name
-    ctx.fillStyle="#f0ead8"; ctx.font=`${p.v>=9?"700":"500"} 14px system-ui`; ctx.textAlign="left";
-    ctx.fillText(p.n,84,y+24);
+    ctx.fillStyle=cream; ctx.font=`${p.v>=9?"700":"500"} 15px system-ui`; ctx.textAlign="left";
+    ctx.fillText(p.n,84,y+27);
 
-    // era label
-    ctx.fillStyle="rgba(255,255,255,.32)"; ctx.font="11px system-ui";
-    ctx.fillText(p.sq||"",84,y+41);
+    // era
+    ctx.fillStyle=muted; ctx.font="11px system-ui";
+    ctx.fillText(p.sq||"",84,y+44);
 
-    // rating badge
+    // rating
     const rating=Math.round(p.v*10);
-    const rColor=rating>=90?"#f5d76e":rating>=80?"#c9a227":"#8a7060";
-    ctx.fillStyle=rColor+"22"; ctx.beginPath(); ctx.roundRect(W-56,y+12,42,20,10); ctx.fill();
-    ctx.fillStyle=rColor; ctx.font="700 13px system-ui"; ctx.textAlign="center";
-    ctx.fillText(rating,W-35,y+26);
+    const rc2=rating>=90?goldL:rating>=80?gold:"#8a7060";
+    ctx.fillStyle=rc2+"22"; ctx.beginPath(); ctx.roundRect(W-58,y+13,44,22,11); ctx.fill();
+    ctx.fillStyle=rc2; ctx.font="700 13px system-ui"; ctx.textAlign="center";
+    ctx.fillText(rating,W-36,y+29);
   });
 
-  // ── Footer stats ────────────────────────────────────
-  const fY=sy+ord.length*rh+6;
-  ctx.strokeStyle=dv; ctx.lineWidth=1;
+  // ── Footer
+  const fY=sy+ord.length*rh+8;
+  ctx.strokeStyle=dvGrad; ctx.lineWidth=1;
   ctx.beginPath(); ctx.moveTo(40,fY); ctx.lineTo(W-40,fY); ctx.stroke();
 
-  ctx.fillStyle="#c9a227"; ctx.font="600 9px system-ui"; ctx.textAlign="left";
-  ctx.fillText("TOP SCORER",16,fY+18);
-  ctx.fillStyle="#f0ead8"; ctx.font="700 12px system-ui";
-  ctx.fillText(`${stats.topBat?.[0]||"—"}  ·  ${stats.topBat?.[1]||0} runs`,16,fY+33);
+  ctx.textAlign="left"; ctx.fillStyle=gold; ctx.font="600 9px system-ui";
+  ctx.fillText("TOP SCORER",16,fY+20);
+  ctx.fillStyle=cream; ctx.font="700 13px system-ui";
+  ctx.fillText(`${stats.topBat?.[0]||"—"}  ·  ${stats.topBat?.[1]||0} runs`,16,fY+36);
 
-  ctx.fillStyle="#c9a227"; ctx.font="600 9px system-ui"; ctx.textAlign="right";
-  ctx.fillText("TOP BOWLER",W-16,fY+18);
-  ctx.fillStyle="#f0ead8"; ctx.font="700 12px system-ui";
-  ctx.fillText(`${stats.topBowl?.[0]||"—"}  ·  ${stats.topBowl?.[1]||0} wkts`,W-16,fY+33);
+  ctx.textAlign="right"; ctx.fillStyle=gold; ctx.font="600 9px system-ui";
+  ctx.fillText("TOP BOWLER",W-16,fY+20);
+  ctx.fillStyle=cream; ctx.font="700 13px system-ui";
+  ctx.fillText(`${stats.topBowl?.[0]||"—"}  ·  ${stats.topBowl?.[1]||0} wkts`,W-16,fY+36);
+
+  // watermark
+  ctx.textAlign="center"; ctx.fillStyle="rgba(201,162,39,.3)"; ctx.font="600 10px system-ui";
+  ctx.fillText("11-0 World Cup Draft",W/2,H-12);
 
   // bottom gold bar
-  ctx.fillStyle=gbar; ctx.fillRect(0,H-4,W,4);
+  ctx.fillStyle=gbar; ctx.fillRect(0,H-5,W,5);
 
-  // ── Export ───────────────────────────────────────────
+  // ── Show preview & wire buttons
   const url=canvas.toDataURL("image/png");
   document.getElementById("share-img").src=url;
   document.getElementById("share-preview").style.display="block";
@@ -2296,15 +2330,21 @@ function generateShareCard(){
     const a=document.createElement("a");
     a.download="11-0-world-cup-xi.png"; a.href=url; a.click();
   };
+
   document.getElementById("btn-share").onclick=async()=>{
-    if(navigator.share&&navigator.canShare){
+    if(navigator.share){
       try{
         const blob=await(await fetch(url)).blob();
-        const file=new File([blob],"7-0-xi.png",{type:"image/png"});
-        if(navigator.canShare({files:[file]})){await navigator.share({files:[file],title:`7-0 World Cup Draft — ${wins}-${losses}`});return;}
+        const file=new File([blob],"11-0-xi.png",{type:"image/png"});
+        if(navigator.canShare&&navigator.canShare({files:[file]})){
+          await navigator.share({files:[file],title:`My 11-0 World Cup XI — ${wins}-${losses}`,text:`I went ${wins}-${losses} in the 11-0 World Cup Draft! Can you do better?`});
+          return;
+        }
       }catch(e){}
     }
-    copyText();
+    // fallback — download
+    const a=document.createElement("a");
+    a.download="11-0-world-cup-xi.png"; a.href=url; a.click();
   };
 }
 
