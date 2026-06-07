@@ -35,6 +35,8 @@ body{font-family:system-ui,-apple-system,sans-serif;background:var(--bg);min-hei
 #mode-phase{text-align:center;padding:32px 16px 40px}
 #mode-phase h2{font-size:1.4rem;font-weight:800;color:var(--cream);margin-bottom:6px}
 #mode-phase p{font-size:.78rem;color:var(--muted);margin-bottom:28px}
+#mode-phase .mode-intro{font-size:.82rem;color:var(--cream);opacity:.8;max-width:480px;margin:0 auto 18px;line-height:1.6}
+#mode-phase .mode-sub{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--faint);margin-bottom:16px}
 .mode-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:600px;margin:0 auto}
 @media(max-width:520px){.mode-cards{grid-template-columns:1fr}}
 .mode-card{background:var(--card);border:2px solid var(--border);border-radius:12px;padding:20px 14px 18px;cursor:pointer;transition:all .18s;text-align:center}
@@ -288,8 +290,9 @@ canvas#sc{display:none}
 
   <!-- ── MODE SELECT PHASE ── -->
   <div class="phase active" id="mode-phase">
-    <h2>Choose Your Difficulty</h2>
-    <p>Pick a mode before you start drafting your XI</p>
+    <h2>11-0 · World Cup Draft</h2>
+    <p class="mode-intro">Spin to reveal a random all-time World Cup squad. Draft one player per spin to build your best XI, then simulate a full World Cup campaign — 9 group games, a semi-final, and a final. Get 5+ group wins to qualify. Can you go 11-0?</p>
+    <p class="mode-sub">Choose your difficulty</p>
     <div class="mode-cards">
       <div class="mode-card easy" data-mode="easy" tabindex="0">
         <div class="mode-icon">🟢</div>
@@ -2333,7 +2336,11 @@ function generateShareCard(){
   };
 
   const gameUrl="https://vmassara.github.io/code/";
-  const shareText=`I went ${wins}-${losses} in the 11-0 World Cup Draft! Can you do better?\n${gameUrl}`;
+  const avgRating=Math.round(team.filter(Boolean).reduce((a,p)=>a+p.v,0)/team.filter(Boolean).length*10);
+  const topBatName=stats.topBat?.[0]||"my opener";
+  const topBatRuns=stats.topBat?.[1]||0;
+  const isPerfectShare=champion&&wins===11;
+  const shareText=`I drafted a ${avgRating}-rated all-time World Cup XI and went ${wins}-${losses} in 11-0 with ${topBatName} scoring ${topBatRuns} runs 🏏 ${isPerfectShare?"The perfect 11-0 run. ":""}Can you do better?\n${gameUrl}`;
   document.getElementById("btn-share").onclick=async()=>{
     if(navigator.share){
       try{
