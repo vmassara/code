@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>7-0 · World Cup Draft</title>
+<title>11-0 · World Cup Draft</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -251,10 +251,10 @@ canvas#sc{display:none}
 <div id="app">
   <div id="hdr">
     <div style="display:flex;align-items:center">
-      <img src="logo.png" id="hdr-logo" alt="7-0 logo" onerror="this.style.display='none';document.getElementById('hdr-logo-fallback').style.display='flex'">
+      <img src="logo.png" id="hdr-logo" alt="11-0 logo" onerror="this.style.display='none';document.getElementById('hdr-logo-fallback').style.display='flex'">
       <div id="hdr-logo-fallback" style="display:none;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--gold-d),var(--gold));align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0;margin-right:10px">🏏</div>
       <div>
-        <h1>7-0</h1>
+        <h1>11-0</h1>
         <div class="sub">World Cup Draft · Pick a legend from each spin</div>
       </div>
     </div>
@@ -1539,20 +1539,24 @@ const OPP_PLAYERS={
   "Netherlands":["M. O'Dowd","V. Singh","C. Ackermann","T. Cooper","S. Edwards","B. de Leede","L. van Beek","P. van Meekeren","A. Dutt","F. Klaassen","T. Nidamanuru"],
   "Scotland":["K. Coetzer","C. MacLeod","F. Coleman","P. Mommsen","M. Cross","R. Berrington","C. de Lange","J. Davey","A. Evans","R. Taylor","M. Haq"],
   "Canada":["J. Davison","G. Barnett","S. Yadav","N. de Groot","A. Bagai","I. Billcliff","U. Bhatti","A. Codrington","B. Seebaran","D. Joseph","J. Langford"],
-  "Sri Lanka":["S. Jayasuriya","M. Atapattu","M. Jayawardene","H. Tillakaratne","K. Sangakkara","A. de Silva","R. Arnold","M. Muralitharan","C. Vaas","D. Fernando","U. Chandana"],
+  "Sri Lanka":["P. Nissanka","D. Gunathilaka","K. Mendis","A. Mathews","D. de Silva","C. Asalanka","N. Dickwella","W. Hasaranga","M. Theekshana","D. Chameera","L. Kumara"],
   "West Indies":["S. Campbell","B. Lara","R. Richardson","C. Hooper","C. Browne","J. Adams","K. Arthurton","C. Ambrose","C. Walsh","I. Bishop","R. Harper"],
   "Zimbabwe":["D. Ebrahim","C. Wishart","G. Flower","M. Vermeulen","A. Flower","H. Streak","A. Blignaut","D. Marillier","H. Olonga","T. Friend","R. Price"],
   "Bangladesh":["M. Ashraful","S. Nafees","H. Bashar","A. Ahmed","M. Rahim","Shakib","M. Rafique","Mashrafe","A. Razzak","S. Rasel","S. Hossain"],
 };
 
 const FIXTURES=[
-  {stage:"Group Stage",   opp:"England",      venue:"Lord's, London",          oppStr:82},
-  {stage:"Group Stage",   opp:"Bangladesh",   venue:"Eden Gardens, Kolkata",   oppStr:67},
-  {stage:"Group Stage",   opp:"New Zealand",  venue:"Eden Park, Auckland",     oppStr:80},
-  {stage:"Group Stage",   opp:"Pakistan",     venue:"Gaddafi Stadium, Lahore", oppStr:83},
-  {stage:"Quarter-Final", opp:"South Africa", venue:"Newlands, Cape Town",     oppStr:85},
-  {stage:"Semi-Final",    opp:"Australia",    venue:"MCG, Melbourne",          oppStr:87},
-  {stage:"Final",         opp:"India",        venue:"Narendra Modi Stadium",   oppStr:88},
+  {stage:"Group Stage", opp:"Bangladesh",   venue:"Zahur Ahmed Chowdhury Stadium",  oppStr:67},
+  {stage:"Group Stage", opp:"Sri Lanka",    venue:"R Premadasa Stadium, Colombo",   oppStr:74},
+  {stage:"Group Stage", opp:"Afghanistan",  venue:"Dubai International Cricket Stadium",oppStr:65},
+  {stage:"Group Stage", opp:"Netherlands",  venue:"VRA Cricket Ground, Amsterdam",  oppStr:60},
+  {stage:"Group Stage", opp:"Pakistan",     venue:"National Stadium, Karachi",       oppStr:83},
+  {stage:"Group Stage", opp:"England",      venue:"Lord's, London",                  oppStr:82},
+  {stage:"Group Stage", opp:"New Zealand",  venue:"Eden Park, Auckland",             oppStr:80},
+  {stage:"Group Stage", opp:"South Africa", venue:"Newlands, Cape Town",             oppStr:85},
+  {stage:"Group Stage", opp:"Australia",    venue:"Melbourne Cricket Ground",        oppStr:87},
+  {stage:"Semi-Final",  opp:"India",        venue:"Wankhede Stadium, Mumbai",        oppStr:86},
+  {stage:"Final",       opp:"Australia",    venue:"Narendra Modi Stadium, Ahmedabad",oppStr:88},
 ];
 
 // ══════════════════════════════════════════════════════
@@ -1940,14 +1944,18 @@ document.getElementById("btn-sim").addEventListener("click",()=>{
       <div class="tv" style="color:${ROLE_COLOR[p.r]}">${p.v}</div>
     </div>`).join("");
 
-  // Run simulation
+  // Run simulation — 9 group games, then knockouts if qualified
   results=[]; currentMatch=0;
-  let knocked=false;
-  for(let i=0;i<FIXTURES.length;i++){
-    if(knocked)break;
-    const r=simulateMatch(FIXTURES[i]);
-    results.push(r);
-    if(!r.won&&r.fixture.stage!=="Group Stage")knocked=true;
+  // Group stage: always play all 9
+  for(let i=0;i<9;i++){
+    results.push(simulateMatch(FIXTURES[i]));
+  }
+  const groupWins=results.filter(r=>r.won).length;
+  const qualified=groupWins>=5;
+  if(qualified){
+    const semi=simulateMatch(FIXTURES[9]);
+    results.push(semi);
+    if(semi.won) results.push(simulateMatch(FIXTURES[10]));
   }
 
   // Summary stats
@@ -1962,7 +1970,7 @@ document.getElementById("btn-sim").addEventListener("click",()=>{
 
   // Final banner
   const last=results[results.length-1];
-  const champion=wins===results.length&&last.fixture.stage==="Final"&&last.won;
+  const champion=last.fixture.stage==="Final"&&last.won;
   const runMap={},wktMap={};
   team.filter(Boolean).forEach(p=>{runMap[p.n]=0;wktMap[p.n]=0;});
   results.forEach(m=>{
@@ -1975,21 +1983,26 @@ document.getElementById("btn-sim").addEventListener("click",()=>{
   const fin=document.getElementById("fin-banner");
   const losses=results.length-wins;
   const recordStr=`${wins}-${losses}`;
-  const isPerfect=champion&&wins===7;
+  const isPerfect=champion&&wins===11;
   if(champion)
     fin.innerHTML=`<div class="fi">🏆</div><div class="ft">World Cup Champions</div>
       <div class="record${isPerfect?" perfect":""}">${recordStr}</div>
-      <div class="verdict">${isPerfect?"Unbeaten. The perfect run.":"All seven. Absolute legends."}</div>
+      <div class="verdict">${isPerfect?"11-0. Unbeaten. The perfect run.":"All the way. Absolute legends."}</div>
       <div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;·&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
-  else if(!last.won&&last.fixture.stage!=="Group Stage")
-    fin.innerHTML=`<div class="fi">💔</div><div class="ft">Knocked Out — ${last.fixture.stage}</div>
-      <div class="record" style="-webkit-text-fill-color:var(--muted);filter:none">${recordStr}</div>
-      <div class="verdict">Beaten by ${last.fixture.opp} at ${last.fixture.venue}.</div>
-      <div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;·&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
-  else
+  else if(last.fixture.stage==="Final"&&!last.won)
     fin.innerHTML=`<div class="fi">🥈</div><div class="ft">Runners-Up</div>
       <div class="record">${recordStr}</div>
       <div class="verdict">Made the Final — couldn't close it out.</div>
+      <div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;·&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
+  else if(last.fixture.stage==="Semi-Final"&&!last.won)
+    fin.innerHTML=`<div class="fi">💔</div><div class="ft">Knocked Out — Semi-Final</div>
+      <div class="record" style="-webkit-text-fill-color:var(--muted);filter:none">${recordStr}</div>
+      <div class="verdict">Beaten by ${last.fixture.opp}. So close.</div>
+      <div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;·&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
+  else
+    fin.innerHTML=`<div class="fi">🚪</div><div class="ft">Eliminated — Group Stage</div>
+      <div class="record" style="-webkit-text-fill-color:var(--muted);filter:none">${recordStr}</div>
+      <div class="verdict">${groupWins} wins from 9 — not enough to qualify.</div>
       <div class="fr">🏏 ${topBat?.[0]} · ${topBat?.[1]} runs &nbsp;·&nbsp; 🎯 ${topBowl?.[0]} · ${topBowl?.[1]} wkts</div>`;
   fin.style.display="block";
 
@@ -2017,9 +2030,12 @@ function matchMoment(m){
 function renderMomentum(idx){
   const el=document.getElementById("mo-dots");
   el.innerHTML=FIXTURES.map((_,i)=>{
+    const divider=i===9?`<div style="width:2px;background:var(--gold-d);border-radius:2px;flex-shrink:0" title="Knockouts"></div>`:"";
     const r=results[i];
-    if(!r)return`<div class="mo-dot ahead" title="${FIXTURES[i].stage}"></div>`;
-    return`<div class="mo-dot ${r.won?"W":"L"}" title="${r.won?"Won":"Lost"} vs ${r.fixture.opp}"></div>`;
+    const dot=r
+      ?`<div class="mo-dot ${r.won?"W":"L"}" title="${r.won?"Won":"Lost"} vs ${r.fixture.opp}"></div>`
+      :`<div class="mo-dot ahead" title="${FIXTURES[i].stage}"></div>`;
+    return divider+dot;
   }).join("");
   document.getElementById("momentum").style.display="block";
 }
@@ -2142,7 +2158,7 @@ function generateShareCard(){
   // ── Header: 7-0 branding ────────────────────────────
   ctx.textAlign="center";
   ctx.fillStyle="#c9a227"; ctx.font="700 11px system-ui";
-  ctx.fillText("7-0  ·  WORLD CUP DRAFT",W/2,26);
+  ctx.fillText("11-0  ·  WORLD CUP DRAFT",W/2,26);
 
   // ── BIG RECORD ──────────────────────────────────────
   const recY=90;
@@ -2227,7 +2243,7 @@ function generateShareCard(){
 
   document.getElementById("btn-dl").onclick=()=>{
     const a=document.createElement("a");
-    a.download="7-0-world-cup-xi.png"; a.href=url; a.click();
+    a.download="11-0-world-cup-xi.png"; a.href=url; a.click();
   };
   document.getElementById("btn-share").onclick=async()=>{
     if(navigator.share&&navigator.canShare){
