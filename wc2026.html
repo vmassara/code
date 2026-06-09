@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WC 2026 Draft Game</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0e1a;color:#e8e8f0;font-family:'Segoe UI',system-ui,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:12px 8px 60px}
+  .screen{width:100%;max-width:520px;display:none}
+  .screen.active{display:block}
+  h1{font-size:1.6rem;color:#f5c518;text-align:center;margin-bottom:4px}
+  h2{font-size:1.2rem;color:#f5c518;margin-bottom:12px}
+  h3{font-size:1rem;color:#f5c518;margin-bottom:8px}
+  .subtitle{text-align:center;color:#9999bb;font-size:.85rem;margin-bottom:20px}
+  .card{background:#131929;border:1px solid rgba(245,197,24,.15);border-radius:12px;padding:16px;margin-bottom:12px}
+  .btn{background:#f5c518;color:#0a0e1a;border:none;border-radius:8px;padding:10px 20px;font-size:.95rem;font-weight:700;cursor:pointer;transition:opacity .2s}
+  .btn:hover{opacity:.85}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+  .btn-outline{background:transparent;color:#f5c518;border:2px solid #f5c518}
+  .btn-sm{padding:7px 14px;font-size:.82rem}
+  .btn-block{width:100%;margin-top:8px}
+  label{display:block;font-size:.82rem;color:#9999bb;margin-bottom:4px}
+  select{width:100%;background:#0a0e1a;color:#e8e8f0;border:1px solid rgba(245,197,24,.3);border-radius:8px;padding:9px 12px;font-size:.9rem}
+  input[type=range]{width:100%;accent-color:#f5c518;margin:6px 0}
+  .style-btns{display:flex;gap:8px;margin-top:6px}
+  .style-btn{flex:1;padding:8px 4px;border-radius:8px;border:2px solid rgba(245,197,24,.3);background:transparent;color:#e8e8f0;font-size:.78rem;cursor:pointer;transition:all .2s}
+  .style-btn.active{background:#f5c518;color:#0a0e1a;border-color:#f5c518;font-weight:700}
+  .slider-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+  .slider-row label{min-width:70px;margin-bottom:0}
+  .slider-val{min-width:22px;text-align:right;color:#f5c518;font-weight:700;font-size:.9rem}
+  /* PITCH */
+  .pitch-wrap{position:relative;width:100%;aspect-ratio:9/13;background:linear-gradient(180deg,#1a4a1a 0%,#1e5c1e 20%,#1a4a1a 40%,#1e5c1e 60%,#1a4a1a 80%,#1e5c1e 100%);border-radius:10px;border:2px solid rgba(255,255,255,.12);overflow:hidden;margin-bottom:12px}
+  .pitch-line{position:absolute;border:1px solid rgba(255,255,255,.18)}
+  .pitch-center{left:5%;right:5%;top:50%;height:1px}
+  .pitch-center-circle{left:50%;top:50%;transform:translate(-50%,-50%);width:22%;padding-bottom:22%;border-radius:50%}
+  .pitch-box-top{left:20%;right:20%;top:3%;height:18%}
+  .pitch-box-bot{left:20%;right:20%;bottom:3%;height:18%}
+  .slot{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-direction:column;gap:1px}
+  .slot-empty{border:2px dashed #f5c518;background:rgba(245,197,24,.08)}
+  .slot-empty:hover{background:rgba(245,197,24,.22);border-style:solid}
+  .slot-filled{border:2px solid #f5c518;background:rgba(245,197,24,.25)}
+  .slot-active{border-color:#fff;background:rgba(255,255,255,.2);animation:pulse .8s infinite}
+  @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.4)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
+  .slot-lbl{font-size:.55rem;color:#f5c518;font-weight:700;line-height:1}
+  .slot-name{font-size:.45rem;color:#fff;line-height:1;text-align:center;max-width:42px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .slot-init{font-size:.75rem;color:#fff;font-weight:700}
+  /* SPIN */
+  .spin-area{text-align:center;padding:10px 0}
+  .spin-flag{font-size:4rem;min-height:70px;display:flex;align-items:center;justify-content:center;transition:opacity .05s}
+  .spin-country{font-size:1.1rem;color:#f5c518;font-weight:700;min-height:28px;margin-bottom:8px}
+  .spin-progress{color:#9999bb;font-size:.8rem;margin-bottom:12px}
+  /* PLAYER LIST */
+  .player-list{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:10px}
+  .player-card{display:flex;align-items:center;gap:10px;background:#0a0e1a;border:1px solid rgba(245,197,24,.2);border-radius:8px;padding:8px 12px;cursor:pointer;transition:all .2s}
+  .player-card:hover{border-color:#f5c518;background:rgba(245,197,24,.06)}
+  .player-card.selected{border-color:#f5c518;background:rgba(245,197,24,.15)}
+  .player-pos{min-width:32px;text-align:center;font-size:.72rem;font-weight:700;padding:2px 4px;border-radius:4px}
+  .pos-GK{background:#8B4513;color:#fff}
+  .pos-DF{background:#1a4a8a;color:#fff}
+  .pos-MF{background:#1a6a1a;color:#fff}
+  .pos-FW{background:#8a1a1a;color:#fff}
+  .player-name{flex:1;font-size:.88rem}
+  .player-rating{font-size:.85rem;color:#f5c518;font-weight:700}
+  .player-rating.hidden-r{color:#555;font-size:.8rem}
+  /* MATCH */
+  .match-card{background:#131929;border:1px solid rgba(245,197,24,.15);border-radius:12px;padding:14px;margin-bottom:10px}
+  .match-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+  .match-stage{font-size:.72rem;color:#9999bb;text-transform:uppercase;letter-spacing:.5px}
+  .match-badge{font-size:.72rem;padding:3px 8px;border-radius:6px;font-weight:700}
+  .badge-w{background:#1a5c1a;color:#4cff4c}
+  .badge-d{background:#4a4a00;color:#ffff44}
+  .badge-l{background:#5c1a1a;color:#ff6666}
+  .match-score{text-align:center;font-size:1.8rem;font-weight:700;margin:6px 0}
+  .match-teams{display:flex;justify-content:space-between;align-items:center;font-size:.8rem;margin-bottom:8px}
+  .match-events{font-size:.75rem;color:#9999bb;line-height:1.8}
+  .event-goal{color:#f5c518}
+  .opp-info{display:flex;align-items:center;gap:6px;font-size:.88rem}
+  /* END SCREEN */
+  .trophy{font-size:4rem;text-align:center;margin:10px 0}
+  .stat-row{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.06);font-size:.88rem}
+  .stat-val{color:#f5c518;font-weight:700}
+  .rating-reveal{display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05);font-size:.82rem}
+  .rating-bar{flex:1;height:6px;background:#1a1a2a;border-radius:3px;overflow:hidden}
+  .rating-fill{height:100%;background:#f5c518;border-radius:3px}
+  .share-area{margin-top:10px}
+  .share-text{background:#0a0e1a;border:1px solid rgba(245,197,24,.2);border-radius:8px;padding:10px;font-size:.78rem;color:#9999bb;line-height:1.5;margin-bottom:8px;white-space:pre-line}
+  .share-btns{display:flex;gap:8px}
+  /* FOOTER */
+  footer{position:fixed;bottom:0;left:0;right:0;background:#0a0e1a;border-top:1px solid rgba(245,197,24,.1);text-align:center;padding:8px;font-size:.72rem;color:#555}
+  footer a{color:#9999bb;text-decoration:none}
+  .formation-preview{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-top:6px}
+  .form-btn{padding:7px 4px;border-radius:6px;border:1px solid rgba(245,197,24,.3);background:transparent;color:#e8e8f0;font-size:.8rem;cursor:pointer;text-align:center}
+  .form-btn.active{background:rgba(245,197,24,.15);border-color:#f5c518;color:#f5c518;font-weight:700}
+  .step-indicator{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:16px}
+  .step{width:8px;height:8px;border-radius:50%;background:#2a2a3a}
+  .step.active{background:#f5c518}
+  .step.done{background:#4a7a2a}
+  .notice{background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.2);border-radius:8px;padding:10px;font-size:.82rem;color:#ccc;margin-bottom:10px;text-align:center}
+  .coach-card{display:flex;align-items:center;gap:10px;background:#0a0e1a;border:2px solid rgba(245,197,24,.3);border-radius:8px;padding:10px 14px;cursor:pointer;transition:all .2s;margin-bottom:6px}
+  .coach-card:hover{border-color:#f5c518}
+  .coach-card.selected{border-color:#f5c518;background:rgba(245,197,24,.12)}
+  .coach-icon{font-size:1.4rem}
+  .coach-name{flex:1;font-size:.88rem;font-weight:600}
+  .coach-r{color:#f5c518;font-weight:700}
+  .hidden-stat{color:#555;font-size:.8rem}
+  .revealed-card{background:rgba(245,197,24,.08);border:1px solid rgba(245,197,24,.25);border-radius:8px;padding:10px;margin-bottom:8px}
+  .spinner-wrap{display:flex;flex-direction:column;align-items:center;justify-content:center}
+  .country-name{font-size:.9rem;color:#9999bb}
+  /* Scrollbar */
+  ::-webkit-scrollbar{width:4px}
+  ::-webkit-scrollbar-track{background:#0a0e1a}
+  ::-webkit-scrollbar-thumb{background:#333}
+  .sim-btn-row{display:flex;gap:8px;margin-top:8px}
+  .eliminated-banner{background:#5c1a1a;border:1px solid #8a2a2a;border-radius:10px;padding:14px;text-align:center;margin-bottom:12px}
+  .qualified-banner{background:#1a4a1a;border:1px solid #2a7a2a;border-radius:10px;padding:14px;text-align:center;margin-bottom:12px}
+  .loading-dots::after{content:'...';animation:dots 1.2s infinite}
+  @keyframes dots{0%{content:'.'}40%{content:'..'}80%{content:'...'}}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="screen-setup" class="screen active">
+  <h1>⚽ WC 2026 Draft</h1>
+  <p class="subtitle">Build your dream XI from World Cup squads</p>
+  <div class="card">
+    <h3>Choose Formation</h3>
+    <div class="formation-preview" id="formBtns"></div>
+  </div>
+  <div class="card">
+    <h3>Set Your Tactics</h3>
+    <div class="slider-row">
+      <label>Pressing</label>
+      <input type="range" min="1" max="10" value="5" id="slPressing" oninput="updateSlider('pressing',this.value)">
+      <span class="slider-val" id="valPressing">5</span>
+    </div>
+    <div class="slider-row">
+      <label>Pace</label>
+      <input type="range" min="1" max="10" value="5" id="slPace" oninput="updateSlider('pace',this.value)">
+      <span class="slider-val" id="valPace">5</span>
+    </div>
+    <div>
+      <label>Play Style</label>
+      <div class="style-btns" id="styleBtns">
+        <button class="style-btn" onclick="setStyle('park')">🚌 Park the Bus</button>
+        <button class="style-btn active" onclick="setStyle('balanced')">⚖️ Balanced</button>
+        <button class="style-btn" onclick="setStyle('total')">🎯 Total Football</button>
+      </div>
+    </div>
+  </div>
+  <button class="btn btn-block" onclick="startDraft()">Start Draft →</button>
+</div>
+
+<!-- DRAFT SCREEN -->
+<div id="screen-draft" class="screen">
+  <h1>⚽ Player Draft</h1>
+  <div id="draftStepIndicator" class="step-indicator"></div>
+  <div id="draftProgress" class="notice">Spin to get a country, then pick a player!</div>
+
+  <!-- Pitch -->
+  <div class="pitch-wrap" id="pitchWrap">
+    <div class="pitch-line pitch-center"></div>
+    <div class="pitch-line pitch-center-circle"></div>
+    <div class="pitch-line pitch-box-top"></div>
+    <div class="pitch-line pitch-box-bot"></div>
+  </div>
+
+  <!-- Spin area -->
+  <div class="card" id="spinCard">
+    <div class="spin-area">
+      <div class="spin-flag" id="spinFlag">🌍</div>
+      <div class="spin-country" id="spinCountry">Press Spin!</div>
+      <div class="spin-progress" id="spinProg"></div>
+    </div>
+    <button class="btn btn-block" id="spinBtn" onclick="doSpin()">🎰 Spin!</button>
+  </div>
+
+  <!-- Player selection (shown after spin) -->
+  <div class="card" id="playerSelectCard" style="display:none">
+    <h3 id="playerSelectTitle">Pick a Player</h3>
+    <div class="player-list" id="playerList"></div>
+    <div id="selectedPlayerInfo" style="display:none;margin-bottom:8px"></div>
+    <div id="slotHint" class="notice" style="display:none"></div>
+    <button class="btn btn-block" id="confirmPickBtn" onclick="confirmPick()" disabled>Confirm Pick →</button>
+  </div>
+
+  <!-- Coach selection (last pick) -->
+  <div class="card" id="coachSelectCard" style="display:none">
+    <h3>Choose Your Coach</h3>
+    <div id="coachList"></div>
+    <button class="btn btn-block" id="confirmCoachBtn" onclick="confirmCoach()" disabled>Confirm Coach →</button>
+  </div>
+</div>
+
+<!-- SIMULATION SCREEN -->
+<div id="screen-sim" class="screen">
+  <h1>⚽ WC 2026</h1>
+  <div class="card" id="teamSummaryCard" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div style="font-size:.8rem;color:#9999bb">Your XI</div>
+        <div style="font-size:1.1rem;font-weight:700;color:#f5c518" id="simTeamRating">Rating: --</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:.8rem;color:#9999bb">Coach</div>
+        <div style="font-size:.88rem" id="simCoachName">--</div>
+      </div>
+    </div>
+    <div style="margin-top:8px;display:flex;gap:12px;font-size:.78rem;color:#9999bb">
+      <span>Pressing: <b style="color:#f5c518" id="simPressing">5</b></span>
+      <span>Pace: <b style="color:#f5c518" id="simPace">5</b></span>
+      <span>Style: <b style="color:#f5c518" id="simStyle">Balanced</b></span>
+    </div>
+  </div>
+  <div id="matchList"></div>
+  <div id="simStatus"></div>
+  <div class="sim-btn-row" id="simBtnRow" style="display:none">
+    <button class="btn" id="nextMatchBtn" onclick="playNextMatch()" style="flex:1">▶ Next Match</button>
+    <button class="btn btn-outline btn-sm" onclick="showEndScreen()">Skip to End</button>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div id="screen-end" class="screen">
+  <div id="endTrophy" class="trophy"></div>
+  <h1 id="endTitle">Tournament Over</h1>
+  <p id="endSubtitle" class="subtitle"></p>
+
+  <div class="card">
+    <h3>Tournament Stats</h3>
+    <div id="endStats"></div>
+  </div>
+
+  <div class="card" id="secretReveal">
+    <h3>🔮 Hidden Modifiers Revealed</h3>
+    <div id="secretStats"></div>
+  </div>
+
+  <div class="card">
+    <h3>Your XI Ratings</h3>
+    <div id="endXI"></div>
+  </div>
+
+  <div class="card share-area">
+    <h3>Share Your Result</h3>
+    <div class="share-text" id="shareText"></div>
+    <div class="share-btns">
+      <button class="btn btn-sm" onclick="copyShare()">📋 Copy</button>
+      <button class="btn btn-sm btn-outline" onclick="shareTwitter()">𝕏 Twitter</button>
+      <button class="btn btn-sm btn-outline" onclick="shareWhatsApp()">💬 WhatsApp</button>
+    </div>
+  </div>
+  <button class="btn btn-block btn-outline" onclick="restartGame()" style="margin-top:8px">🔄 Play Again</button>
+</div>
+
+<footer>Inspired by <a href="https://11-0.xyz" target="_blank">11-0.xyz</a> · Privacy: no data collected</footer>
+
+<script>
+// ===== DATA =====
+const FORMATIONS = {
+  '4-4-2':{slots:[
+    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:25,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:25,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:25,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:25,roles:['DF']},
+    {id:'LM',lbl:'LM',x:15,y:55,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:35,y:55,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:65,y:55,roles:['MF']},
+    {id:'RM',lbl:'RM',x:85,y:55,roles:['MF']},
+    {id:'ST1',lbl:'ST',x:35,y:80,roles:['FW','MF']},
+    {id:'ST2',lbl:'ST',x:65,y:80,roles:['FW','MF']},
+  ]},
+  '4-3-3':{slots:[
+    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:25,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:25,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:25,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:25,roles:['DF']},
+    {id:'CM1',lbl:'CM',x:25,y:52,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:50,y:52,roles:['MF']},
+    {id:'CM3',lbl:'CM',x:75,y:52,roles:['MF']},
+    {id:'LW',lbl:'LW',x:15,y:78,roles:['FW','MF']},
+    {id:'ST',lbl:'ST',x:50,y:85,roles:['FW']},
+    {id:'RW',lbl:'RW',x:85,y:78,roles:['FW','MF']},
+  ]},
+  '3-4-3':{slots:[
+    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
+    {id:'CB1',lbl:'CB',x:25,y:25,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:50,y:25,roles:['DF']},
+    {id:'CB3',lbl:'CB',x:75,y:25,roles:['DF']},
+    {id:'LM',lbl:'LM',x:12,y:55,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:37,y:55,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:63,y:55,roles:['MF']},
+    {id:'RM',lbl:'RM',x:88,y:55,roles:['MF']},
+    {id:'LW',lbl:'LW',x:18,y:80,roles:['FW','MF']},
+    {id:'ST',lbl:'ST',x:50,y:88,roles:['FW']},
+    {id:'RW',lbl:'RW',x:82,y:80,roles:['FW','MF']},
+  ]},
+  '3-5-2':{slots:[
+    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
+    {id:'CB1',lbl:'CB',x:25,y:25,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:50,y:25,roles:['DF']},
+    {id:'CB3',lbl:'CB',x:75,y:25,roles:['DF']},
+    {id:'LWB',lbl:'LWB',x:10,y:50,roles:['MF','DF']},
+    {id:'CM1',lbl:'CM',x:30,y:52,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:50,y:52,roles:['MF']},
+    {id:'CM3',lbl:'CM',x:70,y:52,roles:['MF']},
+    {id:'RWB',lbl:'RWB',x:90,y:50,roles:['MF','DF']},
+    {id:'ST1',lbl:'ST',x:33,y:82,roles:['FW']},
+    {id:'ST2',lbl:'ST',x:67,y:82,roles:['FW']},
+  ]},
+  '5-4-1':{slots:[
+    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
+    {id:'LWB',lbl:'LWB',x:8,y:30,roles:['DF','MF']},
+    {id:'CB1',lbl:'CB',x:28,y:22,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:50,y:22,roles:['DF']},
+    {id:'CB3',lbl:'CB',x:72,y:22,roles:['DF']},
+    {id:'RWB',lbl:'RWB',x:92,y:30,roles:['DF','MF']},
+    {id:'LM',lbl:'LM',x:15,y:57,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:37,y:57,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:63,y:57,roles:['MF']},
+    {id:'RM',lbl:'RM',x:85,y:57,roles:['MF']},
+    {id:'ST',lbl:'ST',x:50,y:85,roles:['FW','MF']},
+  ]},
+  '4-1-4-1':{slots:[
+    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:22,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:22,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:22,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:22,roles:['DF']},
+    {id:'CDM',lbl:'CDM',x:50,y:40,roles:['MF']},
+    {id:'LM',lbl:'LM',x:12,y:60,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:37,y:60,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:63,y:60,roles:['MF']},
+    {id:'RM',lbl:'RM',x:88,y:60,roles:['MF']},
+    {id:'ST',lbl:'ST',x:50,y:83,roles:['FW','MF']},
+  ]},
+};
+
+const SQUADS = [
+  {name:'France',flag:'🇫🇷',str:88,players:[
+    {n:'Maignan',p:'GK',r:84},{n:'Areola',p:'GK',r:74},
+    {n:'Hernandez T',p:'DF',r:82},{n:'Pavard',p:'DF',r:78},{n:'Saliba',p:'DF',r:85},{n:'Upamecano',p:'DF',r:81},{n:'Kounde',p:'DF',r:82},
+    {n:'Camavinga',p:'MF',r:83},{n:'Tchouameni',p:'MF',r:82},{n:'Rabiot',p:'MF',r:78},{n:'Kante',p:'MF',r:84},
+    {n:'Mbappe',p:'FW',r:94},{n:'Griezmann',p:'FW',r:84},{n:'Dembele',p:'FW',r:83},{n:'Thuram M',p:'FW',r:82}
+  ]},
+  {name:'Spain',flag:'🇪🇸',str:87,players:[
+    {n:'Unai Simon',p:'GK',r:82},{n:'Remiro',p:'GK',r:74},
+    {n:'Carvajal',p:'DF',r:82},{n:'Le Normand',p:'DF',r:81},{n:'Laporte',p:'DF',r:80},{n:'Grimaldo',p:'DF',r:80},{n:'Nacho',p:'DF',r:78},
+    {n:'Gavi',p:'MF',r:87},{n:'Pedri',p:'MF',r:87},{n:'Rodri',p:'MF',r:91},{n:'Olmo D',p:'MF',r:84},
+    {n:'Yamal L',p:'FW',r:89},{n:'Williams N',p:'FW',r:84},{n:'Morata',p:'FW',r:79},{n:'Joselu',p:'FW',r:74}
+  ]},
+  {name:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',str:86,players:[
+    {n:'Pickford',p:'GK',r:82},{n:'Ramsdale',p:'GK',r:78},
+    {n:'Trent AA',p:'DF',r:84},{n:'Trippier',p:'DF',r:80},{n:'Maguire',p:'DF',r:78},{n:'Stones',p:'DF',r:82},{n:'Guehi',p:'DF',r:80},
+    {n:'Rice',p:'MF',r:85},{n:'Bellingham',p:'MF',r:90},{n:'Saka',p:'MF',r:87},{n:'Foden',p:'MF',r:87},
+    {n:'Kane',p:'FW',r:89},{n:'Watkins',p:'FW',r:81},{n:'Rashford',p:'FW',r:82},{n:'Gordon A',p:'FW',r:79}
+  ]},
+  {name:'Germany',flag:'🇩🇪',str:85,players:[
+    {n:'Neuer',p:'GK',r:82},{n:'ter Stegen',p:'GK',r:85},
+    {n:'Rudiger',p:'DF',r:82},{n:'Schlotterbeck',p:'DF',r:79},{n:'Raum',p:'DF',r:77},
+    {n:'Kimmich',p:'MF',r:86},{n:'Gundogan',p:'MF',r:83},{n:'Goretzka',p:'MF',r:80},
+    {n:'Sane',p:'FW',r:83},{n:'Havertz',p:'FW',r:83},{n:'Wirtz',p:'FW',r:88},{n:'Musiala',p:'FW',r:87},{n:'Gnabry',p:'FW',r:81},{n:'Fullkrug',p:'FW',r:79}
+  ]},
+  {name:'Portugal',flag:'🇵🇹',str:84,players:[
+    {n:'Diogo Costa',p:'GK',r:82},{n:'Patricio',p:'GK',r:74},
+    {n:'Cancelo',p:'DF',r:81},{n:'Ruben Dias',p:'DF',r:87},{n:'Nuno Mendes',p:'DF',r:82},{n:'Pepe',p:'DF',r:74},
+    {n:'Bernardo Silva',p:'MF',r:86},{n:'Vitinha',p:'MF',r:82},{n:'Bruno Fernandes',p:'MF',r:87},
+    {n:'Ronaldo',p:'FW',r:83},{n:'Felix J',p:'FW',r:83},{n:'Ramos G',p:'FW',r:80},{n:'Leao R',p:'FW',r:83},{n:'Horta',p:'FW',r:78}
+  ]},
+  {name:'Netherlands',flag:'🇳🇱',str:83,players:[
+    {n:'Flekken',p:'GK',r:79},{n:'Cillessen',p:'GK',r:74},
+    {n:'Van Dijk',p:'DF',r:88},{n:'De Ligt',p:'DF',r:83},{n:'Timber',p:'DF',r:83},{n:'Dumfries',p:'DF',r:79},
+    {n:'De Jong F',p:'MF',r:86},{n:'Wijnaldum',p:'MF',r:79},{n:'Xavi Simons',p:'MF',r:83},{n:'Veerman',p:'MF',r:78},
+    {n:'Gakpo',p:'FW',r:83},{n:'Depay',p:'FW',r:79},{n:'Bergwijn',p:'FW',r:78},{n:'Zirkzee',p:'FW',r:79}
+  ]},
+  {name:'Belgium',flag:'🇧🇪',str:82,players:[
+    {n:'Courtois',p:'GK',r:89},{n:'Casteels',p:'GK',r:78},
+    {n:'Vertonghen',p:'DF',r:74},{n:'Theate',p:'DF',r:78},{n:'Debast',p:'DF',r:76},
+    {n:'De Bruyne',p:'MF',r:90},{n:'Trossard',p:'MF',r:82},{n:'Doku',p:'MF',r:83},{n:'De Ketelaere',p:'MF',r:79},
+    {n:'Lukaku',p:'FW',r:82},{n:'Batshuayi',p:'FW',r:74},{n:'Openda',p:'FW',r:81}
+  ]},
+  {name:'Croatia',flag:'🇭🇷',str:80,players:[
+    {n:'Livakovic',p:'GK',r:81},
+    {n:'Gvardiol',p:'DF',r:86},{n:'Lovren',p:'DF',r:74},{n:'Erlic',p:'DF',r:76},{n:'Perisic',p:'DF',r:79},
+    {n:'Modric',p:'MF',r:85},{n:'Kovacic',p:'MF',r:83},{n:'Brozovic',p:'MF',r:81},{n:'Vlasic',p:'MF',r:79},
+    {n:'Kramaric',p:'FW',r:81},{n:'Petkovic',p:'FW',r:75}
+  ]},
+  {name:'Denmark',flag:'🇩🇰',str:78,players:[
+    {n:'Schmeichel K',p:'GK',r:82},
+    {n:'Kjaer',p:'DF',r:78},{n:'Andersen',p:'DF',r:81},{n:'Vestergaard',p:'DF',r:79},
+    {n:'Christensen',p:'MF',r:83},{n:'Eriksen',p:'MF',r:84},{n:'Hojbjerg',p:'MF',r:80},{n:'Delaney',p:'MF',r:77},
+    {n:'Hojlund',p:'FW',r:82},{n:'Skov Olsen',p:'FW',r:78},{n:'Wind',p:'FW',r:76}
+  ]},
+  {name:'Switzerland',flag:'🇨🇭',str:77,players:[
+    {n:'Sommer',p:'GK',r:84},
+    {n:'Elvedi',p:'DF',r:79},{n:'Akanji',p:'DF',r:82},{n:'Rodriguez R',p:'DF',r:76},
+    {n:'Xhaka',p:'MF',r:82},{n:'Zakaria',p:'MF',r:79},{n:'Shaqiri',p:'MF',r:79},
+    {n:'Ndoye',p:'FW',r:78},{n:'Embolo',p:'FW',r:79},{n:'Vargas R',p:'FW',r:79},{n:'Okafor',p:'FW',r:78}
+  ]},
+  {name:'Italy',flag:'🇮🇹',str:82,players:[
+    {n:'Donnarumma',p:'GK',r:87},
+    {n:'Di Lorenzo',p:'DF',r:80},{n:'Bastoni',p:'DF',r:85},{n:'Acerbi',p:'DF',r:77},{n:'Dimarco',p:'DF',r:81},
+    {n:'Barella',p:'MF',r:86},{n:'Jorginho',p:'MF',r:78},{n:'Pellegrini',p:'MF',r:79},
+    {n:'Raspadori',p:'FW',r:79},{n:'Scamacca',p:'FW',r:80},{n:'Retegui',p:'FW',r:79},{n:'Chiesa',p:'FW',r:81}
+  ]},
+  {name:'Serbia',flag:'🇷🇸',str:78,players:[
+    {n:'Rajkovic',p:'GK',r:79},
+    {n:'Milenkovic',p:'DF',r:79},{n:'Pavlovic',p:'DF',r:78},{n:'Kostic',p:'DF',r:80},
+    {n:'Lukic',p:'MF',r:77},{n:'Milinkovic-Savic',p:'MF',r:84},{n:'Tadic',p:'MF',r:79},
+    {n:'Vlahovic',p:'FW',r:85},{n:'Mitrovic',p:'FW',r:82},{n:'Jovic',p:'FW',r:78}
+  ]},
+  {name:'Poland',flag:'🇵🇱',str:76,players:[
+    {n:'Szczesny',p:'GK',r:83},
+    {n:'Bednarek',p:'DF',r:78},{n:'Bereszynski',p:'DF',r:75},{n:'Gumny',p:'DF',r:73},
+    {n:'Zielinski',p:'MF',r:83},{n:'Frankowski',p:'MF',r:76},
+    {n:'Swiderski',p:'FW',r:77},{n:'Piatek',p:'FW',r:77},{n:'Lewandowski',p:'FW',r:87},{n:'Buksa',p:'FW',r:74}
+  ]},
+  {name:'Turkey',flag:'🇹🇷',str:78,players:[
+    {n:'Gunok',p:'GK',r:77},
+    {n:'Demiral',p:'DF',r:80},{n:'Soyuncu',p:'DF',r:77},{n:'Muldur',p:'DF',r:76},
+    {n:'Calhannoglu',p:'MF',r:85},{n:'Ozcan',p:'MF',r:77},{n:'Yildiz K',p:'MF',r:83},{n:'Yazici',p:'MF',r:79},
+    {n:'Akturkoglu',p:'FW',r:78},{n:'Guler A',p:'FW',r:82},{n:'Tosun',p:'FW',r:72}
+  ]},
+  {name:'Scotland',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',str:72,players:[
+    {n:'Gordon A',p:'GK',r:77},
+    {n:'Tierney',p:'DF',r:78},{n:'Robertson',p:'DF',r:82},{n:'Ralston',p:'DF',r:74},
+    {n:'McTominay',p:'MF',r:80},{n:'McGinn',p:'MF',r:79},{n:'Gilmour',p:'MF',r:77},{n:'Christie',p:'MF',r:76},
+    {n:'Adams',p:'FW',r:75},{n:'Dykes',p:'FW',r:74},{n:'Shankland',p:'FW',r:73}
+  ]},
+  {name:'Austria',flag:'🇦🇹',str:74,players:[
+    {n:'Lindner',p:'GK',r:76},
+    {n:'Alaba',p:'DF',r:80},{n:'Trauner',p:'DF',r:76},{n:'Posch',p:'DF',r:75},
+    {n:'Laimer',p:'MF',r:78},{n:'Sabitzer',p:'MF',r:79},{n:'Baumgartner',p:'MF',r:78},
+    {n:'Gregoritsch',p:'FW',r:76},{n:'Arnautovic',p:'FW',r:74}
+  ]},
+  {name:'Argentina',flag:'🇦🇷',str:90,players:[
+    {n:'Emi Martinez',p:'GK',r:87},
+    {n:'Molina',p:'DF',r:80},{n:'Romero C',p:'DF',r:85},{n:'Otamendi',p:'DF',r:79},{n:'Tagliafico',p:'DF',r:78},
+    {n:'Mac Allister',p:'MF',r:83},{n:'De Paul',p:'MF',r:83},{n:'Fernandez E',p:'MF',r:80},
+    {n:'Di Maria',p:'FW',r:79},{n:'Dybala',p:'FW',r:83},{n:'Lautaro',p:'FW',r:87},{n:'Alvarez J',p:'FW',r:84},{n:'Messi',p:'FW',r:91}
+  ]},
+  {name:'Brazil',flag:'🇧🇷',str:89,players:[
+    {n:'Alisson',p:'GK',r:89},{n:'Ederson',p:'GK',r:86},
+    {n:'Militao',p:'DF',r:83},{n:'Marquinhos',p:'DF',r:86},{n:'Danilo',p:'DF',r:79},{n:'Wendell',p:'DF',r:76},
+    {n:'Casemiro',p:'MF',r:83},{n:'Paqueta',p:'MF',r:84},
+    {n:'Raphinha',p:'FW',r:83},{n:'Rodrygo',p:'FW',r:84},{n:'Vinicius Jr',p:'FW',r:92},{n:'Endrick',p:'FW',r:82},{n:'Neymar',p:'FW',r:84}
+  ]},
+  {name:'Colombia',flag:'🇨🇴',str:79,players:[
+    {n:'Camilo Vargas',p:'GK',r:76},
+    {n:'Davinson',p:'DF',r:80},{n:'Cuesta',p:'DF',r:77},{n:'Mojica',p:'DF',r:76},{n:'Munoz',p:'DF',r:77},
+    {n:'Lerma',p:'MF',r:78},{n:'Uribe',p:'MF',r:77},{n:'Rodriguez J',p:'MF',r:78},
+    {n:'Diaz L',p:'FW',r:83},{n:'Arias',p:'FW',r:78},{n:'Borre',p:'FW',r:76},{n:'Gutierrez',p:'FW',r:75}
+  ]},
+  {name:'Uruguay',flag:'🇺🇾',str:80,players:[
+    {n:'Rochet',p:'GK',r:77},
+    {n:'Araujo',p:'DF',r:84},{n:'Gimenez',p:'DF',r:82},{n:'Vina',p:'DF',r:75},{n:'Nandez',p:'DF',r:77},
+    {n:'Valverde F',p:'MF',r:87},{n:'Bentancur',p:'MF',r:82},{n:'Ugarte',p:'MF',r:80},{n:'De la Cruz',p:'MF',r:79},
+    {n:'Nunez D',p:'FW',r:83},{n:'Pellistri',p:'FW',r:77},{n:'Suarez',p:'FW',r:74}
+  ]},
+  {name:'Ecuador',flag:'🇪🇨',str:74,players:[
+    {n:'Galindez',p:'GK',r:75},
+    {n:'Preciado',p:'DF',r:74},{n:'Hincapie',p:'DF',r:79},{n:'Pacho',p:'DF',r:80},{n:'Estupinian',p:'DF',r:80},
+    {n:'Caicedo',p:'MF',r:85},{n:'Mendez',p:'MF',r:78},{n:'Sarmiento',p:'MF',r:76},
+    {n:'Ibarra',p:'FW',r:78},{n:'Plata',p:'FW',r:77},{n:'Valencia E',p:'FW',r:78}
+  ]},
+  {name:'Venezuela',flag:'🇻🇪',str:68,players:[
+    {n:'Romo',p:'GK',r:72},
+    {n:'Chancellor',p:'DF',r:74},{n:'Ferraresi',p:'DF',r:74},{n:'Osorio',p:'DF',r:73},
+    {n:'Herrera Y',p:'MF',r:74},{n:'Sosa',p:'MF',r:74},{n:'Machis',p:'MF',r:76},{n:'Casseres',p:'MF',r:73},
+    {n:'Martinez S',p:'FW',r:74},{n:'Rondon',p:'FW',r:72}
+  ]},
+  {name:'USA',flag:'🇺🇸',str:76,players:[
+    {n:'Turner',p:'GK',r:78},{n:'Horvath',p:'GK',r:74},
+    {n:'Dest',p:'DF',r:77},{n:'Robinson',p:'DF',r:77},{n:'Zimmerman',p:'DF',r:76},{n:'Ream',p:'DF',r:74},
+    {n:'McKennie',p:'MF',r:79},{n:'Adams T',p:'MF',r:80},{n:'Musah',p:'MF',r:79},{n:'Reyna',p:'MF',r:78},
+    {n:'Pulisic',p:'FW',r:84},{n:'Weah',p:'FW',r:78},{n:'Balogun',p:'FW',r:79}
+  ]},
+  {name:'Mexico',flag:'🇲🇽',str:74,players:[
+    {n:'Ochoa',p:'GK',r:77},
+    {n:'Moreno',p:'DF',r:77},{n:'Araujo',p:'DF',r:76},{n:'Alvarez J',p:'DF',r:79},
+    {n:'Gallardo',p:'MF',r:76},{n:'Herrera A',p:'MF',r:78},
+    {n:'Lozano H',p:'FW',r:82},{n:'Jimenez R',p:'FW',r:79},{n:'Martin R',p:'FW',r:75}
+  ]},
+  {name:'Canada',flag:'🇨🇦',str:77,players:[
+    {n:'Borjan',p:'GK',r:76},
+    {n:'Johnston DT',p:'DF',r:78},{n:'Miller M',p:'DF',r:76},{n:'Bombito',p:'DF',r:75},{n:'Laryea',p:'DF',r:77},
+    {n:'Eustaquio',p:'MF',r:81},{n:'Hutchinson',p:'MF',r:76},{n:'Davies A',p:'MF',r:85},
+    {n:'Buchanan',p:'FW',r:79},{n:'David J',p:'FW',r:83},{n:'Larin',p:'FW',r:77}
+  ]},
+  {name:'Costa Rica',flag:'🇨🇷',str:65,players:[
+    {n:'Navas K',p:'GK',r:80},
+    {n:'Duarte',p:'DF',r:72},{n:'Calvo O',p:'DF',r:71},{n:'Fuller',p:'DF',r:70},
+    {n:'Tejeda',p:'MF',r:72},{n:'Campbell J',p:'MF',r:73},{n:'Torres D',p:'MF',r:70},
+    {n:'Ruiz B',p:'FW',r:72},{n:'Contreras',p:'FW',r:69}
+  ]},
+  {name:'Morocco',flag:'🇲🇦',str:81,players:[
+    {n:'Bono',p:'GK',r:82},
+    {n:'Hakimi',p:'DF',r:85},{n:'Saiss',p:'DF',r:78},{n:'Aguerd',p:'DF',r:80},{n:'Mazraoui',p:'DF',r:81},
+    {n:'Amrabat',p:'MF',r:82},{n:'Ounahi',p:'MF',r:79},{n:'Ziyech',p:'MF',r:82},
+    {n:'En-Nesyri',p:'FW',r:81},{n:'Boufal',p:'FW',r:78},{n:'Cheddira',p:'FW',r:75}
+  ]},
+  {name:'Nigeria',flag:'🇳🇬',str:79,players:[
+    {n:'Uzoho',p:'GK',r:77},
+    {n:'Troost-Ekong',p:'DF',r:78},{n:'Aina',p:'DF',r:78},{n:'Bassey',p:'DF',r:77},
+    {n:'Ndidi',p:'MF',r:81},{n:'Iwobi',p:'MF',r:79},{n:'Lookman',p:'MF',r:83},
+    {n:'Osimhen',p:'FW',r:89},{n:'Chukwueze',p:'FW',r:79},{n:'Iheanacho',p:'FW',r:74}
+  ]},
+  {name:'Senegal',flag:'🇸🇳',str:79,players:[
+    {n:'Mendy E',p:'GK',r:82},
+    {n:'Koulibaly',p:'DF',r:84},{n:'Jakobs',p:'DF',r:76},{n:'Mendy B',p:'DF',r:76},
+    {n:'Gueye I',p:'MF',r:81},{n:'Diatta',p:'MF',r:77},{n:'Sarr I',p:'MF',r:79},
+    {n:'Mane S',p:'FW',r:85},{n:'Dia B',p:'FW',r:80},{n:'Diedhiou',p:'FW',r:75}
+  ]},
+  {name:'Ghana',flag:'🇬🇭',str:73,players:[
+    {n:'Ati-Zigi',p:'GK',r:76},
+    {n:'Salisu',p:'DF',r:77},{n:'Amartey',p:'DF',r:75},{n:'Djiku',p:'DF',r:74},
+    {n:'Partey',p:'MF',r:82},{n:'Ayew J',p:'MF',r:77},{n:'Kudus',p:'MF',r:82},
+    {n:'Sulemana',p:'FW',r:77},{n:'Bansa',p:'FW',r:74},{n:'Kyere',p:'FW',r:72}
+  ]},
+  {name:'Cameroon',flag:'🇨🇲',str:72,players:[
+    {n:'Epassy',p:'GK',r:74},
+    {n:'Tolo',p:'DF',r:74},{n:'Castelletto',p:'DF',r:73},{n:'Fai',p:'DF',r:73},
+    {n:'Anguissa',p:'MF',r:82},{n:'Hongla',p:'MF',r:76},
+    {n:'Mbeumo',p:'FW',r:81},{n:'Aboubakar',p:'FW',r:76},{n:'Choupo-Moting',p:'FW',r:74}
+  ]},
+  {name:'Ivory Coast',flag:'🇨🇮',str:76,players:[
+    {n:'Sangare',p:'GK',r:76},
+    {n:'Konate D',p:'DF',r:74},{n:'Boly',p:'DF',r:75},{n:'Singo',p:'DF',r:77},
+    {n:'Kessie',p:'MF',r:82},{n:'Sangare I',p:'MF',r:78},
+    {n:'Pepe N',p:'FW',r:79},{n:'Haller',p:'FW',r:78},{n:'Cornet',p:'FW',r:77},{n:'Fofana',p:'FW',r:76}
+  ]},
+  {name:'Japan',flag:'🇯🇵',str:78,players:[
+    {n:'Gonda',p:'GK',r:78},
+    {n:'Itakura',p:'DF',r:79},{n:'Tanaka K',p:'DF',r:79},{n:'Tomiyasu',p:'DF',r:80},
+    {n:'Endo W',p:'MF',r:82},{n:'Kamada',p:'MF',r:80},{n:'Kubo T',p:'MF',r:83},{n:'Doan',p:'MF',r:78},
+    {n:'Minamino',p:'FW',r:80},{n:'Maeda',p:'FW',r:77},{n:'Furuhashi',p:'FW',r:79},{n:'Ueda',p:'FW',r:78}
+  ]},
+  {name:'South Korea',flag:'🇰🇷',str:75,players:[
+    {n:'Kim SG',p:'GK',r:82},
+    {n:'Kim MH',p:'DF',r:78},{n:'Kim YG',p:'DF',r:79},{n:'Lee JY',p:'DF',r:76},
+    {n:'Jung WY',p:'MF',r:77},{n:'Lee KJ',p:'MF',r:77},
+    {n:'Son HM',p:'FW',r:88},{n:'Hwang HC',p:'FW',r:79},{n:'Lee JH',p:'FW',r:77},{n:'Cho GS',p:'FW',r:78}
+  ]},
+  {name:'Australia',flag:'🇦🇺',str:72,players:[
+    {n:'Ryan M',p:'GK',r:79},
+    {n:'Rowles',p:'DF',r:75},{n:'Souttar',p:'DF',r:76},{n:'Atkinson',p:'DF',r:74},
+    {n:'Mooy',p:'MF',r:78},{n:'Irvine J',p:'MF',r:76},{n:'Leckie',p:'MF',r:77},{n:'McGree',p:'MF',r:76},
+    {n:'Duke',p:'FW',r:76},{n:'Maclaren',p:'FW',r:75},{n:'Nabbout',p:'FW',r:73}
+  ]},
+  {name:'Iran',flag:'🇮🇷',str:70,players:[
+    {n:'Beiranvand',p:'GK',r:77},
+    {n:'Pouraliganji',p:'DF',r:74},{n:'Hosseini M',p:'DF',r:73},{n:'Hajsafi',p:'DF',r:74},
+    {n:'Ezatolahi',p:'MF',r:76},{n:'Jahanbakhsh',p:'MF',r:78},{n:'Gholizadeh',p:'MF',r:77},
+    {n:'Taremi',p:'FW',r:82},{n:'Azmoun S',p:'FW',r:80}
+  ]}
+];
+
+const COACHES = [
+  {n:'Pep Guardiola',r:92},{n:'Jurgen Klopp',r:90},{n:'Carlo Ancelotti',r:89},
+  {n:'Zinedine Zidane',r:87},{n:'Luis Enrique',r:84},{n:'Marcelo Bielsa',r:84},
+  {n:'Didier Deschamps',r:86},{n:'Julian Nagelsmann',r:83},{n:'Lionel Scaloni',r:82},
+  {n:'Jose Mourinho',r:85},{n:'Antonio Conte',r:84},{n:'Thomas Tuchel',r:83},
+  {n:'Roberto Martinez',r:80},{n:'Ronald Koeman',r:80},{n:'Zlatko Dalic',r:80},
+  {n:'Luciano Spalletti',r:81},{n:'Ralf Rangnick',r:80},{n:'Erik ten Hag',r:78},
+  {n:'Kasper Hjulmand',r:78},{n:'Walid Regragui',r:79},{n:'Aliou Cisse',r:77},
+  {n:'Hajime Moriyasu',r:78},{n:'Gregg Berhalter',r:75},{n:'Tony Popovic',r:74},
+  {n:'Marcelo Gallardo',r:83},{n:'Fernando Diniz',r:76},{n:'Hernan Crespo',r:74},
+  {n:'Roger Schmidt',r:77},{n:'Gianni De Biasi',r:72},{n:'Peter Bosz',r:76}
+];
+
+const MATCH_TEMPLATES = [
+  {stage:'Group Stage',game:1,oppStr:70,label:'Group Stage - Game 1'},
+  {stage:'Group Stage',game:2,oppStr:73,label:'Group Stage - Game 2'},
+  {stage:'Group Stage',game:3,oppStr:77,label:'Group Stage - Game 3'},
+  {stage:'Round of 32',oppStr:76,label:'Round of 32'},
+  {stage:'Round of 16',oppStr:80,label:'Round of 16'},
+  {stage:'Quarter-Final',oppStr:83,label:'Quarter-Final'},
+  {stage:'Semi-Final',oppStr:86,label:'Semi-Final'},
+  {stage:'Final',oppStr:89,label:'Final'},
+];
+
+// ===== STATE =====
+let state = {
+  formation: '4-3-3',
+  pressing: 5,
+  pace: 5,
+  style: 'balanced',
+  slots: [], // formation slots with player assignments
+  draftStep: 0, // 0-10 = players, 11 = coach
+  currentCountry: null,
+  currentPlayers: [],
+  selectedPlayer: null,
+  selectedSlotId: null,
+  coach: null,
+  coachOptions: [],
+  usedCountries: [],
+  matches: [],
+  currentMatchIdx: 0,
+  groupWins: 0,
+  groupDraws: 0,
+  groupLosses: 0,
+  eliminated: false,
+  spirit: 0,
+  fitness: 0,
+  topScorer: {name:'', goals:0},
+  goalsByPlayer: {},
+};
+
+// ===== SETUP =====
+function initSetup() {
+  const fb = document.getElementById('formBtns');
+  fb.innerHTML = '';
+  Object.keys(FORMATIONS).forEach(f => {
+    const b = document.createElement('button');
+    b.className = 'form-btn' + (f === state.formation ? ' active' : '');
+    b.textContent = f;
+    b.onclick = () => {
+      state.formation = f;
+      document.querySelectorAll('.form-btn').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+    };
+    fb.appendChild(b);
+  });
+}
+
+function updateSlider(type, val) {
+  state[type] = parseInt(val);
+  document.getElementById('val' + type.charAt(0).toUpperCase() + type.slice(1)).textContent = val;
+}
+
+function setStyle(s) {
+  state.style = s;
+  document.querySelectorAll('.style-btn').forEach((b,i) => {
+    b.classList.toggle('active', ['park','balanced','total'][i] === s);
+  });
+}
+
+function startDraft() {
+  // Init slots from formation
+  state.slots = FORMATIONS[state.formation].slots.map(s => ({...s, player: null}));
+  state.draftStep = 0;
+  state.usedCountries = [];
+  state.matches = [];
+  state.goalsByPlayer = {};
+  state.topScorer = {name:'', goals:0};
+  state.spirit = Math.floor(Math.random()*10)+1;
+  state.fitness = Math.floor(Math.random()*10)+1;
+  showScreen('draft');
+  renderPitch();
+  updateDraftUI();
+}
+
+// ===== PITCH =====
+function renderPitch() {
+  const wrap = document.getElementById('pitchWrap');
+  // Remove old slots
+  wrap.querySelectorAll('.slot').forEach(s=>s.remove());
+  state.slots.forEach(slot => {
+    const el = document.createElement('div');
+    const isFilled = !!slot.player;
+    const isActive = !isFilled && state.selectedPlayer && !state.selectedSlotId;
+    el.className = 'slot ' + (isFilled ? 'slot-filled' : (isActive ? 'slot-empty' : 'slot-empty'));
+    el.style.left = slot.x + '%';
+    el.style.top = slot.y + '%';
+    el.id = 'slot-' + slot.id;
+    if (isFilled) {
+      el.innerHTML = `<span class="slot-init">${slot.player.n.charAt(0)}</span><span class="slot-lbl">${slot.lbl}</span><span class="slot-name">${slot.player.n.split(' ')[0]}</span>`;
+    } else {
+      el.innerHTML = `<span class="slot-lbl">${slot.lbl}</span>`;
+    }
+    el.onclick = () => clickSlot(slot.id);
+    wrap.appendChild(el);
+  });
+}
+
+function clickSlot(slotId) {
+  if (!state.selectedPlayer) return;
+  const slot = state.slots.find(s=>s.id===slotId);
+  if (!slot || slot.player) return;
+  // Check position fit (allow with warning)
+  state.selectedSlotId = slotId;
+  assignPlayerToSlot();
+}
+
+// ===== DRAFT =====
+function updateDraftUI() {
+  const total = 12; // 11 players + 1 coach
+  // Step indicator
+  const ind = document.getElementById('draftStepIndicator');
+  ind.innerHTML = '';
+  for(let i=0;i<total;i++){
+    const s = document.createElement('div');
+    s.className = 'step' + (i===state.draftStep?' active':(i<state.draftStep?' done':''));
+    ind.appendChild(s);
+  }
+  const prog = document.getElementById('draftProgress');
+  if(state.draftStep < 11) {
+    prog.textContent = `Pick ${state.draftStep+1} of 11 — Choose a player to place on the pitch`;
+  } else {
+    prog.textContent = `Pick 12 of 12 — Choose your coach!`;
+  }
+  // Show/hide cards
+  document.getElementById('spinCard').style.display = state.draftStep < 11 ? 'block' : 'none';
+  document.getElementById('playerSelectCard').style.display = 'none';
+  document.getElementById('coachSelectCard').style.display = state.draftStep === 11 ? 'block' : 'none';
+  if(state.draftStep === 11) showCoachPick();
+  document.getElementById('spinBtn').disabled = false;
+  document.getElementById('spinFlag').textContent = '🌍';
+  document.getElementById('spinCountry').textContent = 'Press Spin!';
+  document.getElementById('spinProg').textContent = '';
+}
+
+let spinInterval = null;
+function doSpin() {
+  const btn = document.getElementById('spinBtn');
+  btn.disabled = true;
+  // Pick random country not yet used
+  const available = SQUADS.filter(s => !state.usedCountries.includes(s.name));
+  if(available.length===0){state.usedCountries=[];} // reset if exhausted
+  const available2 = SQUADS.filter(s => !state.usedCountries.includes(s.name));
+  const target = available2[Math.floor(Math.random()*available2.length)];
+  // Animate
+  let frames = 0;
+  const totalFrames = 26;
+  const allFlags = SQUADS.map(s=>s.flag);
+  function frame(){
+    if(frames >= totalFrames){
+      clearInterval(spinInterval);
+      document.getElementById('spinFlag').textContent = target.flag;
+      document.getElementById('spinCountry').textContent = target.name;
+      document.getElementById('spinProg').textContent = '';
+      state.currentCountry = target;
+      state.usedCountries.push(target.name);
+      showPlayerPick(target);
+      return;
+    }
+    const delay = frames < 10 ? 60 : frames < 18 ? 100 : frames < 24 ? 160 : 300;
+    const randFlag = allFlags[Math.floor(Math.random()*allFlags.length)];
+    const randSquad = SQUADS[Math.floor(Math.random()*SQUADS.length)];
+    document.getElementById('spinFlag').textContent = randFlag;
+    document.getElementById('spinCountry').textContent = randSquad.name;
+    frames++;
+    setTimeout(frame, delay);
+  }
+  frame();
+}
+
+function showPlayerPick(squad) {
+  document.getElementById('playerSelectCard').style.display = 'block';
+  document.getElementById('playerSelectTitle').textContent = `${squad.flag} ${squad.name} — Pick a Player`;
+  const list = document.getElementById('playerList');
+  list.innerHTML = '';
+  state.currentPlayers = squad.players;
+  state.selectedPlayer = null;
+  document.getElementById('confirmPickBtn').disabled = true;
+  document.getElementById('selectedPlayerInfo').style.display = 'none';
+  document.getElementById('slotHint').style.display = 'none';
+  squad.players.forEach((p,i) => {
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.id = 'pc-'+i;
+    card.innerHTML = `<span class="player-pos pos-${p.p}">${p.p}</span><span class="player-name">${p.n}</span><span class="player-rating hidden-r">???</span>`;
+    card.onclick = () => selectPlayer(p, i);
+    list.appendChild(card);
+  });
+}
+
+function selectPlayer(p, idx) {
+  state.selectedPlayer = p;
+  document.querySelectorAll('.player-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('pc-'+idx).classList.add('selected');
+  document.getElementById('confirmPickBtn').disabled = false;
+  document.getElementById('slotHint').style.display = 'block';
+  document.getElementById('slotHint').textContent = `Now click an empty slot on the pitch to place ${p.n} (${p.p})`;
+  renderPitch();
+}
+
+function confirmPick() {
+  if(!state.selectedPlayer) return;
+  // Find best available slot for this player
+  const p = state.selectedPlayer;
+  let bestSlot = null;
+  // Try to find matching empty slot
+  const emptySlots = state.slots.filter(s=>!s.player);
+  // Perfect match
+  for(const s of emptySlots){
+    if(s.roles.includes(p.p)){bestSlot=s;break;}
+  }
+  // Fallback: any empty slot
+  if(!bestSlot && emptySlots.length>0) bestSlot=emptySlots[0];
+  if(bestSlot){
+    state.selectedSlotId = bestSlot.id;
+    assignPlayerToSlot();
+  }
+}
+
+function assignPlayerToSlot() {
+  const slot = state.slots.find(s=>s.id===state.selectedSlotId);
+  if(!slot){return;}
+  const p = state.selectedPlayer;
+  // Check position fit
+  const fit = slot.roles.includes(p.p);
+  slot.player = {...p, fit};
+  state.selectedPlayer = null;
+  state.selectedSlotId = null;
+  state.draftStep++;
+  renderPitch();
+  document.getElementById('playerSelectCard').style.display='none';
+  if(state.draftStep < 11){
+    updateDraftUI();
+  } else if(state.draftStep === 11){
+    updateDraftUI();
+  } else {
+    // All done (coach was 12th)
+  }
+}
+
+function showCoachPick() {
+  // Pick 3 random coaches
+  const shuffled = [...COACHES].sort(()=>Math.random()-.5);
+  state.coachOptions = shuffled.slice(0,3);
+  state.coach = null;
+  const list = document.getElementById('coachList');
+  list.innerHTML = '';
+  document.getElementById('confirmCoachBtn').disabled = true;
+  state.coachOptions.forEach((c,i) => {
+    const card = document.createElement('div');
+    card.className = 'coach-card';
+    card.id = 'coach-'+i;
+    card.innerHTML = `<span class="coach-icon">👔</span><span class="coach-name">${c.n}</span><span class="coach-r">???</span>`;
+    card.onclick = () => {
+      state.coach = c;
+      document.querySelectorAll('.coach-card').forEach(x=>x.classList.remove('selected'));
+      card.classList.add('selected');
+      document.getElementById('confirmCoachBtn').disabled = false;
+    };
+    list.appendChild(card);
+  });
+}
+
+function confirmCoach() {
+  if(!state.coach) return;
+  state.draftStep = 12;
+  startSimulation();
+}
+
+// ===== TEAM RATING =====
+function calcTeamRating() {
+  let total = 0, count = 0;
+  state.slots.forEach(slot => {
+    if(slot.player){
+      let r = slot.player.r;
+      if(!slot.player.fit) r -= 8;
+      total += r;
+      count++;
+    }
+  });
+  const avg = count > 0 ? total/count : 70;
+  const coachBonus = state.coach ? state.coach.r/20 : 4;
+  const styleBonus = {park:-3,balanced:0,total:3}[state.style]||0;
+  const tacticBonus = (state.pressing-5)*0.3 + (state.pace-5)*0.3 + styleBonus;
+  const spiritMod = (state.spirit-5)*0.6;
+  const fitnessMod = (state.fitness-5)*0.4;
+  return Math.round((avg + coachBonus + tacticBonus + spiritMod + fitnessMod)*10)/10;
+}
+
+function calcBaseTeamRating() {
+  let total = 0, count = 0;
+  state.slots.forEach(slot => {
+    if(slot.player){
+      let r = slot.player.r;
+      if(!slot.player.fit) r -= 8;
+      total += r;
+      count++;
+    }
+  });
+  const avg = count > 0 ? total/count : 70;
+  const coachBonus = state.coach ? state.coach.r/20 : 4;
+  const styleBonus = {park:-3,balanced:0,total:3}[state.style]||0;
+  const tacticBonus = (state.pressing-5)*0.3 + (state.pace-5)*0.3 + styleBonus;
+  return Math.round((avg + coachBonus + tacticBonus)*10)/10;
+}
+
+function winProbability(teamRating, oppStr) {
+  return Math.max(0.12, Math.min(0.88, 0.5 + (teamRating - oppStr) / 100 * 1.5));
+}
+
+// ===== SIMULATION =====
+function startSimulation() {
+  showScreen('sim');
+  // Build match list with opponents
+  const usedInDraft = state.usedCountries.slice();
+  const available = SQUADS.filter(s=>!usedInDraft.includes(s.name));
+  state.matches = [];
+  MATCH_TEMPLATES.forEach((tmpl,i) => {
+    const oppList = available.filter(s=>Math.abs(s.str - tmpl.oppStr) <= 15);
+    const oppPool = oppList.length > 0 ? oppList : available;
+    const opp = oppPool[Math.floor(Math.random()*oppPool.length)] || {name:'World XI',flag:'🌍',str:tmpl.oppStr};
+    const effStr = Math.max(55, Math.min(95, opp.str + (Math.random()*10-5)));
+    state.matches.push({
+      ...tmpl,
+      opp,
+      effStr: Math.round(effStr),
+      played: false,
+      result: null,
+    });
+  });
+  state.currentMatchIdx = 0;
+  state.groupWins = 0; state.groupDraws = 0; state.groupLosses = 0;
+  state.eliminated = false;
+  renderSimHeader();
+  document.getElementById('matchList').innerHTML = '';
+  document.getElementById('simStatus').innerHTML = '';
+  document.getElementById('simBtnRow').style.display = 'flex';
+  document.getElementById('nextMatchBtn').textContent = '▶ Play Next Match';
+}
+
+function renderSimHeader() {
+  const r = calcTeamRating();
+  const baseR = calcBaseTeamRating();
+  document.getElementById('simTeamRating').textContent = `Rating: ${baseR} (effective: ${r})`;
+  document.getElementById('simCoachName').textContent = state.coach ? state.coach.n : '—';
+  document.getElementById('simPressing').textContent = state.pressing;
+  document.getElementById('simPace').textContent = state.pace;
+  document.getElementById('simStyle').textContent = {park:'Park the Bus',balanced:'Balanced',total:'Total Football'}[state.style];
+}
+
+function simulateMatch(matchIdx) {
+  const match = state.matches[matchIdx];
+  const teamRating = calcTeamRating();
+  const wp = winProbability(teamRating, match.effStr);
+  const roll = Math.random();
+  let outcome; // 'W','D','L'
+  if(roll < wp * 0.75) outcome = 'W';
+  else if(roll < wp * 0.75 + 0.15) outcome = 'D';
+  else outcome = 'L';
+  // Knockout extra time/pens
+  let extraTime = false, penalties = false, penWin = false;
+  if(match.stage !== 'Group Stage' && outcome === 'D'){
+    extraTime = true;
+    const etRoll = Math.random();
+    if(etRoll < wp * 0.6) outcome = 'W';
+    else if(etRoll < wp * 0.6 + 0.3) {
+      outcome = 'D'; // still draw after ET
+      penalties = true;
+      penWin = Math.random() < 0.5 + (teamRating - match.effStr)/200;
+      outcome = penWin ? 'W' : 'L';
+    } else outcome = 'L';
+  }
+  // Generate score
+  let ug=0, og=0;
+  if(outcome==='W'){ ug=randGoals(1,4); og=Math.max(0,ug-1-Math.floor(Math.random()*2)); if(og>=ug)og=ug-1; }
+  else if(outcome==='D'){ ug=randGoals(0,3); og=ug; }
+  else { og=randGoals(1,3); ug=Math.max(0,og-1-Math.floor(Math.random()*2)); if(ug>=og)ug=og-1; }
+  if(penalties){ ug=og=1; } // show 1-1 then pens
+  // Goal scorers
+  const userGoalScorers = [];
+  const scoringPlayers = getScoringPool();
+  for(let i=0;i<ug;i++){
+    const scorer = pickScorer(scoringPlayers);
+    const min = Math.floor(Math.random()*90)+1;
+    userGoalScorers.push({name:scorer, min});
+    state.goalsByPlayer[scorer] = (state.goalsByPlayer[scorer]||0)+1;
+    if(!state.topScorer.name || state.goalsByPlayer[scorer] > state.topScorer.goals){
+      state.topScorer = {name:scorer, goals:state.goalsByPlayer[scorer]};
+    }
+  }
+  userGoalScorers.sort((a,b)=>a.min-b.min);
+  const oppGoalScorers = [];
+  for(let i=0;i<og;i++){
+    oppGoalScorers.push({name:randomOppScorer(match.opp), min:Math.floor(Math.random()*90)+1});
+  }
+  oppGoalScorers.sort((a,b)=>a.min-b.min);
+  match.played = true;
+  match.result = {outcome, ug, og, userGoalScorers, oppGoalScorers, extraTime, penalties, penWin};
+  // Update group record
+  if(match.stage==='Group Stage'){
+    if(outcome==='W') state.groupWins++;
+    else if(outcome==='D') state.groupDraws++;
+    else state.groupLosses++;
+  }
+  return match;
+}
+
+function randGoals(min, max){ return Math.floor(Math.random()*(max-min+1))+min; }
+
+function getScoringPool(){
+  const pool = [];
+  state.slots.forEach(slot=>{
+    if(!slot.player) return;
+    const p = slot.player;
+    let w = p.p==='FW'?55:p.p==='MF'?30:p.p==='DF'?10:0;
+    if(w>0) for(let i=0;i<w;i++) pool.push(p.n);
+  });
+  return pool;
+}
+
+function pickScorer(pool){
+  if(!pool.length) return 'Unknown';
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
+function randomOppScorer(opp){
+  if(opp.players && opp.players.length){
+    const fwMf = opp.players.filter(p=>p.p==='FW'||p.p==='MF');
+    const pool = fwMf.length ? fwMf : opp.players;
+    return pool[Math.floor(Math.random()*pool.length)].n;
+  }
+  return 'Opponent';
+}
+
+function playNextMatch(){
+  if(state.eliminated){showEndScreen();return;}
+  // Check if group stage ended and qualification
+  if(state.currentMatchIdx===3){
+    // About to play R32 — check qualification
+    let qualifies = false;
+    if(state.groupWins>=2) qualifies=true;
+    else if(state.groupWins===1) qualifies=Math.random()<0.5;
+    else qualifies=false;
+    if(!qualifies){
+      state.eliminated=true;
+      const banner = document.createElement('div');
+      banner.className='eliminated-banner';
+      banner.innerHTML=`<div style="font-size:1.4rem">😢</div><div style="font-weight:700;margin:4px 0">Eliminated After Group Stage</div><div style="font-size:.82rem;color:#ffaaaa">Record: ${state.groupWins}W-${state.groupDraws}D-${state.groupLosses}L — Not enough to qualify</div>`;
+      document.getElementById('matchList').appendChild(banner);
+      document.getElementById('simBtnRow').style.display='none';
+      setTimeout(showEndScreen,2000);
+      return;
+    } else {
+      const banner = document.createElement('div');
+      banner.className='qualified-banner';
+      banner.innerHTML=`<div style="font-size:1.2rem">✅ Qualified for Round of 32!</div><div style="font-size:.82rem;color:#aaffaa">Group Record: ${state.groupWins}W-${state.groupDraws}D-${state.groupLosses}L</div>`;
+      document.getElementById('matchList').appendChild(banner);
+    }
+  }
+  if(state.currentMatchIdx >= state.matches.length){showEndScreen();return;}
+  const match = simulateMatch(state.currentMatchIdx);
+  renderMatchCard(match, state.currentMatchIdx);
+  // Check knockout elimination
+  if(match.stage!=='Group Stage' && match.result.outcome==='L'){
+    state.eliminated=true;
+    document.getElementById('nextMatchBtn').textContent='See Results';
+    document.getElementById('nextMatchBtn').onclick=showEndScreen;
+    return;
+  }
+  state.currentMatchIdx++;
+  if(state.currentMatchIdx >= state.matches.length){
+    document.getElementById('nextMatchBtn').textContent='See Final Results';
+    document.getElementById('nextMatchBtn').onclick=showEndScreen;
+  }
+}
+
+function renderMatchCard(match, idx){
+  const r = match.result;
+  const card = document.createElement('div');
+  card.className='match-card';
+  const badgeClass = r.outcome==='W'?'badge-w':r.outcome==='D'?'badge-d':'badge-l';
+  const badgeText = r.outcome==='W'?'WIN':r.outcome==='D'?'DRAW':'LOSS';
+  let scoreStr = `${r.ug} - ${r.og}`;
+  let penStr = '';
+  if(r.penalties) penStr = `<div style="font-size:.7rem;color:#9999bb;text-align:center">(${r.penWin?'Won':'Lost'} on Penalties)</div>`;
+  if(r.extraTime && !r.penalties) penStr='<div style="font-size:.7rem;color:#9999bb;text-align:center">(After Extra Time)</div>';
+  let eventsHtml = '';
+  const allEvents = [];
+  r.userGoalScorers.forEach(e=>allEvents.push({min:e.min,text:`⚽ ${e.min}' ${e.name}`,side:'user'}));
+  r.oppGoalScorers.forEach(e=>allEvents.push({min:e.min,text:`⚽ ${e.min}' ${e.name} (opp)`,side:'opp'}));
+  allEvents.sort((a,b)=>a.min-b.min);
+  if(allEvents.length){
+    eventsHtml='<div class="match-events">'+allEvents.map(e=>`<div class="${e.side==='user'?'event-goal':''}">${e.text}</div>`).join('')+'</div>';
+  }
+  card.innerHTML=`
+    <div class="match-header">
+      <div><div class="match-stage">${match.label}</div></div>
+      <span class="match-badge ${badgeClass}">${badgeText}</span>
+    </div>
+    <div class="match-teams">
+      <div>🏴 Your XI</div>
+      <div class="match-score">${scoreStr}</div>
+      <div class="opp-info">${match.opp.flag} ${match.opp.name}</div>
+    </div>
+    ${penStr}
+    ${eventsHtml}
+  `;
+  document.getElementById('matchList').appendChild(card);
+  card.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+// ===== END SCREEN =====
+function showEndScreen(){
+  showScreen('end');
+  const played = state.matches.filter(m=>m.played);
+  const wins = played.filter(m=>m.result.outcome==='W').length;
+  const draws = played.filter(m=>m.result.outcome==='D').length;
+  const losses = played.filter(m=>m.result.outcome==='L').length;
+  const goalsFor = played.reduce((a,m)=>a+m.result.ug,0);
+  const goalsAgainst = played.reduce((a,m)=>a+m.result.og,0);
+  const lastPlayed = played[played.length-1];
+  const wonWC = lastPlayed && lastPlayed.stage==='Final' && lastPlayed.result.outcome==='W';
+  const lastStage = lastPlayed ? lastPlayed.stage : 'Group Stage';
+  // Trophy or bust
+  document.getElementById('endTrophy').textContent = wonWC ? '🏆' : '😢';
+  document.getElementById('endTitle').textContent = wonWC ? 'World Champions!' : 'Tournament Over';
+  document.getElementById('endSubtitle').textContent = wonWC
+    ? `You won the 2026 World Cup!`
+    : `Eliminated in the ${lastStage}`;
+  // Stats
+  const baseR = calcBaseTeamRating();
+  document.getElementById('endStats').innerHTML = `
+    <div class="stat-row"><span>Games Played</span><span class="stat-val">${played.length}</span></div>
+    <div class="stat-row"><span>Record</span><span class="stat-val">${wins}W-${draws}D-${losses}L</span></div>
+    <div class="stat-row"><span>Goals For</span><span class="stat-val">${goalsFor}</span></div>
+    <div class="stat-row"><span>Goals Against</span><span class="stat-val">${goalsAgainst}</span></div>
+    <div class="stat-row"><span>Team Rating</span><span class="stat-val">${baseR}</span></div>
+    <div class="stat-row"><span>Top Scorer</span><span class="stat-val">${state.topScorer.name||'—'} (${state.topScorer.goals||0} goals)</span></div>
+    <div class="stat-row"><span>Coach</span><span class="stat-val">${state.coach?state.coach.n:'—'} (${state.coach?state.coach.r:'—'})</span></div>
+  `;
+  // Secret reveal
+  document.getElementById('secretStats').innerHTML=`
+    <div class="stat-row"><span>⚡ Team Spirit (1-10)</span><span class="stat-val">${state.spirit}/10 ${state.spirit>=7?'🔥':state.spirit<=3?'💀':''}</span></div>
+    <div class="stat-row"><span>🏃 Fitness (1-10)</span><span class="stat-val">${state.fitness}/10 ${state.fitness>=7?'💪':state.fitness<=3?'😩':''}</span></div>
+    <div class="stat-row"><span>Hidden Boost</span><span class="stat-val">${((state.spirit-5)*0.6+(state.fitness-5)*0.4)>0?'+':''}${((state.spirit-5)*0.6+(state.fitness-5)*0.4).toFixed(1)} pts</span></div>
+  `;
+  // XI Ratings
+  let xiHtml = '';
+  state.slots.forEach(slot=>{
+    if(slot.player){
+      const p = slot.player;
+      const fitBadge = p.fit ? '' : '<span style="color:#ff6666;font-size:.7rem"> ⚠ wrong pos</span>';
+      const pct = Math.max(0,Math.min(100,(p.r-60)/40*100));
+      xiHtml+=`<div class="rating-reveal"><span class="player-pos pos-${p.p}" style="min-width:28px;font-size:.68rem">${p.p}</span><span style="flex:1;font-size:.8rem">${p.n}${fitBadge}</span><div class="rating-bar"><div class="rating-fill" style="width:${pct}%"></div></div><span class="player-rating">${p.r}</span></div>`;
+    }
+  });
+  document.getElementById('endXI').innerHTML = xiHtml;
+  // Share text
+  const shareMsg = buildShareText(wonWC, wins, draws, losses, baseR, lastStage);
+  document.getElementById('shareText').textContent = shareMsg;
+}
+
+function buildShareText(wonWC, wins, draws, losses, rating, stage){
+  const scorer = state.topScorer.name ? `${state.topScorer.name} scored ${state.topScorer.goals} goal${state.topScorer.goals!==1?'s':''}` : 'no goals scored';
+  if(wonWC){
+    return `⚽ I won the 2026 World Cup with a ${rating}-rated XI going ${wins}W-${draws}D-${losses}L! ${scorer} 🏆 Can you do better? wc26.xyz`;
+  } else {
+    return `😢 Eliminated in the ${stage} at 2026 WC with my ${rating}-rated XI (${wins}W-${draws}D-${losses}L). ${scorer}. Can you do better? wc26.xyz`;
+  }
+}
+
+function copyShare(){
+  const t = document.getElementById('shareText').textContent;
+  navigator.clipboard.writeText(t).then(()=>{alert('Copied to clipboard!');}).catch(()=>{
+    const ta=document.createElement('textarea');ta.value=t;document.body.appendChild(ta);ta.select();document.execCommand('copy');document.body.removeChild(ta);alert('Copied!');
+  });
+}
+function shareTwitter(){
+  const t = encodeURIComponent(document.getElementById('shareText').textContent);
+  window.open(`https://twitter.com/intent/tweet?text=${t}`,'_blank');
+}
+function shareWhatsApp(){
+  const t = encodeURIComponent(document.getElementById('shareText').textContent);
+  window.open(`https://wa.me/?text=${t}`,'_blank');
+}
+
+function showEndScreen_skip(){
+  // Play all remaining matches
+  while(state.currentMatchIdx < state.matches.length && !state.eliminated){
+    if(state.currentMatchIdx===3){
+      let q=false;
+      if(state.groupWins>=2)q=true;
+      else if(state.groupWins===1)q=Math.random()<0.5;
+      if(!q){state.eliminated=true;break;}
+    }
+    const m=simulateMatch(state.currentMatchIdx);
+    if(m.stage!=='Group Stage'&&m.result.outcome==='L'){state.eliminated=true;}
+    state.currentMatchIdx++;
+  }
+  showEndScreen();
+}
+
+function restartGame(){
+  state={formation:'4-3-3',pressing:5,pace:5,style:'balanced',slots:[],draftStep:0,currentCountry:null,currentPlayers:[],selectedPlayer:null,selectedSlotId:null,coach:null,coachOptions:[],usedCountries:[],matches:[],currentMatchIdx:0,groupWins:0,groupDraws:0,groupLosses:0,eliminated:false,spirit:0,fitness:0,topScorer:{name:'',goals:0},goalsByPlayer:{}};
+  document.getElementById('slPressing').value=5;
+  document.getElementById('slPace').value=5;
+  document.getElementById('valPressing').textContent='5';
+  document.getElementById('valPace').textContent='5';
+  setStyle('balanced');
+  initSetup();
+  showScreen('setup');
+}
+
+// ===== UTILS =====
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+name).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+// Override skip to end button
+document.querySelector('#simBtnRow .btn-outline').onclick = showEndScreen_skip;
+
+// ===== INIT =====
+initSetup();
+</script>
+</body>
+</html>
