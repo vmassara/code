@@ -185,12 +185,6 @@
     <button class="btn btn-block" id="confirmPickBtn" onclick="confirmPick()" disabled>Confirm Pick →</button>
   </div>
 
-  <!-- Coach spin result -->
-  <div class="card" id="coachSelectCard" style="display:none">
-    <h3>Your Coach</h3>
-    <div id="coachSpunDisplay"></div>
-    <button class="btn btn-block" id="confirmCoachBtn" onclick="confirmCoach()" disabled>Start Tournament →</button>
-  </div>
 </div>
 
 <!-- SIMULATION SCREEN -->
@@ -353,283 +347,283 @@ const FORMATIONS = {
 };
 
 const SQUADS = [
-  {name:'France',flag:'🇫🇷',str:88,players:[
+  {name:'France',flag:'🇫🇷',str:88,coach:{n:"Didier Deschamps",r:82},players:[
     {n:'Maignan',p:'GK',r:84},{n:'Areola',p:'GK',r:74},
     {n:'Hernandez T',p:'DF',r:82},{n:'Pavard',p:'DF',r:78},{n:'Saliba',p:'DF',r:85},{n:'Upamecano',p:'DF',r:81},{n:'Kounde',p:'DF',r:82},
     {n:'Camavinga',p:'MF',r:83},{n:'Tchouameni',p:'MF',r:82},{n:'Rabiot',p:'MF',r:78},{n:'Kante',p:'MF',r:84},
     {n:'Mbappe',p:'FW',r:94},{n:'Griezmann',p:'FW',r:84},{n:'Dembele',p:'FW',r:83},{n:'Thuram M',p:'FW',r:82}
   ]},
-  {name:'Spain',flag:'🇪🇸',str:87,players:[
+  {name:'Spain',flag:'🇪🇸',str:87,coach:{n:"Luis de la Fuente",r:78},players:[
     {n:'Unai Simon',p:'GK',r:82},{n:'Remiro',p:'GK',r:74},
     {n:'Carvajal',p:'DF',r:82},{n:'Le Normand',p:'DF',r:81},{n:'Laporte',p:'DF',r:80},{n:'Grimaldo',p:'DF',r:80},{n:'Nacho',p:'DF',r:78},
     {n:'Gavi',p:'MF',r:87},{n:'Pedri',p:'MF',r:87},{n:'Rodri',p:'MF',r:91},{n:'Olmo D',p:'MF',r:84},
     {n:'Yamal L',p:'FW',r:89},{n:'Williams N',p:'FW',r:84},{n:'Morata',p:'FW',r:79},{n:'Joselu',p:'FW',r:74}
   ]},
-  {name:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',str:86,players:[
+  {name:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',str:86,coach:{n:"Thomas Tuchel",r:83},players:[
     {n:'Pickford',p:'GK',r:82},{n:'Ramsdale',p:'GK',r:78},
     {n:'Trent AA',p:'DF',r:84},{n:'Trippier',p:'DF',r:80},{n:'Maguire',p:'DF',r:78},{n:'Stones',p:'DF',r:82},{n:'Guehi',p:'DF',r:80},
     {n:'Rice',p:'MF',r:85},{n:'Bellingham',p:'MF',r:90},{n:'Saka',p:'MF',r:87},{n:'Foden',p:'MF',r:87},
     {n:'Kane',p:'FW',r:89},{n:'Watkins',p:'FW',r:81},{n:'Rashford',p:'FW',r:82},{n:'Gordon A',p:'FW',r:79}
   ]},
-  {name:'Germany',flag:'🇩🇪',str:85,players:[
+  {name:'Germany',flag:'🇩🇪',str:85,coach:{n:"Julian Nagelsmann",r:83},players:[
     {n:'Neuer',p:'GK',r:82},{n:'ter Stegen',p:'GK',r:85},
     {n:'Rudiger',p:'DF',r:82},{n:'Schlotterbeck',p:'DF',r:79},{n:'Raum',p:'DF',r:77},
     {n:'Kimmich',p:'MF',r:86},{n:'Gundogan',p:'MF',r:83},{n:'Goretzka',p:'MF',r:80},
     {n:'Sane',p:'FW',r:83},{n:'Havertz',p:'FW',r:83},{n:'Wirtz',p:'FW',r:88},{n:'Musiala',p:'FW',r:87},{n:'Gnabry',p:'FW',r:81},{n:'Fullkrug',p:'FW',r:79}
   ]},
-  {name:'Portugal',flag:'🇵🇹',str:84,players:[
+  {name:'Portugal',flag:'🇵🇹',str:84,coach:{n:"Roberto Martinez",r:78},players:[
     {n:'Diogo Costa',p:'GK',r:82},{n:'Patricio',p:'GK',r:74},
     {n:'Cancelo',p:'DF',r:81},{n:'Ruben Dias',p:'DF',r:87},{n:'Nuno Mendes',p:'DF',r:82},{n:'Pepe',p:'DF',r:74},
     {n:'Bernardo Silva',p:'MF',r:86},{n:'Vitinha',p:'MF',r:82},{n:'Bruno Fernandes',p:'MF',r:87},
     {n:'Ronaldo',p:'FW',r:83},{n:'Felix J',p:'FW',r:83},{n:'Ramos G',p:'FW',r:80},{n:'Leao R',p:'FW',r:83},{n:'Horta',p:'FW',r:78}
   ]},
-  {name:'Netherlands',flag:'🇳🇱',str:83,players:[
+  {name:'Netherlands',flag:'🇳🇱',str:83,coach:{n:"Ronald Koeman",r:79},players:[
     {n:'Flekken',p:'GK',r:79},{n:'Cillessen',p:'GK',r:74},
     {n:'Van Dijk',p:'DF',r:88},{n:'De Ligt',p:'DF',r:83},{n:'Timber',p:'DF',r:83},{n:'Dumfries',p:'DF',r:79},
     {n:'De Jong F',p:'MF',r:86},{n:'Wijnaldum',p:'MF',r:79},{n:'Xavi Simons',p:'MF',r:83},{n:'Veerman',p:'MF',r:78},
     {n:'Gakpo',p:'FW',r:83},{n:'Depay',p:'FW',r:79},{n:'Bergwijn',p:'FW',r:78},{n:'Zirkzee',p:'FW',r:79}
   ]},
-  {name:'Belgium',flag:'🇧🇪',str:82,players:[
+  {name:'Belgium',flag:'🇧🇪',str:82,coach:{n:"Domenico Tedesco",r:76},players:[
     {n:'Courtois',p:'GK',r:89},{n:'Casteels',p:'GK',r:78},
     {n:'Vertonghen',p:'DF',r:74},{n:'Theate',p:'DF',r:78},{n:'Debast',p:'DF',r:76},
     {n:'De Bruyne',p:'MF',r:90},{n:'Trossard',p:'MF',r:82},{n:'Doku',p:'MF',r:83},{n:'De Ketelaere',p:'MF',r:79},
     {n:'Lukaku',p:'FW',r:82},{n:'Batshuayi',p:'FW',r:74},{n:'Openda',p:'FW',r:81}
   ]},
-  {name:'Croatia',flag:'🇭🇷',str:80,players:[
+  {name:'Croatia',flag:'🇭🇷',str:80,coach:{n:"Zlatko Dalic",r:79},players:[
     {n:'Livakovic',p:'GK',r:81},
     {n:'Gvardiol',p:'DF',r:86},{n:'Lovren',p:'DF',r:74},{n:'Erlic',p:'DF',r:76},{n:'Perisic',p:'DF',r:79},
     {n:'Modric',p:'MF',r:85},{n:'Kovacic',p:'MF',r:83},{n:'Brozovic',p:'MF',r:81},{n:'Vlasic',p:'MF',r:79},
     {n:'Kramaric',p:'FW',r:81},{n:'Petkovic',p:'FW',r:75}
   ]},
-  {name:'Denmark',flag:'🇩🇰',str:78,players:[
+  {name:'Denmark',flag:'🇩🇰',str:78,coach:{n:"Kasper Hjulmand",r:77},players:[
     {n:'Schmeichel K',p:'GK',r:82},
     {n:'Kjaer',p:'DF',r:78},{n:'Andersen',p:'DF',r:81},{n:'Vestergaard',p:'DF',r:79},
     {n:'Christensen',p:'MF',r:83},{n:'Eriksen',p:'MF',r:84},{n:'Hojbjerg',p:'MF',r:80},{n:'Delaney',p:'MF',r:77},
     {n:'Hojlund',p:'FW',r:82},{n:'Skov Olsen',p:'FW',r:78},{n:'Wind',p:'FW',r:76}
   ]},
-  {name:'Switzerland',flag:'🇨🇭',str:77,players:[
+  {name:'Switzerland',flag:'🇨🇭',str:77,coach:{n:"Murat Yakin",r:74},players:[
     {n:'Sommer',p:'GK',r:84},
     {n:'Elvedi',p:'DF',r:79},{n:'Akanji',p:'DF',r:82},{n:'Rodriguez R',p:'DF',r:76},
     {n:'Xhaka',p:'MF',r:82},{n:'Zakaria',p:'MF',r:79},{n:'Shaqiri',p:'MF',r:79},
     {n:'Ndoye',p:'FW',r:78},{n:'Embolo',p:'FW',r:79},{n:'Vargas R',p:'FW',r:79},{n:'Okafor',p:'FW',r:78}
   ]},
-  {name:'Italy',flag:'🇮🇹',str:82,players:[
+  {name:'Italy',flag:'🇮🇹',str:82,coach:{n:"Luciano Spalletti",r:81},players:[
     {n:'Donnarumma',p:'GK',r:87},
     {n:'Di Lorenzo',p:'DF',r:80},{n:'Bastoni',p:'DF',r:85},{n:'Acerbi',p:'DF',r:77},{n:'Dimarco',p:'DF',r:81},
     {n:'Barella',p:'MF',r:86},{n:'Jorginho',p:'MF',r:78},{n:'Pellegrini',p:'MF',r:79},
     {n:'Raspadori',p:'FW',r:79},{n:'Scamacca',p:'FW',r:80},{n:'Retegui',p:'FW',r:79},{n:'Chiesa',p:'FW',r:81}
   ]},
-  {name:'Serbia',flag:'🇷🇸',str:78,players:[
+  {name:'Serbia',flag:'🇷🇸',str:78,coach:{n:"Dragan Stojkovic",r:74},players:[
     {n:'Rajkovic',p:'GK',r:79},
     {n:'Milenkovic',p:'DF',r:79},{n:'Pavlovic',p:'DF',r:78},{n:'Kostic',p:'DF',r:80},
     {n:'Lukic',p:'MF',r:77},{n:'Milinkovic-Savic',p:'MF',r:84},{n:'Tadic',p:'MF',r:79},
     {n:'Vlahovic',p:'FW',r:85},{n:'Mitrovic',p:'FW',r:82},{n:'Jovic',p:'FW',r:78}
   ]},
-  {name:'Poland',flag:'🇵🇱',str:76,players:[
+  {name:'Poland',flag:'🇵🇱',str:76,coach:{n:"Michal Probierz",r:72},players:[
     {n:'Szczesny',p:'GK',r:83},
     {n:'Bednarek',p:'DF',r:78},{n:'Bereszynski',p:'DF',r:75},{n:'Gumny',p:'DF',r:73},
     {n:'Zielinski',p:'MF',r:83},{n:'Frankowski',p:'MF',r:76},
     {n:'Swiderski',p:'FW',r:77},{n:'Piatek',p:'FW',r:77},{n:'Lewandowski',p:'FW',r:87},{n:'Buksa',p:'FW',r:74}
   ]},
-  {name:'Turkey',flag:'🇹🇷',str:78,players:[
+  {name:'Turkey',flag:'🇹🇷',str:78,coach:{n:"Vincenzo Montella",r:74},players:[
     {n:'Gunok',p:'GK',r:77},
     {n:'Demiral',p:'DF',r:80},{n:'Soyuncu',p:'DF',r:77},{n:'Muldur',p:'DF',r:76},
     {n:'Calhannoglu',p:'MF',r:85},{n:'Ozcan',p:'MF',r:77},{n:'Yildiz K',p:'MF',r:83},{n:'Yazici',p:'MF',r:79},
     {n:'Akturkoglu',p:'FW',r:78},{n:'Guler A',p:'FW',r:82},{n:'Tosun',p:'FW',r:72}
   ]},
-  {name:'Scotland',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',str:72,players:[
+  {name:'Scotland',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',str:72,coach:{n:"Steve Clarke",r:72},players:[
     {n:'Gordon A',p:'GK',r:77},
     {n:'Tierney',p:'DF',r:78},{n:'Robertson',p:'DF',r:82},{n:'Ralston',p:'DF',r:74},
     {n:'McTominay',p:'MF',r:80},{n:'McGinn',p:'MF',r:79},{n:'Gilmour',p:'MF',r:77},{n:'Christie',p:'MF',r:76},
     {n:'Adams',p:'FW',r:75},{n:'Dykes',p:'FW',r:74},{n:'Shankland',p:'FW',r:73}
   ]},
-  {name:'Austria',flag:'🇦🇹',str:74,players:[
+  {name:'Austria',flag:'🇦🇹',str:74,coach:{n:"Ralf Rangnick",r:80},players:[
     {n:'Lindner',p:'GK',r:76},
     {n:'Alaba',p:'DF',r:80},{n:'Trauner',p:'DF',r:76},{n:'Posch',p:'DF',r:75},
     {n:'Laimer',p:'MF',r:78},{n:'Sabitzer',p:'MF',r:79},{n:'Baumgartner',p:'MF',r:78},
     {n:'Gregoritsch',p:'FW',r:76},{n:'Arnautovic',p:'FW',r:74}
   ]},
-  {name:'Argentina',flag:'🇦🇷',str:90,players:[
+  {name:'Argentina',flag:'🇦🇷',str:90,coach:{n:"Lionel Scaloni",r:81},players:[
     {n:'Emi Martinez',p:'GK',r:87},
     {n:'Molina',p:'DF',r:80},{n:'Romero C',p:'DF',r:85},{n:'Otamendi',p:'DF',r:79},{n:'Tagliafico',p:'DF',r:78},
     {n:'Mac Allister',p:'MF',r:83},{n:'De Paul',p:'MF',r:83},{n:'Fernandez E',p:'MF',r:80},
     {n:'Di Maria',p:'FW',r:79},{n:'Dybala',p:'FW',r:83},{n:'Lautaro',p:'FW',r:87},{n:'Alvarez J',p:'FW',r:84},{n:'Messi',p:'FW',r:91}
   ]},
-  {name:'Brazil',flag:'🇧🇷',str:89,players:[
+  {name:'Brazil',flag:'🇧🇷',str:89,coach:{n:"Dorival Junior",r:74},players:[
     {n:'Alisson',p:'GK',r:89},{n:'Ederson',p:'GK',r:86},
     {n:'Militao',p:'DF',r:83},{n:'Marquinhos',p:'DF',r:86},{n:'Danilo',p:'DF',r:79},{n:'Wendell',p:'DF',r:76},
     {n:'Casemiro',p:'MF',r:83},{n:'Paqueta',p:'MF',r:84},
     {n:'Raphinha',p:'FW',r:83},{n:'Rodrygo',p:'FW',r:84},{n:'Vinicius Jr',p:'FW',r:92},{n:'Endrick',p:'FW',r:82},{n:'Neymar',p:'FW',r:84}
   ]},
-  {name:'Colombia',flag:'🇨🇴',str:79,players:[
+  {name:'Colombia',flag:'🇨🇴',str:79,coach:{n:"Nestor Lorenzo",r:73},players:[
     {n:'Camilo Vargas',p:'GK',r:76},
     {n:'Davinson',p:'DF',r:80},{n:'Cuesta',p:'DF',r:77},{n:'Mojica',p:'DF',r:76},{n:'Munoz',p:'DF',r:77},
     {n:'Lerma',p:'MF',r:78},{n:'Uribe',p:'MF',r:77},{n:'Rodriguez J',p:'MF',r:78},
     {n:'Diaz L',p:'FW',r:83},{n:'Arias',p:'FW',r:78},{n:'Borre',p:'FW',r:76},{n:'Gutierrez',p:'FW',r:75}
   ]},
-  {name:'Uruguay',flag:'🇺🇾',str:80,players:[
+  {name:'Uruguay',flag:'🇺🇾',str:80,coach:{n:"Marcelo Bielsa",r:84},players:[
     {n:'Rochet',p:'GK',r:77},
     {n:'Araujo',p:'DF',r:84},{n:'Gimenez',p:'DF',r:82},{n:'Vina',p:'DF',r:75},{n:'Nandez',p:'DF',r:77},
     {n:'Valverde F',p:'MF',r:87},{n:'Bentancur',p:'MF',r:82},{n:'Ugarte',p:'MF',r:80},{n:'De la Cruz',p:'MF',r:79},
     {n:'Nunez D',p:'FW',r:83},{n:'Pellistri',p:'FW',r:77},{n:'Suarez',p:'FW',r:74}
   ]},
-  {name:'Ecuador',flag:'🇪🇨',str:74,players:[
+  {name:'Ecuador',flag:'🇪🇨',str:74,coach:{n:"Felix Sanchez",r:72},players:[
     {n:'Galindez',p:'GK',r:75},
     {n:'Preciado',p:'DF',r:74},{n:'Hincapie',p:'DF',r:79},{n:'Pacho',p:'DF',r:80},{n:'Estupinian',p:'DF',r:80},
     {n:'Caicedo',p:'MF',r:85},{n:'Mendez',p:'MF',r:78},{n:'Sarmiento',p:'MF',r:76},
     {n:'Ibarra',p:'FW',r:78},{n:'Plata',p:'FW',r:77},{n:'Valencia E',p:'FW',r:78}
   ]},
-  {name:'Venezuela',flag:'🇻🇪',str:68,players:[
+  {name:'Venezuela',flag:'🇻🇪',str:68,coach:{n:"Fernando Batista",r:69},players:[
     {n:'Romo',p:'GK',r:72},
     {n:'Chancellor',p:'DF',r:74},{n:'Ferraresi',p:'DF',r:74},{n:'Osorio',p:'DF',r:73},
     {n:'Herrera Y',p:'MF',r:74},{n:'Sosa',p:'MF',r:74},{n:'Machis',p:'MF',r:76},{n:'Casseres',p:'MF',r:73},
     {n:'Martinez S',p:'FW',r:74},{n:'Rondon',p:'FW',r:72}
   ]},
-  {name:'USA',flag:'🇺🇸',str:76,players:[
+  {name:'USA',flag:'🇺🇸',str:76,coach:{n:"Mauricio Pochettino",r:80},players:[
     {n:'Turner',p:'GK',r:78},{n:'Horvath',p:'GK',r:74},
     {n:'Dest',p:'DF',r:77},{n:'Robinson',p:'DF',r:77},{n:'Zimmerman',p:'DF',r:76},{n:'Ream',p:'DF',r:74},
     {n:'McKennie',p:'MF',r:79},{n:'Adams T',p:'MF',r:80},{n:'Musah',p:'MF',r:79},{n:'Reyna',p:'MF',r:78},
     {n:'Pulisic',p:'FW',r:84},{n:'Weah',p:'FW',r:78},{n:'Balogun',p:'FW',r:79}
   ]},
-  {name:'Mexico',flag:'🇲🇽',str:74,players:[
+  {name:'Mexico',flag:'🇲🇽',str:74,coach:{n:"Jaime Lozano",r:72},players:[
     {n:'Ochoa',p:'GK',r:77},
     {n:'Moreno',p:'DF',r:77},{n:'Araujo',p:'DF',r:76},{n:'Alvarez J',p:'DF',r:79},
     {n:'Gallardo',p:'MF',r:76},{n:'Herrera A',p:'MF',r:78},
     {n:'Lozano H',p:'FW',r:82},{n:'Jimenez R',p:'FW',r:79},{n:'Martin R',p:'FW',r:75}
   ]},
-  {name:'Canada',flag:'🇨🇦',str:77,players:[
+  {name:'Canada',flag:'🇨🇦',str:77,coach:{n:"Jesse Marsch",r:74},players:[
     {n:'Borjan',p:'GK',r:76},
     {n:'Johnston DT',p:'DF',r:78},{n:'Miller M',p:'DF',r:76},{n:'Bombito',p:'DF',r:75},{n:'Laryea',p:'DF',r:77},
     {n:'Eustaquio',p:'MF',r:81},{n:'Hutchinson',p:'MF',r:76},{n:'Davies A',p:'MF',r:85},
     {n:'Buchanan',p:'FW',r:79},{n:'David J',p:'FW',r:83},{n:'Larin',p:'FW',r:77}
   ]},
-  {name:'Costa Rica',flag:'🇨🇷',str:65,players:[
+  {name:'Costa Rica',flag:'🇨🇷',str:65,coach:{n:"Claudio Vivas",r:68},players:[
     {n:'Navas K',p:'GK',r:80},
     {n:'Duarte',p:'DF',r:72},{n:'Calvo O',p:'DF',r:71},{n:'Fuller',p:'DF',r:70},
     {n:'Tejeda',p:'MF',r:72},{n:'Campbell J',p:'MF',r:73},{n:'Torres D',p:'MF',r:70},
     {n:'Ruiz B',p:'FW',r:72},{n:'Contreras',p:'FW',r:69}
   ]},
-  {name:'Morocco',flag:'🇲🇦',str:81,players:[
+  {name:'Morocco',flag:'🇲🇦',str:81,coach:{n:"Walid Regragui",r:78},players:[
     {n:'Bono',p:'GK',r:82},
     {n:'Hakimi',p:'DF',r:85},{n:'Saiss',p:'DF',r:78},{n:'Aguerd',p:'DF',r:80},{n:'Mazraoui',p:'DF',r:81},
     {n:'Amrabat',p:'MF',r:82},{n:'Ounahi',p:'MF',r:79},{n:'Ziyech',p:'MF',r:82},
     {n:'En-Nesyri',p:'FW',r:81},{n:'Boufal',p:'FW',r:78},{n:'Cheddira',p:'FW',r:75}
   ]},
-  {name:'Nigeria',flag:'🇳🇬',str:79,players:[
+  {name:'Nigeria',flag:'🇳🇬',str:79,coach:{n:"Jose Peseiro",r:70},players:[
     {n:'Uzoho',p:'GK',r:77},
     {n:'Troost-Ekong',p:'DF',r:78},{n:'Aina',p:'DF',r:78},{n:'Bassey',p:'DF',r:77},
     {n:'Ndidi',p:'MF',r:81},{n:'Iwobi',p:'MF',r:79},{n:'Lookman',p:'MF',r:83},
     {n:'Osimhen',p:'FW',r:89},{n:'Chukwueze',p:'FW',r:79},{n:'Iheanacho',p:'FW',r:74}
   ]},
-  {name:'Senegal',flag:'🇸🇳',str:79,players:[
+  {name:'Senegal',flag:'🇸🇳',str:79,coach:{n:"Aliou Cisse",r:76},players:[
     {n:'Mendy E',p:'GK',r:82},
     {n:'Koulibaly',p:'DF',r:84},{n:'Jakobs',p:'DF',r:76},{n:'Mendy B',p:'DF',r:76},
     {n:'Gueye I',p:'MF',r:81},{n:'Diatta',p:'MF',r:77},{n:'Sarr I',p:'MF',r:79},
     {n:'Mane S',p:'FW',r:85},{n:'Dia B',p:'FW',r:80},{n:'Diedhiou',p:'FW',r:75}
   ]},
-  {name:'Ghana',flag:'🇬🇭',str:73,players:[
+  {name:'Ghana',flag:'🇬🇭',str:73,coach:{n:"Otto Addo",r:70},players:[
     {n:'Ati-Zigi',p:'GK',r:76},
     {n:'Salisu',p:'DF',r:77},{n:'Amartey',p:'DF',r:75},{n:'Djiku',p:'DF',r:74},
     {n:'Partey',p:'MF',r:82},{n:'Ayew J',p:'MF',r:77},{n:'Kudus',p:'MF',r:82},
     {n:'Sulemana',p:'FW',r:77},{n:'Bansa',p:'FW',r:74},{n:'Kyere',p:'FW',r:72}
   ]},
-  {name:'Cameroon',flag:'🇨🇲',str:72,players:[
+  {name:'Cameroon',flag:'🇨🇲',str:72,coach:{n:"Rigobert Song",r:68},players:[
     {n:'Epassy',p:'GK',r:74},
     {n:'Tolo',p:'DF',r:74},{n:'Castelletto',p:'DF',r:73},{n:'Fai',p:'DF',r:73},
     {n:'Anguissa',p:'MF',r:82},{n:'Hongla',p:'MF',r:76},
     {n:'Mbeumo',p:'FW',r:81},{n:'Aboubakar',p:'FW',r:76},{n:'Choupo-Moting',p:'FW',r:74}
   ]},
-  {name:'Ivory Coast',flag:'🇨🇮',str:76,players:[
+  {name:'Ivory Coast',flag:'🇨🇮',str:76,coach:{n:"Emerse Fae",r:69},players:[
     {n:'Sangare',p:'GK',r:76},
     {n:'Konate D',p:'DF',r:74},{n:'Boly',p:'DF',r:75},{n:'Singo',p:'DF',r:77},
     {n:'Kessie',p:'MF',r:82},{n:'Sangare I',p:'MF',r:78},
     {n:'Pepe N',p:'FW',r:79},{n:'Haller',p:'FW',r:78},{n:'Cornet',p:'FW',r:77},{n:'Fofana',p:'FW',r:76}
   ]},
-  {name:'Japan',flag:'🇯🇵',str:78,players:[
+  {name:'Japan',flag:'🇯🇵',str:78,coach:{n:"Hajime Moriyasu",r:77},players:[
     {n:'Gonda',p:'GK',r:78},
     {n:'Itakura',p:'DF',r:79},{n:'Tanaka K',p:'DF',r:79},{n:'Tomiyasu',p:'DF',r:80},
     {n:'Endo W',p:'MF',r:82},{n:'Kamada',p:'MF',r:80},{n:'Kubo T',p:'MF',r:83},{n:'Doan',p:'MF',r:78},
     {n:'Minamino',p:'FW',r:80},{n:'Maeda',p:'FW',r:77},{n:'Furuhashi',p:'FW',r:79},{n:'Ueda',p:'FW',r:78}
   ]},
-  {name:'South Korea',flag:'🇰🇷',str:75,players:[
+  {name:'South Korea',flag:'🇰🇷',str:75,coach:{n:"Hong Myung-bo",r:72},players:[
     {n:'Kim SG',p:'GK',r:82},
     {n:'Kim MH',p:'DF',r:78},{n:'Kim YG',p:'DF',r:79},{n:'Lee JY',p:'DF',r:76},
     {n:'Jung WY',p:'MF',r:77},{n:'Lee KJ',p:'MF',r:77},
     {n:'Son HM',p:'FW',r:88},{n:'Hwang HC',p:'FW',r:79},{n:'Lee JH',p:'FW',r:77},{n:'Cho GS',p:'FW',r:78}
   ]},
-  {name:'Australia',flag:'🇦🇺',str:72,players:[
+  {name:'Australia',flag:'🇦🇺',str:72,coach:{n:"Tony Popovic",r:72},players:[
     {n:'Ryan M',p:'GK',r:79},
     {n:'Rowles',p:'DF',r:75},{n:'Souttar',p:'DF',r:76},{n:'Atkinson',p:'DF',r:74},
     {n:'Mooy',p:'MF',r:78},{n:'Irvine J',p:'MF',r:76},{n:'Leckie',p:'MF',r:77},{n:'McGree',p:'MF',r:76},
     {n:'Duke',p:'FW',r:76},{n:'Maclaren',p:'FW',r:75},{n:'Nabbout',p:'FW',r:73}
   ]},
-  {name:'Iran',flag:'🇮🇷',str:70,players:[
+  {name:'Iran',flag:'🇮🇷',str:70,coach:{n:"Amir Ghalenoei",r:70},players:[
     {n:'Beiranvand',p:'GK',r:77},
     {n:'Pouraliganji',p:'DF',r:74},{n:'Hosseini M',p:'DF',r:73},{n:'Hajsafi',p:'DF',r:74},
     {n:'Ezatolahi',p:'MF',r:76},{n:'Jahanbakhsh',p:'MF',r:78},{n:'Gholizadeh',p:'MF',r:77},
     {n:'Taremi',p:'FW',r:82},{n:'Azmoun S',p:'FW',r:80}
   ]},
-  {name:'Saudi Arabia',flag:'🇸🇦',str:69,players:[
+  {name:'Saudi Arabia',flag:'🇸🇦',str:69,coach:{n:"Roberto Mancini",r:80},players:[
     {n:'Al-Owais',p:'GK',r:75},
     {n:'Al-Tambakti',p:'DF',r:72},{n:'Al-Bulayhi',p:'DF',r:73},{n:'Al-Shahrani',p:'DF',r:72},
     {n:'Al-Faraj',p:'MF',r:74},{n:'Al-Malki',p:'MF',r:72},{n:'Kanno',p:'MF',r:73},
     {n:'Al-Dawsari F',p:'FW',r:78},{n:'Al-Buraikan',p:'FW',r:75},{n:'Bahebri',p:'FW',r:73},{n:'Nasser A',p:'FW',r:71}
   ]},
-  {name:'Qatar',flag:'🇶🇦',str:64,players:[
+  {name:'Qatar',flag:'🇶🇦',str:64,coach:{n:"Marquez Lopez",r:66},players:[
     {n:'Al-Sheeb',p:'GK',r:73},
     {n:'Pedro Miguel',p:'DF',r:70},{n:'Khoukhi',p:'DF',r:70},{n:'Al-Rawi',p:'DF',r:68},
     {n:'Boudiaf',p:'MF',r:72},{n:'Al-Haydos',p:'MF',r:74},{n:'Afif A',p:'MF',r:76},
     {n:'Muntari',p:'FW',r:71},{n:'Al-Moez Ali',p:'FW',r:72},{n:'Hassan A',p:'FW',r:69}
   ]},
-  {name:'Uzbekistan',flag:'🇺🇿',str:66,players:[
+  {name:'Uzbekistan',flag:'🇺🇿',str:66,coach:{n:"Srecko Katanec",r:70},players:[
     {n:'Nishonov',p:'GK',r:70},
     {n:'Ashurmatov',p:'DF',r:69},{n:'Khakmurdov',p:'DF',r:68},{n:'Narzullayev',p:'DF',r:67},
     {n:'Komilov',p:'MF',r:70},{n:'Masharipov',p:'MF',r:73},{n:'Tursunov',p:'MF',r:69},
     {n:'Shomurodov',p:'FW',r:74},{n:'Yusupov',p:'FW',r:70},{n:'Djeparov',p:'FW',r:68}
   ]},
-  {name:'Jordan',flag:'🇯🇴',str:63,players:[
+  {name:'Jordan',flag:'🇯🇴',str:63,coach:{n:"Hossam Hassan",r:68},players:[
     {n:'Shuaibi',p:'GK',r:68},
     {n:'Abu Zema',p:'DF',r:66},{n:'Al-Bawab',p:'DF',r:65},{n:'Bani Hani',p:'DF',r:65},
     {n:'Alzubaidi',p:'MF',r:67},{n:'Nimer',p:'MF',r:66},{n:'Bani Attiyeh',p:'MF',r:65},
     {n:'Al-Taamari',p:'FW',r:72},{n:'Safri',p:'FW',r:67},{n:'Nasib',p:'FW',r:65}
   ]},
-  {name:'Iraq',flag:'🇮🇶',str:65,players:[
+  {name:'Iraq',flag:'🇮🇶',str:65,coach:{n:"Jesus Casas",r:68},players:[
     {n:'Dawood',p:'GK',r:69},
     {n:'Karrar Jasim',p:'DF',r:67},{n:'Resan',p:'DF',r:67},{n:'Hamza',p:'DF',r:66},
     {n:'Tariq',p:'MF',r:70},{n:'Amjed A',p:'MF',r:69},{n:'Al-Hamdani',p:'MF',r:68},
     {n:'Alaa Abbas',p:'FW',r:71},{n:'Mohanad Ali',p:'FW',r:70},{n:'Amir S',p:'FW',r:68}
   ]},
-  {name:'Egypt',flag:'🇪🇬',str:72,players:[
+  {name:'Egypt',flag:'🇪🇬',str:72,coach:{n:"Rui Vitoria",r:72},players:[
     {n:'El-Shenawy',p:'GK',r:76},{n:'Gabaski',p:'GK',r:73},
     {n:'Hegazy',p:'DF',r:76},{n:'Hamdi F',p:'DF',r:74},{n:'Ashraf H',p:'DF',r:73},
     {n:'Elneny',p:'MF',r:75},{n:'Nabil M',p:'MF',r:74},{n:'Sobhi',p:'MF',r:73},
     {n:'Salah M',p:'FW',r:88},{n:'Trezeguet',p:'FW',r:74},{n:'Mostafa M',p:'FW',r:73}
   ]},
-  {name:'Tunisia',flag:'🇹🇳',str:68,players:[
+  {name:'Tunisia',flag:'🇹🇳',str:68,coach:{n:"Jalel Kadri",r:68},players:[
     {n:'Dahmen',p:'GK',r:74},
     {n:'Talbi',p:'DF',r:72},{n:'Ben Romdhane',p:'DF',r:70},{n:'Maaloul',p:'DF',r:71},
     {n:'Skhiri',p:'MF',r:76},{n:'Slimane',p:'MF',r:74},{n:'Ben Slimane',p:'MF',r:72},
     {n:'Jebali',p:'FW',r:74},{n:'Khazri',p:'FW',r:73},{n:'Sahraoui',p:'FW',r:70}
   ]},
-  {name:'South Africa',flag:'🇿🇦',str:63,players:[
+  {name:'South Africa',flag:'🇿🇦',str:63,coach:{n:"Hugo Broos",r:72},players:[
     {n:'Williams R',p:'GK',r:70},
     {n:'Mudau',p:'DF',r:67},{n:'Modise H',p:'DF',r:66},{n:'Ngcongca',p:'DF',r:65},
     {n:'Zungu B',p:'MF',r:69},{n:'Grobler',p:'MF',r:66},{n:'Lepasa',p:'MF',r:66},
     {n:'Tau P',p:'FW',r:74},{n:'Dolly',p:'FW',r:71},{n:'Evidence M',p:'FW',r:67}
   ]},
-  {name:'Algeria',flag:'🇩🇿',str:70,players:[
+  {name:'Algeria',flag:'🇩🇿',str:70,coach:{n:"Djamel Belmadi",r:76},players:[
     {n:'Mbolhi',p:'GK',r:73},
     {n:'Mandi',p:'DF',r:74},{n:'Benlamri',p:'DF',r:72},{n:'Ait Nouri',p:'DF',r:75},
     {n:'Bennacer',p:'MF',r:79},{n:'Guedioura',p:'MF',r:72},{n:'Belaili',p:'MF',r:74},
     {n:'Mahrez',p:'FW',r:82},{n:'Slimani',p:'FW',r:72},{n:'Bensebaini',p:'FW',r:74}
   ]},
-  {name:'Panama',flag:'🇵🇦',str:64,players:[
+  {name:'Panama',flag:'🇵🇦',str:64,coach:{n:"Thomas Christiansen",r:68},players:[
     {n:'Penedo',p:'GK',r:73},
     {n:'Murillo C',p:'DF',r:70},{n:'Miller A',p:'DF',r:68},{n:'Davis E',p:'DF',r:69},
     {n:'Harvey',p:'MF',r:69},{n:'Gondola',p:'MF',r:67},{n:'Fajardo',p:'MF',r:67},
     {n:'Quintero C',p:'FW',r:70},{n:'Cordoba A',p:'FW',r:68},{n:'Barcenas',p:'FW',r:68}
   ]},
-  {name:'New Zealand',flag:'🇳🇿',str:61,players:[
+  {name:'New Zealand',flag:'🇳🇿',str:61,coach:{n:"Darren Bazeley",r:65},players:[
     {n:'Sail',p:'GK',r:68},
     {n:'Boxall',p:'DF',r:65},{n:'Wood',p:'DF',r:64},{n:'Cacace',p:'DF',r:66},
     {n:'McGlinchey',p:'MF',r:65},{n:'De Vries',p:'MF',r:64},{n:'Payne',p:'MF',r:63},
@@ -668,7 +662,7 @@ let state = {
   pace: 5,
   style: 'balanced',
   slots: [], // formation slots with player assignments
-  draftStep: 0, // 0-10 = players, 11 = coach
+  draftStep: 0, // 0-11 = players/coach (any order), 12 = done
   currentCountry: null,
   currentPlayers: [],
   selectedPlayer: null,
@@ -757,9 +751,14 @@ function renderPitch() {
 
 function clickSlot(slotId) {
   if (!state.selectedPlayer) return;
+  if (state.selectedPlayer.p === 'COACH') return;
   const slot = state.slots.find(s=>s.id===slotId);
   if (!slot || slot.player) return;
-  // Check position fit (allow with warning)
+  if (!slot.roles.includes(state.selectedPlayer.p)) {
+    document.getElementById('slotHint').style.display = 'block';
+    document.getElementById('slotHint').textContent = `Can't place a ${state.selectedPlayer.p} in a ${slot.lbl} slot`;
+    return;
+  }
   state.selectedSlotId = slotId;
   assignPlayerToSlot();
 }
@@ -776,18 +775,13 @@ function updateDraftUI() {
     ind.appendChild(s);
   }
   const prog = document.getElementById('draftProgress');
-  if(state.draftStep < 11) {
-    prog.textContent = `Pick ${state.draftStep+1} of 11 — Choose a player to place on the pitch`;
-  } else {
-    prog.textContent = `Pick 12 of 12 — Choose your coach!`;
-  }
+  prog.textContent = `Pick ${state.draftStep+1} of 12 — spin for a player or coach`;
   // Show/hide cards
   document.getElementById('spinCard').style.display = 'block';
   document.getElementById('playerSelectCard').style.display = 'none';
-  document.getElementById('coachSelectCard').style.display = 'none';
   document.getElementById('spinBtn').disabled = false;
-  document.getElementById('spinFlag').textContent = state.draftStep === 11 ? '👔' : '🌍';
-  document.getElementById('spinCountry').textContent = state.draftStep === 11 ? 'Spin for a Coach!' : 'Press Spin!';
+  document.getElementById('spinFlag').textContent = '🌍';
+  document.getElementById('spinCountry').textContent = 'Press Spin!';
   document.getElementById('spinProg').textContent = '';
 }
 
@@ -795,29 +789,7 @@ let spinInterval = null;
 function doSpin() {
   const btn = document.getElementById('spinBtn');
   btn.disabled = true;
-  // Coach spin (step 11)
-  if(state.draftStep === 11) {
-    const target = COACHES[Math.floor(Math.random()*COACHES.length)];
-    let frames = 0;
-    const coachNames = COACHES.map(c=>c.n);
-    function coachFrame(){
-      if(frames >= 26){
-        document.getElementById('spinFlag').textContent = '👔';
-        document.getElementById('spinCountry').textContent = target.n;
-        document.getElementById('spinProg').textContent = '';
-        showCoachSpun(target);
-        return;
-      }
-      const delay = frames < 10 ? 60 : frames < 18 ? 100 : frames < 24 ? 160 : 300;
-      document.getElementById('spinFlag').textContent = '👔';
-      document.getElementById('spinCountry').textContent = coachNames[Math.floor(Math.random()*coachNames.length)];
-      frames++;
-      setTimeout(coachFrame, delay);
-    }
-    coachFrame();
-    return;
-  }
-  // Player spin
+  // Always spin for a country
   const available = SQUADS.filter(s => !state.usedCountries.includes(s.name));
   if(available.length===0){state.usedCountries=[];}
   const available2 = SQUADS.filter(s => !state.usedCountries.includes(s.name));
@@ -851,12 +823,39 @@ function showPlayerPick(squad) {
   document.getElementById('playerSelectTitle').textContent = `${squad.flag} ${squad.name} — Pick a Player`;
   const list = document.getElementById('playerList');
   list.innerHTML = '';
-  state.currentPlayers = squad.players;
   state.selectedPlayer = null;
   document.getElementById('confirmPickBtn').disabled = true;
   document.getElementById('selectedPlayerInfo').style.display = 'none';
   document.getElementById('slotHint').style.display = 'none';
-  squad.players.forEach((p,i) => {
+
+  // Filter players to only those with at least one compatible empty slot
+  const validPlayers = squad.players.filter(p =>
+    state.slots.some(s => !s.player && s.roles.includes(p.p))
+  );
+
+  const hasCoachOption = squad.coach && state.coach === null;
+
+  // If no valid players and coach already picked, show message and re-enable spin
+  if (validPlayers.length === 0 && !hasCoachOption) {
+    list.innerHTML = '<div class="notice" style="text-align:center">No suitable players for your remaining positions — spin again</div>';
+    document.getElementById('spinBtn').disabled = false;
+    return;
+  }
+
+  state.currentPlayers = validPlayers;
+
+  // Add coach card at the top if coach slot is empty
+  if (hasCoachOption) {
+    const coach = squad.coach;
+    const card = document.createElement('div');
+    card.className = 'player-card';
+    card.id = 'pc-coach';
+    card.innerHTML = `<span class="player-pos pos-GK">👔</span><span class="player-name">${coach.n}</span><span class="player-rating hidden-r">???</span>`;
+    card.onclick = () => selectCoach(coach);
+    list.appendChild(card);
+  }
+
+  validPlayers.forEach((p, i) => {
     const card = document.createElement('div');
     card.className = 'player-card';
     card.id = 'pc-'+i;
@@ -876,19 +875,41 @@ function selectPlayer(p, idx) {
   renderPitch();
 }
 
+function selectCoach(coach) {
+  state.selectedPlayer = {n: coach.n, r: coach.r, p: 'COACH'};
+  document.querySelectorAll('.player-card').forEach(c=>c.classList.remove('selected'));
+  document.getElementById('pc-coach').classList.add('selected');
+  document.getElementById('confirmPickBtn').disabled = false;
+  document.getElementById('slotHint').style.display = 'block';
+  document.getElementById('slotHint').textContent = `Click 'Confirm Pick' to assign ${coach.n} as your coach`;
+}
+
+function assignCoach() {
+  state.coach = state.selectedPlayer;
+  state.selectedPlayer = null;
+  state.draftStep++;
+  document.getElementById('playerSelectCard').style.display = 'none';
+  if (state.draftStep >= 12) {
+    startSimulation();
+  } else {
+    updateDraftUI();
+  }
+}
+
 function confirmPick() {
   if(!state.selectedPlayer) return;
-  // Find best available slot for this player
   const p = state.selectedPlayer;
+  // Coach pick
+  if(p.p === 'COACH') {
+    assignCoach();
+    return;
+  }
+  // Find best available slot for this player (strict position matching)
   let bestSlot = null;
-  // Try to find matching empty slot
   const emptySlots = state.slots.filter(s=>!s.player);
-  // Perfect match
   for(const s of emptySlots){
     if(s.roles.includes(p.p)){bestSlot=s;break;}
   }
-  // Fallback: any empty slot
-  if(!bestSlot && emptySlots.length>0) bestSlot=emptySlots[0];
   if(bestSlot){
     state.selectedSlotId = bestSlot.id;
     assignPlayerToSlot();
@@ -899,40 +920,14 @@ function assignPlayerToSlot() {
   const slot = state.slots.find(s=>s.id===state.selectedSlotId);
   if(!slot){return;}
   const p = state.selectedPlayer;
-  // Check position fit
-  const fit = slot.roles.includes(p.p);
-  slot.player = {...p, fit};
+  // Position is always valid (enforced by clickSlot and confirmPick)
+  slot.player = {...p, fit: true};
   state.selectedPlayer = null;
   state.selectedSlotId = null;
   state.draftStep++;
   renderPitch();
   document.getElementById('playerSelectCard').style.display='none';
-  if(state.draftStep < 11){
-    updateDraftUI();
-  } else if(state.draftStep === 11){
-    updateDraftUI();
-  } else {
-    // All done (coach was 12th)
-  }
-}
-
-function showCoachSpun(coach) {
-  state.coach = coach;
-  document.getElementById('spinCard').style.display = 'none';
-  document.getElementById('coachSelectCard').style.display = 'block';
-  document.getElementById('coachSpunDisplay').innerHTML =
-    `<div class="coach-card selected" style="cursor:default">
-      <span class="coach-icon">👔</span>
-      <span class="coach-name">${coach.n}</span>
-      <span class="coach-r">???</span>
-    </div>`;
-  document.getElementById('confirmCoachBtn').disabled = false;
-}
-
-function confirmCoach() {
-  if(!state.coach) return;
-  state.draftStep = 12;
-  startSimulation();
+  updateDraftUI();
 }
 
 // ===== TEAM RATING =====
