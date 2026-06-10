@@ -57,9 +57,9 @@
   .player-card.selected{border-color:#f5c518;background:rgba(245,197,24,.15)}
   .player-pos{min-width:32px;text-align:center;font-size:.72rem;font-weight:700;padding:2px 4px;border-radius:4px}
   .pos-GK{background:#8B4513;color:#fff}
-  .pos-DF{background:#1a4a8a;color:#fff}
-  .pos-MF{background:#1a6a1a;color:#fff}
-  .pos-FW{background:#8a1a1a;color:#fff}
+  .pos-CB,.pos-LB,.pos-RB{background:#1a4a8a;color:#fff}
+  .pos-CDM,.pos-CM,.pos-CAM{background:#1a6a1a;color:#fff}
+  .pos-LW,.pos-RW,.pos-ST{background:#8a1a1a;color:#fff}
   .player-name{flex:1;font-size:.88rem}
   .player-rating{font-size:.85rem;color:#f5c518;font-weight:700}
   .player-rating.hidden-r{color:#555;font-size:.8rem}
@@ -254,9 +254,10 @@
 .player-pos { font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:3px; }
 .player-rating { font-size:.85rem; font-weight:700; color:#f5c518; min-width:28px; text-align:right; }
 .pos-GK { background:rgba(245,197,24,.2); color:#f5c518; }
-.pos-DF { background:rgba(39,174,96,.2); color:#27ae60; }
-.pos-MF { background:rgba(52,152,219,.2); color:#3498db; }
-.pos-FW { background:rgba(231,76,60,.2); color:#e74c3c; }
+.pos-CB,.pos-LB,.pos-RB { background:rgba(39,174,96,.2); color:#27ae60; }
+.pos-CDM,.pos-CM { background:rgba(52,152,219,.2); color:#3498db; }
+.pos-CAM { background:rgba(155,89,182,.2); color:#9b59b6; }
+.pos-LW,.pos-RW,.pos-ST { background:rgba(231,76,60,.2); color:#e74c3c; }
 .pos-COACH { background:rgba(155,89,182,.2); color:#9b59b6; }
 
 /* MOBILE */
@@ -450,94 +451,94 @@
 const FORMATIONS = {
   '4-4-2':{slots:[
     {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:75,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:75,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:75,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:75,roles:['DF']},
-    {id:'LM',lbl:'LM',x:15,y:45,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:35,y:45,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:65,y:45,roles:['MF']},
-    {id:'RM',lbl:'RM',x:85,y:45,roles:['MF']},
-    {id:'ST1',lbl:'ST',x:35,y:20,roles:['FW','MF']},
-    {id:'ST2',lbl:'ST',x:65,y:20,roles:['FW','MF']},
+    {id:'LB',lbl:'LB',x:15,y:75,roles:['LB','CB']},
+    {id:'CB1',lbl:'CB',x:35,y:75,roles:['CB','LB','RB']},
+    {id:'CB2',lbl:'CB',x:65,y:75,roles:['CB','LB','RB']},
+    {id:'RB',lbl:'RB',x:85,y:75,roles:['RB','CB']},
+    {id:'LM',lbl:'LM',x:15,y:45,roles:['LW','RW','CAM']},
+    {id:'CM1',lbl:'CM',x:35,y:45,roles:['CM','CDM','CAM']},
+    {id:'CM2',lbl:'CM',x:65,y:45,roles:['CM','CDM','CAM']},
+    {id:'RM',lbl:'RM',x:85,y:45,roles:['RW','LW','CAM']},
+    {id:'ST1',lbl:'ST',x:35,y:20,roles:['ST','LW','RW']},
+    {id:'ST2',lbl:'ST',x:65,y:20,roles:['ST','LW','RW']},
   ]},
   '4-3-3':{slots:[
     {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:75,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:75,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:75,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:75,roles:['DF']},
-    {id:'CM1',lbl:'CM',x:25,y:48,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:50,y:48,roles:['MF']},
-    {id:'CM3',lbl:'CM',x:75,y:48,roles:['MF']},
-    {id:'LW',lbl:'LW',x:15,y:22,roles:['FW','MF']},
-    {id:'ST',lbl:'ST',x:50,y:14,roles:['FW']},
-    {id:'RW',lbl:'RW',x:85,y:22,roles:['FW','MF']},
+    {id:'LB',lbl:'LB',x:15,y:75,roles:['LB','CB']},
+    {id:'CB1',lbl:'CB',x:35,y:75,roles:['CB','LB','RB']},
+    {id:'CB2',lbl:'CB',x:65,y:75,roles:['CB','LB','RB']},
+    {id:'RB',lbl:'RB',x:85,y:75,roles:['RB','CB']},
+    {id:'CM1',lbl:'CM',x:25,y:48,roles:['CM','CDM','CAM']},
+    {id:'CM2',lbl:'CM',x:50,y:48,roles:['CM','CDM','CAM']},
+    {id:'CM3',lbl:'CM',x:75,y:48,roles:['CM','CDM','CAM']},
+    {id:'LW',lbl:'LW',x:15,y:22,roles:['LW','RW','CAM']},
+    {id:'ST',lbl:'ST',x:50,y:14,roles:['ST','LW','RW']},
+    {id:'RW',lbl:'RW',x:85,y:22,roles:['RW','LW','CAM']},
   ]},
   '3-4-3':{slots:[
     {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
-    {id:'CB1',lbl:'CB',x:25,y:75,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:50,y:75,roles:['DF']},
-    {id:'CB3',lbl:'CB',x:75,y:75,roles:['DF']},
-    {id:'LM',lbl:'LM',x:12,y:45,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:37,y:45,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:63,y:45,roles:['MF']},
-    {id:'RM',lbl:'RM',x:88,y:45,roles:['MF']},
-    {id:'LW',lbl:'LW',x:18,y:20,roles:['FW','MF']},
-    {id:'ST',lbl:'ST',x:50,y:12,roles:['FW']},
-    {id:'RW',lbl:'RW',x:82,y:20,roles:['FW','MF']},
+    {id:'CB1',lbl:'CB',x:25,y:75,roles:['CB','LB','RB']},
+    {id:'CB2',lbl:'CB',x:50,y:75,roles:['CB','LB','RB']},
+    {id:'CB3',lbl:'CB',x:75,y:75,roles:['CB','LB','RB']},
+    {id:'LM',lbl:'LM',x:12,y:45,roles:['LW','RW','CAM']},
+    {id:'CM1',lbl:'CM',x:37,y:45,roles:['CM','CDM','CAM']},
+    {id:'CM2',lbl:'CM',x:63,y:45,roles:['CM','CDM','CAM']},
+    {id:'RM',lbl:'RM',x:88,y:45,roles:['RW','LW','CAM']},
+    {id:'LW',lbl:'LW',x:18,y:20,roles:['LW','RW','ST']},
+    {id:'ST',lbl:'ST',x:50,y:12,roles:['ST','LW','RW']},
+    {id:'RW',lbl:'RW',x:82,y:20,roles:['RW','LW','ST']},
   ]},
   '3-5-2':{slots:[
     {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
-    {id:'CB1',lbl:'CB',x:25,y:75,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:50,y:75,roles:['DF']},
-    {id:'CB3',lbl:'CB',x:75,y:75,roles:['DF']},
-    {id:'LWB',lbl:'LWB',x:10,y:50,roles:['MF','DF']},
-    {id:'CM1',lbl:'CM',x:30,y:48,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:50,y:48,roles:['MF']},
-    {id:'CM3',lbl:'CM',x:70,y:48,roles:['MF']},
-    {id:'RWB',lbl:'RWB',x:90,y:50,roles:['MF','DF']},
-    {id:'ST1',lbl:'ST',x:33,y:18,roles:['FW']},
-    {id:'ST2',lbl:'ST',x:67,y:18,roles:['FW']},
+    {id:'CB1',lbl:'CB',x:25,y:75,roles:['CB','LB','RB']},
+    {id:'CB2',lbl:'CB',x:50,y:75,roles:['CB','LB','RB']},
+    {id:'CB3',lbl:'CB',x:75,y:75,roles:['CB','LB','RB']},
+    {id:'LWB',lbl:'LWB',x:10,y:50,roles:['LB','LW']},
+    {id:'CM1',lbl:'CM',x:30,y:48,roles:['CM','CDM','CAM']},
+    {id:'CM2',lbl:'CM',x:50,y:48,roles:['CM','CDM','CAM']},
+    {id:'CM3',lbl:'CM',x:70,y:48,roles:['CM','CDM','CAM']},
+    {id:'RWB',lbl:'RWB',x:90,y:50,roles:['RB','RW']},
+    {id:'ST1',lbl:'ST',x:33,y:18,roles:['ST','LW','RW']},
+    {id:'ST2',lbl:'ST',x:67,y:18,roles:['ST','LW','RW']},
   ]},
   '5-4-1':{slots:[
     {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
-    {id:'LWB',lbl:'LWB',x:8,y:70,roles:['DF','MF']},
-    {id:'CB1',lbl:'CB',x:28,y:78,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:50,y:78,roles:['DF']},
-    {id:'CB3',lbl:'CB',x:72,y:78,roles:['DF']},
-    {id:'RWB',lbl:'RWB',x:92,y:70,roles:['DF','MF']},
-    {id:'LM',lbl:'LM',x:15,y:43,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:37,y:43,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:63,y:43,roles:['MF']},
-    {id:'RM',lbl:'RM',x:85,y:43,roles:['MF']},
-    {id:'ST',lbl:'ST',x:50,y:15,roles:['FW','MF']},
+    {id:'LWB',lbl:'LWB',x:8,y:70,roles:['LB','LW']},
+    {id:'CB1',lbl:'CB',x:28,y:78,roles:['CB','LB','RB']},
+    {id:'CB2',lbl:'CB',x:50,y:78,roles:['CB','LB','RB']},
+    {id:'CB3',lbl:'CB',x:72,y:78,roles:['CB','LB','RB']},
+    {id:'RWB',lbl:'RWB',x:92,y:70,roles:['RB','RW']},
+    {id:'LM',lbl:'LM',x:15,y:43,roles:['LW','RW','CAM']},
+    {id:'CM1',lbl:'CM',x:37,y:43,roles:['CM','CDM','CAM']},
+    {id:'CM2',lbl:'CM',x:63,y:43,roles:['CM','CDM','CAM']},
+    {id:'RM',lbl:'RM',x:85,y:43,roles:['RW','LW','CAM']},
+    {id:'ST',lbl:'ST',x:50,y:15,roles:['ST','LW','RW']},
   ]},
   '4-1-4-1':{slots:[
     {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:78,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:78,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:78,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:78,roles:['DF']},
-    {id:'CDM',lbl:'CDM',x:50,y:60,roles:['MF']},
-    {id:'LM',lbl:'LM',x:12,y:40,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:37,y:40,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:63,y:40,roles:['MF']},
-    {id:'RM',lbl:'RM',x:88,y:40,roles:['MF']},
-    {id:'ST',lbl:'ST',x:50,y:17,roles:['FW','MF']},
+    {id:'LB',lbl:'LB',x:15,y:78,roles:['LB','CB']},
+    {id:'CB1',lbl:'CB',x:35,y:78,roles:['CB','LB','RB']},
+    {id:'CB2',lbl:'CB',x:65,y:78,roles:['CB','LB','RB']},
+    {id:'RB',lbl:'RB',x:85,y:78,roles:['RB','CB']},
+    {id:'CDM',lbl:'CDM',x:50,y:60,roles:['CDM','CM']},
+    {id:'LM',lbl:'LM',x:12,y:40,roles:['LW','RW','CAM']},
+    {id:'CM1',lbl:'CM',x:37,y:40,roles:['CM','CDM','CAM']},
+    {id:'CM2',lbl:'CM',x:63,y:40,roles:['CM','CDM','CAM']},
+    {id:'RM',lbl:'RM',x:88,y:40,roles:['RW','LW','CAM']},
+    {id:'ST',lbl:'ST',x:50,y:17,roles:['ST','LW','RW']},
   ]},
   '4-2-3-1':{slots:[
     {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:78,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:78,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:78,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:78,roles:['DF']},
-    {id:'CDM1',lbl:'DM',x:35,y:60,roles:['MF']},
-    {id:'CDM2',lbl:'DM',x:65,y:60,roles:['MF']},
-    {id:'LW',lbl:'LW',x:15,y:38,roles:['MF','FW']},
-    {id:'CAM',lbl:'CAM',x:50,y:38,roles:['MF']},
-    {id:'RW',lbl:'RW',x:85,y:38,roles:['MF','FW']},
-    {id:'ST',lbl:'ST',x:50,y:17,roles:['FW']},
+    {id:'LB',lbl:'LB',x:15,y:78,roles:['LB','CB']},
+    {id:'CB1',lbl:'CB',x:35,y:78,roles:['CB','LB','RB']},
+    {id:'CB2',lbl:'CB',x:65,y:78,roles:['CB','LB','RB']},
+    {id:'RB',lbl:'RB',x:85,y:78,roles:['RB','CB']},
+    {id:'CDM1',lbl:'DM',x:35,y:60,roles:['CDM','CM']},
+    {id:'CDM2',lbl:'DM',x:65,y:60,roles:['CDM','CM']},
+    {id:'LW',lbl:'LW',x:15,y:38,roles:['LW','RW','CAM']},
+    {id:'CAM',lbl:'CAM',x:50,y:38,roles:['CAM','CM','LW','RW']},
+    {id:'RW',lbl:'RW',x:85,y:38,roles:['RW','LW','CAM']},
+    {id:'ST',lbl:'ST',x:50,y:17,roles:['ST','LW','RW']},
   ]},
 };
 
@@ -545,290 +546,290 @@ const SQUADS = [
   // ── UEFA ──
   {name:'France',flag:'🇫🇷',str:88,coach:{n:'Didier Deschamps',r:82},players:[
     {n:'Maignan',p:'GK',r:84},{n:'Areola',p:'GK',r:75},{n:'Samba',p:'GK',r:74},
-    {n:'Hernandez T',p:'DF',r:83},{n:'Saliba',p:'DF',r:85},{n:'Kounde',p:'DF',r:83},{n:'Upamecano',p:'DF',r:81},{n:'Pavard',p:'DF',r:79},
-    {n:'Camavinga',p:'MF',r:83},{n:'Tchouameni',p:'MF',r:82},{n:'Kante',p:'MF',r:83},{n:'Griezmann',p:'MF',r:84},{n:'Rabiot',p:'MF',r:79},
-    {n:'Mbappe',p:'FW',r:94},{n:'Dembele',p:'FW',r:83},{n:'Thuram M',p:'FW',r:82},{n:'Diaby',p:'FW',r:78},{n:'Giroud',p:'FW',r:74}
+    {n:'Hernandez T',p:'LB',r:83},{n:'Saliba',p:'CB',r:85},{n:'Kounde',p:'RB',r:83},{n:'Upamecano',p:'CB',r:81},{n:'Pavard',p:'CB',r:79},
+    {n:'Camavinga',p:'CM',r:83},{n:'Tchouameni',p:'CDM',r:82},{n:'Kante',p:'CDM',r:83},{n:'Griezmann',p:'CAM',r:84},{n:'Rabiot',p:'CM',r:79},
+    {n:'Mbappe',p:'LW',r:94},{n:'Dembele',p:'RW',r:83},{n:'Thuram M',p:'ST',r:82},{n:'Diaby',p:'LW',r:78},{n:'Giroud',p:'ST',r:74}
   ]},
   {name:'Spain',flag:'🇪🇸',str:87,coach:{n:'Luis de la Fuente',r:78},players:[
     {n:'Unai Simon',p:'GK',r:82},{n:'Raya D',p:'GK',r:79},{n:'Remiro',p:'GK',r:74},
-    {n:'Carvajal',p:'DF',r:82},{n:'Le Normand',p:'DF',r:82},{n:'Laporte',p:'DF',r:80},{n:'Grimaldo',p:'DF',r:81},{n:'Nacho',p:'DF',r:79},
-    {n:'Rodri',p:'MF',r:91},{n:'Pedri',p:'MF',r:87},{n:'Gavi',p:'MF',r:86},{n:'Olmo D',p:'MF',r:84},{n:'Ruiz F',p:'MF',r:82},
-    {n:'Yamal L',p:'FW',r:89},{n:'Williams N',p:'FW',r:84},{n:'Morata',p:'FW',r:79},{n:'Torres F',p:'FW',r:78},{n:'Joselu',p:'FW',r:74}
+    {n:'Carvajal',p:'RB',r:82},{n:'Le Normand',p:'CB',r:82},{n:'Laporte',p:'CB',r:80},{n:'Grimaldo',p:'LB',r:81},{n:'Nacho',p:'CB',r:79},
+    {n:'Rodri',p:'CDM',r:91},{n:'Pedri',p:'CM',r:87},{n:'Gavi',p:'CM',r:86},{n:'Olmo D',p:'CAM',r:84},{n:'Ruiz F',p:'CM',r:82},
+    {n:'Yamal L',p:'RW',r:89},{n:'Williams N',p:'LW',r:84},{n:'Morata',p:'ST',r:79},{n:'Torres F',p:'ST',r:78},{n:'Joselu',p:'ST',r:74}
   ]},
   {name:'England',flag:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',str:86,coach:{n:'Thomas Tuchel',r:83},players:[
     {n:'Pickford',p:'GK',r:82},{n:'Ramsdale',p:'GK',r:78},{n:'Henderson J',p:'GK',r:76},
-    {n:'Trent AA',p:'DF',r:84},{n:'Stones',p:'DF',r:82},{n:'Guehi',p:'DF',r:81},{n:'Trippier',p:'DF',r:80},{n:'Maguire',p:'DF',r:78},
-    {n:'Bellingham',p:'MF',r:91},{n:'Rice',p:'MF',r:86},{n:'Saka',p:'MF',r:87},{n:'Foden',p:'MF',r:88},{n:'Palmer',p:'MF',r:84},
-    {n:'Kane',p:'FW',r:89},{n:'Watkins',p:'FW',r:82},{n:'Rashford',p:'FW',r:82},{n:'Gordon A',p:'FW',r:80},{n:'Madueke',p:'FW',r:77}
+    {n:'Trent AA',p:'RB',r:84},{n:'Stones',p:'CB',r:82},{n:'Guehi',p:'CB',r:81},{n:'Trippier',p:'RB',r:80},{n:'Maguire',p:'CB',r:78},
+    {n:'Bellingham',p:'CM',r:91},{n:'Rice',p:'CDM',r:86},{n:'Saka',p:'RW',r:87},{n:'Foden',p:'CAM',r:88},{n:'Palmer',p:'CAM',r:84},
+    {n:'Kane',p:'ST',r:89},{n:'Watkins',p:'ST',r:82},{n:'Rashford',p:'LW',r:82},{n:'Gordon A',p:'LW',r:80},{n:'Madueke',p:'RW',r:77}
   ]},
   {name:'Germany',flag:'🇩🇪',str:85,coach:{n:'Julian Nagelsmann',r:83},players:[
     {n:'Neuer',p:'GK',r:82},{n:'ter Stegen',p:'GK',r:85},{n:'Trapp',p:'GK',r:74},
-    {n:'Rudiger',p:'DF',r:83},{n:'Schlotterbeck',p:'DF',r:80},{n:'Raum',p:'DF',r:78},{n:'Tah',p:'DF',r:78},{n:'Mittelstadt',p:'DF',r:76},
-    {n:'Kimmich',p:'MF',r:87},{n:'Wirtz',p:'MF',r:89},{n:'Musiala',p:'MF',r:87},{n:'Gundogan',p:'MF',r:83},{n:'Goretzka',p:'MF',r:80},
-    {n:'Havertz',p:'FW',r:84},{n:'Sane',p:'FW',r:83},{n:'Gnabry',p:'FW',r:81},{n:'Fullkrug',p:'FW',r:80},{n:'Undav',p:'FW',r:77}
+    {n:'Rudiger',p:'CB',r:83},{n:'Schlotterbeck',p:'CB',r:80},{n:'Raum',p:'LB',r:78},{n:'Tah',p:'CB',r:78},{n:'Mittelstadt',p:'LB',r:76},
+    {n:'Kimmich',p:'CDM',r:87},{n:'Wirtz',p:'CAM',r:89},{n:'Musiala',p:'CAM',r:87},{n:'Gundogan',p:'CM',r:83},{n:'Goretzka',p:'CM',r:80},
+    {n:'Havertz',p:'ST',r:84},{n:'Sane',p:'LW',r:83},{n:'Gnabry',p:'RW',r:81},{n:'Fullkrug',p:'ST',r:80},{n:'Undav',p:'ST',r:77}
   ]},
   {name:'Portugal',flag:'🇵🇹',str:84,coach:{n:'Roberto Martinez',r:78},players:[
     {n:'Diogo Costa',p:'GK',r:83},{n:'Jose Sa',p:'GK',r:76},{n:'Patricio',p:'GK',r:74},
-    {n:'Cancelo',p:'DF',r:81},{n:'Ruben Dias',p:'DF',r:88},{n:'Nuno Mendes',p:'DF',r:83},{n:'Dalot',p:'DF',r:79},{n:'Pepe',p:'DF',r:74},
-    {n:'Bruno Fernandes',p:'MF',r:88},{n:'Bernardo Silva',p:'MF',r:87},{n:'Vitinha',p:'MF',r:83},{n:'Palhinha',p:'MF',r:82},{n:'Sanches R',p:'MF',r:75},
-    {n:'Leao R',p:'FW',r:84},{n:'Ramos G',p:'FW',r:81},{n:'Felix J',p:'FW',r:83},{n:'Ronaldo',p:'FW',r:83},{n:'Horta',p:'FW',r:79}
+    {n:'Cancelo',p:'RB',r:81},{n:'Ruben Dias',p:'CB',r:88},{n:'Nuno Mendes',p:'LB',r:83},{n:'Dalot',p:'RB',r:79},{n:'Pepe',p:'CB',r:74},
+    {n:'Bruno Fernandes',p:'CAM',r:88},{n:'Bernardo Silva',p:'CM',r:87},{n:'Vitinha',p:'CM',r:83},{n:'Palhinha',p:'CDM',r:82},{n:'Sanches R',p:'CM',r:75},
+    {n:'Leao R',p:'LW',r:84},{n:'Ramos G',p:'ST',r:81},{n:'Felix J',p:'ST',r:83},{n:'Ronaldo',p:'ST',r:83},{n:'Horta',p:'RW',r:79}
   ]},
   {name:'Netherlands',flag:'🇳🇱',str:83,coach:{n:'Ronald Koeman',r:79},players:[
     {n:'Flekken',p:'GK',r:79},{n:'Bijlow',p:'GK',r:76},{n:'Cillessen',p:'GK',r:74},
-    {n:'Van Dijk',p:'DF',r:88},{n:'De Ligt',p:'DF',r:84},{n:'Timber',p:'DF',r:83},{n:'Ake',p:'DF',r:82},{n:'Dumfries',p:'DF',r:80},
-    {n:'De Jong F',p:'MF',r:87},{n:'Xavi Simons',p:'MF',r:84},{n:'Reijnders',p:'MF',r:83},{n:'Wijnaldum',p:'MF',r:79},{n:'Veerman',p:'MF',r:78},
-    {n:'Gakpo',p:'FW',r:84},{n:'Zirkzee',p:'FW',r:80},{n:'Depay',p:'FW',r:79},{n:'Bergwijn',p:'FW',r:78},{n:'Lang',p:'FW',r:76}
+    {n:'Van Dijk',p:'CB',r:88},{n:'De Ligt',p:'CB',r:84},{n:'Timber',p:'CB',r:83},{n:'Ake',p:'LB',r:82},{n:'Dumfries',p:'RB',r:80},
+    {n:'De Jong F',p:'CDM',r:87},{n:'Xavi Simons',p:'CAM',r:84},{n:'Reijnders',p:'CM',r:83},{n:'Wijnaldum',p:'CM',r:79},{n:'Veerman',p:'CM',r:78},
+    {n:'Gakpo',p:'LW',r:84},{n:'Zirkzee',p:'ST',r:80},{n:'Depay',p:'ST',r:79},{n:'Bergwijn',p:'RW',r:78},{n:'Lang',p:'LW',r:76}
   ]},
   {name:'Belgium',flag:'🇧🇪',str:82,coach:{n:'Domenico Tedesco',r:76},players:[
     {n:'Courtois',p:'GK',r:89},{n:'Casteels',p:'GK',r:78},{n:'Mignolet',p:'GK',r:73},
-    {n:'Castagne',p:'DF',r:78},{n:'Theate',p:'DF',r:79},{n:'Debast',p:'DF',r:77},{n:'Faes',p:'DF',r:76},{n:'Vertonghen',p:'DF',r:74},
-    {n:'De Bruyne',p:'MF',r:90},{n:'Trossard',p:'MF',r:83},{n:'Doku',p:'MF',r:84},{n:'De Ketelaere',p:'MF',r:80},{n:'Onana A',p:'MF',r:78},
-    {n:'Lukaku',p:'FW',r:83},{n:'Openda',p:'FW',r:82},{n:'Vanzeir',p:'FW',r:75},{n:'Batshuayi',p:'FW',r:74},{n:'Verschaeren',p:'FW',r:76}
+    {n:'Castagne',p:'RB',r:78},{n:'Theate',p:'CB',r:79},{n:'Debast',p:'CB',r:77},{n:'Faes',p:'CB',r:76},{n:'Vertonghen',p:'LB',r:74},
+    {n:'De Bruyne',p:'CAM',r:90},{n:'Trossard',p:'LW',r:83},{n:'Doku',p:'LW',r:84},{n:'De Ketelaere',p:'CAM',r:80},{n:'Onana A',p:'CDM',r:78},
+    {n:'Lukaku',p:'ST',r:83},{n:'Openda',p:'ST',r:82},{n:'Vanzeir',p:'ST',r:75},{n:'Batshuayi',p:'ST',r:74},{n:'Verschaeren',p:'RW',r:76}
   ]},
   {name:'Croatia',flag:'🇭🇷',str:80,coach:{n:'Zlatko Dalic',r:79},players:[
     {n:'Livakovic',p:'GK',r:82},{n:'Grbic',p:'GK',r:74},{n:'Ivusic',p:'GK',r:72},
-    {n:'Gvardiol',p:'DF',r:87},{n:'Erlic',p:'DF',r:77},{n:'Sosa',p:'DF',r:78},{n:'Sutalo',p:'DF',r:76},{n:'Stanisic',p:'DF',r:76},
-    {n:'Modric',p:'MF',r:85},{n:'Kovacic',p:'MF',r:84},{n:'Brozovic',p:'MF',r:81},{n:'Vlasic',p:'MF',r:80},{n:'Majer',p:'MF',r:78},
-    {n:'Kramaric',p:'FW',r:82},{n:'Pasalic',p:'FW',r:78},{n:'Petkovic',p:'FW',r:76},{n:'Budimir',p:'FW',r:75},{n:'Ivanusec',p:'FW',r:74}
+    {n:'Gvardiol',p:'LB',r:87},{n:'Erlic',p:'CB',r:77},{n:'Sosa',p:'LB',r:78},{n:'Sutalo',p:'CB',r:76},{n:'Stanisic',p:'RB',r:76},
+    {n:'Modric',p:'CM',r:85},{n:'Kovacic',p:'CM',r:84},{n:'Brozovic',p:'CDM',r:81},{n:'Vlasic',p:'CAM',r:80},{n:'Majer',p:'CM',r:78},
+    {n:'Kramaric',p:'ST',r:82},{n:'Pasalic',p:'ST',r:78},{n:'Petkovic',p:'ST',r:76},{n:'Budimir',p:'ST',r:75},{n:'Ivanusec',p:'RW',r:74}
   ]},
   {name:'Denmark',flag:'🇩🇰',str:78,coach:{n:'Kasper Hjulmand',r:77},players:[
     {n:'Schmeichel K',p:'GK',r:82},{n:'Grabara',p:'GK',r:74},{n:'Ronnow',p:'GK',r:73},
-    {n:'Christensen A',p:'DF',r:84},{n:'Andersen',p:'DF',r:82},{n:'Vestergaard',p:'DF',r:79},{n:'Kjaer',p:'DF',r:78},{n:'Maehle',p:'DF',r:78},
-    {n:'Eriksen',p:'MF',r:84},{n:'Hojbjerg',p:'MF',r:81},{n:'Skov Olsen',p:'MF',r:79},{n:'Delaney',p:'MF',r:77},{n:'Damsgaard',p:'MF',r:78},
-    {n:'Hojlund',p:'FW',r:83},{n:'Wind',p:'FW',r:77},{n:'Dolberg',p:'FW',r:75},{n:'Dreyer',p:'FW',r:74},{n:'Cornelius',p:'FW',r:73}
+    {n:'Christensen A',p:'CB',r:84},{n:'Andersen',p:'CB',r:82},{n:'Vestergaard',p:'CB',r:79},{n:'Kjaer',p:'CB',r:78},{n:'Maehle',p:'LB',r:78},
+    {n:'Eriksen',p:'CAM',r:84},{n:'Hojbjerg',p:'CDM',r:81},{n:'Skov Olsen',p:'RW',r:79},{n:'Delaney',p:'CM',r:77},{n:'Damsgaard',p:'LW',r:78},
+    {n:'Hojlund',p:'ST',r:83},{n:'Wind',p:'ST',r:77},{n:'Dolberg',p:'ST',r:75},{n:'Dreyer',p:'LW',r:74},{n:'Cornelius',p:'ST',r:73}
   ]},
   {name:'Switzerland',flag:'🇨🇭',str:77,coach:{n:'Murat Yakin',r:74},players:[
     {n:'Sommer',p:'GK',r:85},{n:'Kobel',p:'GK',r:80},{n:'Mvogo',p:'GK',r:72},
-    {n:'Akanji',p:'DF',r:83},{n:'Elvedi',p:'DF',r:79},{n:'Rodriguez R',p:'DF',r:77},{n:'Widmer',p:'DF',r:76},{n:'Stergiou',p:'DF',r:74},
-    {n:'Xhaka',p:'MF',r:83},{n:'Freuler',p:'MF',r:79},{n:'Zakaria',p:'MF',r:79},{n:'Sow',p:'MF',r:78},{n:'Shaqiri',p:'MF',r:78},
-    {n:'Ndoye',p:'FW',r:80},{n:'Embolo',p:'FW',r:80},{n:'Vargas R',p:'FW',r:79},{n:'Okafor',p:'FW',r:79},{n:'Amdouni',p:'FW',r:75}
+    {n:'Akanji',p:'CB',r:83},{n:'Elvedi',p:'CB',r:79},{n:'Rodriguez R',p:'LB',r:77},{n:'Widmer',p:'RB',r:76},{n:'Stergiou',p:'CB',r:74},
+    {n:'Xhaka',p:'CDM',r:83},{n:'Freuler',p:'CM',r:79},{n:'Zakaria',p:'CDM',r:79},{n:'Sow',p:'CM',r:78},{n:'Shaqiri',p:'LW',r:78},
+    {n:'Ndoye',p:'RW',r:80},{n:'Embolo',p:'ST',r:80},{n:'Vargas R',p:'LW',r:79},{n:'Okafor',p:'ST',r:79},{n:'Amdouni',p:'ST',r:75}
   ]},
   {name:'Italy',flag:'🇮🇹',str:82,coach:{n:'Luciano Spalletti',r:81},players:[
     {n:'Donnarumma',p:'GK',r:87},{n:'Vicario',p:'GK',r:80},{n:'Meret',p:'GK',r:76},
-    {n:'Bastoni',p:'DF',r:86},{n:'Di Lorenzo',p:'DF',r:81},{n:'Dimarco',p:'DF',r:82},{n:'Buongiorno',p:'DF',r:79},{n:'Acerbi',p:'DF',r:77},
-    {n:'Barella',p:'MF',r:87},{n:'Tonali',p:'MF',r:83},{n:'Frattesi',p:'MF',r:82},{n:'Pellegrini',p:'MF',r:79},{n:'Locatelli',p:'MF',r:78},
-    {n:'Retegui',p:'FW',r:81},{n:'Scamacca',p:'FW',r:80},{n:'Chiesa',p:'FW',r:81},{n:'Raspadori',p:'FW',r:79},{n:'Gnonto',p:'FW',r:77}
+    {n:'Bastoni',p:'LB',r:86},{n:'Di Lorenzo',p:'RB',r:81},{n:'Dimarco',p:'LB',r:82},{n:'Buongiorno',p:'CB',r:79},{n:'Acerbi',p:'CB',r:77},
+    {n:'Barella',p:'CM',r:87},{n:'Tonali',p:'CM',r:83},{n:'Frattesi',p:'CM',r:82},{n:'Pellegrini',p:'CAM',r:79},{n:'Locatelli',p:'CDM',r:78},
+    {n:'Retegui',p:'ST',r:81},{n:'Scamacca',p:'ST',r:80},{n:'Chiesa',p:'RW',r:81},{n:'Raspadori',p:'ST',r:79},{n:'Gnonto',p:'LW',r:77}
   ]},
   {name:'Serbia',flag:'🇷🇸',str:78,coach:{n:'Dragan Stojkovic',r:74},players:[
     {n:'Rajkovic',p:'GK',r:79},{n:'Dmitrovic',p:'GK',r:76},{n:'Jovanovic V',p:'GK',r:70},
-    {n:'Milenkovic',p:'DF',r:80},{n:'Pavlovic M',p:'DF',r:78},{n:'Kostic',p:'DF',r:80},{n:'Spajic',p:'DF',r:75},{n:'Maksimovic',p:'DF',r:74},
-    {n:'Milinkovic-Savic',p:'MF',r:84},{n:'Tadic',p:'MF',r:80},{n:'Samardzic',p:'MF',r:79},{n:'Lukic',p:'MF',r:77},{n:'Ilic S',p:'MF',r:77},
-    {n:'Vlahovic',p:'FW',r:86},{n:'Mitrovic',p:'FW',r:83},{n:'Jovic',p:'FW',r:78},{n:'Radonjic',p:'FW',r:74},{n:'Lazovic',p:'FW',r:73}
+    {n:'Milenkovic',p:'CB',r:80},{n:'Pavlovic M',p:'CB',r:78},{n:'Kostic',p:'LB',r:80},{n:'Spajic',p:'CB',r:75},{n:'Maksimovic',p:'RB',r:74},
+    {n:'Milinkovic-Savic',p:'CM',r:84},{n:'Tadic',p:'CAM',r:80},{n:'Samardzic',p:'CM',r:79},{n:'Lukic',p:'CDM',r:77},{n:'Ilic S',p:'CDM',r:77},
+    {n:'Vlahovic',p:'ST',r:86},{n:'Mitrovic',p:'ST',r:83},{n:'Jovic',p:'ST',r:78},{n:'Radonjic',p:'LW',r:74},{n:'Lazovic',p:'RW',r:73}
   ]},
   {name:'Poland',flag:'🇵🇱',str:76,coach:{n:'Michal Probierz',r:72},players:[
     {n:'Szczesny',p:'GK',r:83},{n:'Bulka',p:'GK',r:74},{n:'Skorupski',p:'GK',r:73},
-    {n:'Bednarek',p:'DF',r:79},{n:'Kiwior',p:'DF',r:77},{n:'Cash',p:'DF',r:76},{n:'Bereszynski',p:'DF',r:75},{n:'Gumny',p:'DF',r:73},
-    {n:'Zielinski',p:'MF',r:84},{n:'Szymanski S',p:'MF',r:78},{n:'Frankowski',p:'MF',r:77},{n:'Slisz',p:'MF',r:74},{n:'Moder',p:'MF',r:74},
-    {n:'Lewandowski',p:'FW',r:87},{n:'Swiderski',p:'FW',r:78},{n:'Piatek',p:'FW',r:77},{n:'Buksa',p:'FW',r:74},{n:'Urbanski',p:'FW',r:74}
+    {n:'Bednarek',p:'CB',r:79},{n:'Kiwior',p:'CB',r:77},{n:'Cash',p:'RB',r:76},{n:'Bereszynski',p:'RB',r:75},{n:'Gumny',p:'LB',r:73},
+    {n:'Zielinski',p:'CAM',r:84},{n:'Szymanski S',p:'CM',r:78},{n:'Frankowski',p:'RW',r:77},{n:'Slisz',p:'CDM',r:74},{n:'Moder',p:'CM',r:74},
+    {n:'Lewandowski',p:'ST',r:87},{n:'Swiderski',p:'ST',r:78},{n:'Piatek',p:'ST',r:77},{n:'Buksa',p:'ST',r:74},{n:'Urbanski',p:'LW',r:74}
   ]},
   {name:'Turkey',flag:'🇹🇷',str:78,coach:{n:'Vincenzo Montella',r:74},players:[
     {n:'Gunok',p:'GK',r:77},{n:'Bayindir',p:'GK',r:74},{n:'Cakir',p:'GK',r:72},
-    {n:'Demiral',p:'DF',r:81},{n:'Bardakci',p:'DF',r:79},{n:'Soyuncu',p:'DF',r:77},{n:'Muldur',p:'DF',r:77},{n:'Zeki Celik',p:'DF',r:76},
-    {n:'Calhannoglu',p:'MF',r:86},{n:'Yildiz K',p:'MF',r:84},{n:'Guler A',p:'MF',r:83},{n:'Yazici',p:'MF',r:79},{n:'Ozcan',p:'MF',r:78},
-    {n:'Akturkoglu',p:'FW',r:79},{n:'Yilmaz B',p:'FW',r:77},{n:'Tosun',p:'FW',r:72},{n:'Ilkhan',p:'FW',r:73},{n:'Kahveci',p:'FW',r:76}
+    {n:'Demiral',p:'CB',r:81},{n:'Bardakci',p:'CB',r:79},{n:'Soyuncu',p:'CB',r:77},{n:'Muldur',p:'RB',r:77},{n:'Zeki Celik',p:'RB',r:76},
+    {n:'Calhannoglu',p:'CDM',r:86},{n:'Yildiz K',p:'LW',r:84},{n:'Guler A',p:'CAM',r:83},{n:'Yazici',p:'CAM',r:79},{n:'Ozcan',p:'CM',r:78},
+    {n:'Akturkoglu',p:'LW',r:79},{n:'Yilmaz B',p:'ST',r:77},{n:'Tosun',p:'ST',r:72},{n:'Ilkhan',p:'ST',r:73},{n:'Kahveci',p:'RW',r:76}
   ]},
   {name:'Scotland',flag:'🏴󠁧󠁢󠁳󠁣󠁴󠁿',str:72,coach:{n:'Steve Clarke',r:72},players:[
     {n:'Gordon A',p:'GK',r:77},{n:'Marshall',p:'GK',r:72},{n:'Clark',p:'GK',r:70},
-    {n:'Robertson',p:'DF',r:83},{n:'Tierney',p:'DF',r:78},{n:'McKenna',p:'DF',r:75},{n:'Hanley',p:'DF',r:74},{n:'Ralston',p:'DF',r:74},
-    {n:'McTominay',p:'MF',r:81},{n:'McGinn',p:'MF',r:80},{n:'Gilmour',p:'MF',r:78},{n:'Christie',p:'MF',r:77},{n:'Armstrong',p:'MF',r:75},
-    {n:'Adams',p:'FW',r:76},{n:'Shankland',p:'FW',r:74},{n:'Dykes',p:'FW',r:74},{n:'Gauld',p:'FW',r:73},{n:'McLean',p:'FW',r:72}
+    {n:'Robertson',p:'LB',r:83},{n:'Tierney',p:'LB',r:78},{n:'McKenna',p:'CB',r:75},{n:'Hanley',p:'CB',r:74},{n:'Ralston',p:'RB',r:74},
+    {n:'McTominay',p:'CM',r:81},{n:'McGinn',p:'CM',r:80},{n:'Gilmour',p:'CM',r:78},{n:'Christie',p:'RW',r:77},{n:'Armstrong',p:'CAM',r:75},
+    {n:'Adams',p:'ST',r:76},{n:'Shankland',p:'ST',r:74},{n:'Dykes',p:'ST',r:74},{n:'Gauld',p:'LW',r:73},{n:'McLean',p:'RW',r:72}
   ]},
   {name:'Austria',flag:'🇦🇹',str:74,coach:{n:'Ralf Rangnick',r:80},players:[
     {n:'Lindner',p:'GK',r:77},{n:'Pentz',p:'GK',r:74},{n:'Hedl',p:'GK',r:72},
-    {n:'Alaba',p:'DF',r:80},{n:'Trauner',p:'DF',r:77},{n:'Posch',p:'DF',r:76},{n:'Wober',p:'DF',r:75},{n:'Lienhart',p:'DF',r:74},
-    {n:'Sabitzer',p:'MF',r:80},{n:'Laimer',p:'MF',r:79},{n:'Baumgartner',p:'MF',r:79},{n:'Grillitsch',p:'MF',r:75},{n:'Kainz',p:'MF',r:74},
-    {n:'Gregoritsch',p:'FW',r:77},{n:'Arnautovic',p:'FW',r:75},{n:'Weimann',p:'FW',r:73},{n:'Wimmer',p:'FW',r:73},{n:'Adamu',p:'FW',r:72}
+    {n:'Alaba',p:'CB',r:80},{n:'Trauner',p:'CB',r:77},{n:'Posch',p:'RB',r:76},{n:'Wober',p:'LB',r:75},{n:'Lienhart',p:'CB',r:74},
+    {n:'Sabitzer',p:'CM',r:80},{n:'Laimer',p:'CM',r:79},{n:'Baumgartner',p:'CAM',r:79},{n:'Grillitsch',p:'CDM',r:75},{n:'Kainz',p:'LW',r:74},
+    {n:'Gregoritsch',p:'ST',r:77},{n:'Arnautovic',p:'ST',r:75},{n:'Weimann',p:'ST',r:73},{n:'Wimmer',p:'RW',r:73},{n:'Adamu',p:'LW',r:72}
   ]},
   // ── CONMEBOL ──
   {name:'Argentina',flag:'🇦🇷',str:90,coach:{n:'Lionel Scaloni',r:81},players:[
     {n:'Emi Martinez',p:'GK',r:88},{n:'Rulli',p:'GK',r:76},{n:'Musso',p:'GK',r:78},
-    {n:'Romero C',p:'DF',r:86},{n:'Lisandro Martinez',p:'DF',r:83},{n:'Molina',p:'DF',r:81},{n:'Otamendi',p:'DF',r:80},{n:'Tagliafico',p:'DF',r:79},
-    {n:'Mac Allister',p:'MF',r:84},{n:'De Paul',p:'MF',r:84},{n:'Fernandez E',p:'MF',r:81},{n:'Lo Celso',p:'MF',r:79},{n:'Almada',p:'MF',r:79},
-    {n:'Messi',p:'FW',r:91},{n:'Lautaro',p:'FW',r:88},{n:'Alvarez J',p:'FW',r:85},{n:'Dybala',p:'FW',r:83},{n:'Di Maria',p:'FW',r:79}
+    {n:'Romero C',p:'CB',r:86},{n:'Lisandro Martinez',p:'CB',r:83},{n:'Molina',p:'RB',r:81},{n:'Otamendi',p:'CB',r:80},{n:'Tagliafico',p:'LB',r:79},
+    {n:'Mac Allister',p:'CM',r:84},{n:'De Paul',p:'CM',r:84},{n:'Fernandez E',p:'CDM',r:81},{n:'Lo Celso',p:'CAM',r:79},{n:'Almada',p:'CAM',r:79},
+    {n:'Messi',p:'RW',r:91},{n:'Lautaro',p:'ST',r:88},{n:'Alvarez J',p:'ST',r:85},{n:'Dybala',p:'ST',r:83},{n:'Di Maria',p:'LW',r:79}
   ]},
   {name:'Brazil',flag:'🇧🇷',str:89,coach:{n:'Dorival Junior',r:74},players:[
     {n:'Alisson',p:'GK',r:89},{n:'Ederson',p:'GK',r:86},{n:'Bento',p:'GK',r:77},
-    {n:'Marquinhos',p:'DF',r:86},{n:'Militao',p:'DF',r:84},{n:'Danilo',p:'DF',r:79},{n:'Beraldo',p:'DF',r:76},{n:'Wendell',p:'DF',r:76},
-    {n:'Paqueta',p:'MF',r:85},{n:'Casemiro',p:'MF',r:83},{n:'Rodrygo',p:'MF',r:84},{n:'Raphinha',p:'MF',r:84},{n:'Guimaraes B',p:'MF',r:83},
-    {n:'Vinicius Jr',p:'FW',r:93},{n:'Endrick',p:'FW',r:83},{n:'Neymar',p:'FW',r:83},{n:'Martinelli G',p:'FW',r:82},{n:'Savinho',p:'FW',r:80}
+    {n:'Marquinhos',p:'CB',r:86},{n:'Militao',p:'CB',r:84},{n:'Danilo',p:'RB',r:79},{n:'Beraldo',p:'CB',r:76},{n:'Wendell',p:'LB',r:76},
+    {n:'Paqueta',p:'CAM',r:85},{n:'Casemiro',p:'CDM',r:83},{n:'Rodrygo',p:'RW',r:84},{n:'Raphinha',p:'LW',r:84},{n:'Guimaraes B',p:'CDM',r:83},
+    {n:'Vinicius Jr',p:'LW',r:93},{n:'Endrick',p:'ST',r:83},{n:'Neymar',p:'LW',r:83},{n:'Martinelli G',p:'ST',r:82},{n:'Savinho',p:'RW',r:80}
   ]},
   {name:'Colombia',flag:'🇨🇴',str:79,coach:{n:'Nestor Lorenzo',r:73},players:[
     {n:'Camilo Vargas',p:'GK',r:76},{n:'Montero',p:'GK',r:73},{n:'Candelo',p:'GK',r:70},
-    {n:'Davinson',p:'DF',r:81},{n:'Cuesta',p:'DF',r:78},{n:'Munoz',p:'DF',r:78},{n:'Mojica',p:'DF',r:77},{n:'Lucumi',p:'DF',r:76},
-    {n:'Rodriguez J',p:'MF',r:79},{n:'Lerma',p:'MF',r:79},{n:'Arias',p:'MF',r:79},{n:'Uribe',p:'MF',r:78},{n:'Cardona',p:'MF',r:76},
-    {n:'Diaz L',p:'FW',r:84},{n:'Cucho Hernandez',p:'FW',r:78},{n:'Borre',p:'FW',r:77},{n:'Gutierrez',p:'FW',r:76},{n:'Arango',p:'FW',r:76}
+    {n:'Davinson',p:'CB',r:81},{n:'Cuesta',p:'CB',r:78},{n:'Munoz',p:'RB',r:78},{n:'Mojica',p:'LB',r:77},{n:'Lucumi',p:'CB',r:76},
+    {n:'Rodriguez J',p:'CAM',r:79},{n:'Lerma',p:'CDM',r:79},{n:'Arias',p:'CM',r:79},{n:'Uribe',p:'CM',r:78},{n:'Cardona',p:'RW',r:76},
+    {n:'Diaz L',p:'LW',r:84},{n:'Cucho Hernandez',p:'ST',r:78},{n:'Borre',p:'ST',r:77},{n:'Gutierrez',p:'ST',r:76},{n:'Arango',p:'LW',r:76}
   ]},
   {name:'Uruguay',flag:'🇺🇾',str:80,coach:{n:'Marcelo Bielsa',r:84},players:[
     {n:'Rochet',p:'GK',r:77},{n:'Muslera',p:'GK',r:74},{n:'Sosa T',p:'GK',r:72},
-    {n:'Araujo',p:'DF',r:85},{n:'Gimenez',p:'DF',r:83},{n:'Nandez',p:'DF',r:78},{n:'Olivera',p:'DF',r:77},{n:'Vina',p:'DF',r:76},
-    {n:'Valverde F',p:'MF',r:88},{n:'Bentancur',p:'MF',r:83},{n:'Ugarte',p:'MF',r:81},{n:'De la Cruz',p:'MF',r:80},{n:'Pellistri',p:'MF',r:78},
-    {n:'Nunez D',p:'FW',r:84},{n:'Torres F',p:'FW',r:76},{n:'Suarez',p:'FW',r:74},{n:'Sanchez L',p:'FW',r:75},{n:'Saravia',p:'FW',r:73}
+    {n:'Araujo',p:'CB',r:85},{n:'Gimenez',p:'CB',r:83},{n:'Nandez',p:'RB',r:78},{n:'Olivera',p:'LB',r:77},{n:'Vina',p:'LB',r:76},
+    {n:'Valverde F',p:'CM',r:88},{n:'Bentancur',p:'CM',r:83},{n:'Ugarte',p:'CDM',r:81},{n:'De la Cruz',p:'CAM',r:80},{n:'Pellistri',p:'RW',r:78},
+    {n:'Nunez D',p:'ST',r:84},{n:'Torres F',p:'LW',r:76},{n:'Suarez',p:'ST',r:74},{n:'Sanchez L',p:'LW',r:75},{n:'Saravia',p:'RW',r:73}
   ]},
   {name:'Ecuador',flag:'🇪🇨',str:74,coach:{n:'Sebastian Beccacece',r:72},players:[
     {n:'Galindez',p:'GK',r:76},{n:'Dominguez H',p:'GK',r:71},{n:'Bone',p:'GK',r:68},
-    {n:'Pacho',p:'DF',r:81},{n:'Hincapie',p:'DF',r:80},{n:'Estupinian',p:'DF',r:81},{n:'Preciado',p:'DF',r:75},{n:'Sarmiento',p:'DF',r:76},
-    {n:'Caicedo',p:'MF',r:86},{n:'Mendez',p:'MF',r:79},{n:'Gruezo',p:'MF',r:75},{n:'Cifuentes',p:'MF',r:76},{n:'Palacios',p:'MF',r:74},
-    {n:'Ibarra',p:'FW',r:79},{n:'Valencia E',p:'FW',r:79},{n:'Plata',p:'FW',r:78},{n:'Enner Valencia',p:'FW',r:74},{n:'Minda',p:'FW',r:72}
+    {n:'Pacho',p:'CB',r:81},{n:'Hincapie',p:'LB',r:80},{n:'Estupinian',p:'LB',r:81},{n:'Preciado',p:'RB',r:75},{n:'Sarmiento',p:'CB',r:76},
+    {n:'Caicedo',p:'CDM',r:86},{n:'Mendez',p:'CM',r:79},{n:'Gruezo',p:'CDM',r:75},{n:'Cifuentes',p:'CM',r:76},{n:'Palacios',p:'CAM',r:74},
+    {n:'Ibarra',p:'LW',r:79},{n:'Valencia E',p:'ST',r:79},{n:'Plata',p:'LW',r:78},{n:'Enner Valencia',p:'ST',r:74},{n:'Minda',p:'ST',r:72}
   ]},
   {name:'Venezuela',flag:'🇻🇪',str:68,coach:{n:'Fernando Batista',r:69},players:[
     {n:'Romo',p:'GK',r:73},{n:'Graterol',p:'GK',r:70},{n:'Baroja',p:'GK',r:67},
-    {n:'Chancellor',p:'DF',r:75},{n:'Ferraresi',p:'DF',r:75},{n:'Osorio',p:'DF',r:74},{n:'Gonzalez E',p:'DF',r:72},{n:'Navarro',p:'DF',r:71},
-    {n:'Herrera Y',p:'MF',r:75},{n:'Sosa',p:'MF',r:75},{n:'Machis',p:'MF',r:77},{n:'Savarino',p:'MF',r:76},{n:'Casseres',p:'MF',r:74},
-    {n:'Soteldo',p:'FW',r:76},{n:'Martinez S',p:'FW',r:75},{n:'Rondon',p:'FW',r:73},{n:'Flores',p:'FW',r:71},{n:'Penaranda',p:'FW',r:72}
+    {n:'Chancellor',p:'CB',r:75},{n:'Ferraresi',p:'CB',r:75},{n:'Osorio',p:'CB',r:74},{n:'Gonzalez E',p:'LB',r:72},{n:'Navarro',p:'RB',r:71},
+    {n:'Herrera Y',p:'CM',r:75},{n:'Sosa',p:'CDM',r:75},{n:'Machis',p:'LW',r:77},{n:'Savarino',p:'CAM',r:76},{n:'Casseres',p:'CM',r:74},
+    {n:'Soteldo',p:'LW',r:76},{n:'Martinez S',p:'ST',r:75},{n:'Rondon',p:'ST',r:73},{n:'Flores',p:'RW',r:71},{n:'Penaranda',p:'ST',r:72}
   ]},
   // ── CONCACAF ──
   {name:'USA',flag:'🇺🇸',str:76,coach:{n:'Mauricio Pochettino',r:80},players:[
     {n:'Turner',p:'GK',r:79},{n:'Horvath',p:'GK',r:75},{n:'Schuler',p:'GK',r:72},
-    {n:'Dest',p:'DF',r:78},{n:'Robinson',p:'DF',r:78},{n:'Zimmerman',p:'DF',r:77},{n:'Richards',p:'DF',r:75},{n:'Ream',p:'DF',r:75},
-    {n:'Adams T',p:'MF',r:81},{n:'Musah',p:'MF',r:80},{n:'McKennie',p:'MF',r:80},{n:'Reyna',p:'MF',r:79},{n:'Pulisic',p:'MF',r:84},
-    {n:'Balogun',p:'FW',r:80},{n:'Weah',p:'FW',r:79},{n:'Pepi',p:'FW',r:78},{n:'Tillman',p:'FW',r:76},{n:'Ferreira',p:'FW',r:75}
+    {n:'Dest',p:'RB',r:78},{n:'Robinson',p:'LB',r:78},{n:'Zimmerman',p:'CB',r:77},{n:'Richards',p:'CB',r:75},{n:'Ream',p:'CB',r:75},
+    {n:'Adams T',p:'CDM',r:81},{n:'Musah',p:'CM',r:80},{n:'McKennie',p:'CM',r:80},{n:'Reyna',p:'CAM',r:79},{n:'Pulisic',p:'LW',r:84},
+    {n:'Balogun',p:'ST',r:80},{n:'Weah',p:'RW',r:79},{n:'Pepi',p:'ST',r:78},{n:'Tillman',p:'LW',r:76},{n:'Ferreira',p:'ST',r:75}
   ]},
   {name:'Mexico',flag:'🇲🇽',str:74,coach:{n:'Javier Aguirre',r:74},players:[
     {n:'Malagon',p:'GK',r:76},{n:'Ochoa',p:'GK',r:75},{n:'Cota',p:'GK',r:72},
-    {n:'Sanchez J',p:'DF',r:77},{n:'Alvarez I',p:'DF',r:79},{n:'Araujo',p:'DF',r:77},{n:'Gallardo',p:'DF',r:77},{n:'Vasquez',p:'DF',r:75},
-    {n:'Herrera A',p:'MF',r:78},{n:'Lozano H',p:'MF',r:82},{n:'Antuna',p:'MF',r:76},{n:'Guardado',p:'MF',r:74},{n:'Chavez',p:'MF',r:76},
-    {n:'Jimenez R',p:'FW',r:80},{n:'Martin R',p:'FW',r:76},{n:'Vega',p:'FW',r:76},{n:'Flores',p:'FW',r:74},{n:'Alvarado',p:'FW',r:72}
+    {n:'Sanchez J',p:'CB',r:77},{n:'Alvarez I',p:'CB',r:79},{n:'Araujo',p:'LB',r:77},{n:'Gallardo',p:'RB',r:77},{n:'Vasquez',p:'CB',r:75},
+    {n:'Herrera A',p:'CDM',r:78},{n:'Lozano H',p:'RW',r:82},{n:'Antuna',p:'LW',r:76},{n:'Guardado',p:'CM',r:74},{n:'Chavez',p:'CM',r:76},
+    {n:'Jimenez R',p:'ST',r:80},{n:'Martin R',p:'ST',r:76},{n:'Vega',p:'LW',r:76},{n:'Flores',p:'RW',r:74},{n:'Alvarado',p:'ST',r:72}
   ]},
   {name:'Canada',flag:'🇨🇦',str:77,coach:{n:'Jesse Marsch',r:74},players:[
     {n:'Borjan',p:'GK',r:77},{n:'St. Clair',p:'GK',r:74},{n:'Crepeau',p:'GK',r:73},
-    {n:'Johnston DT',p:'DF',r:79},{n:'Miller M',p:'DF',r:77},{n:'Bombito',p:'DF',r:76},{n:'Laryea',p:'DF',r:78},{n:'Cornelius',p:'DF',r:74},
-    {n:'Eustaquio',p:'MF',r:82},{n:'Davies A',p:'MF',r:86},{n:'Hutchinson',p:'MF',r:77},{n:'Buchanan',p:'MF',r:80},{n:'Osorio',p:'MF',r:77},
-    {n:'David J',p:'FW',r:84},{n:'Larin',p:'FW',r:78},{n:'Hoilett',p:'FW',r:74},{n:'Shaffelburg',p:'FW',r:74},{n:'Corbeanu',p:'FW',r:73}
+    {n:'Johnston DT',p:'CB',r:79},{n:'Miller M',p:'CB',r:77},{n:'Bombito',p:'CB',r:76},{n:'Laryea',p:'RB',r:78},{n:'Cornelius',p:'LB',r:74},
+    {n:'Eustaquio',p:'CM',r:82},{n:'Davies A',p:'LW',r:86},{n:'Hutchinson',p:'CDM',r:77},{n:'Buchanan',p:'RW',r:80},{n:'Osorio',p:'CM',r:77},
+    {n:'David J',p:'ST',r:84},{n:'Larin',p:'ST',r:78},{n:'Hoilett',p:'LW',r:74},{n:'Shaffelburg',p:'LW',r:74},{n:'Corbeanu',p:'RW',r:73}
   ]},
   {name:'Costa Rica',flag:'🇨🇷',str:65,coach:{n:'Claudio Vivas',r:68},players:[
     {n:'Navas K',p:'GK',r:80},{n:'Sequeira',p:'GK',r:71},{n:'Barrantes',p:'GK',r:68},
-    {n:'Duarte',p:'DF',r:73},{n:'Calvo O',p:'DF',r:72},{n:'Oviedo',p:'DF',r:74},{n:'Fuller',p:'DF',r:71},{n:'Vargas A',p:'DF',r:70},
-    {n:'Tejeda',p:'MF',r:73},{n:'Campbell J',p:'MF',r:74},{n:'Torres D',p:'MF',r:71},{n:'Salas',p:'MF',r:70},{n:'Borges',p:'MF',r:69},
-    {n:'Ruiz B',p:'FW',r:73},{n:'Contreras',p:'FW',r:70},{n:'Lassiter',p:'FW',r:70},{n:'Hernandez C',p:'FW',r:68},{n:'Lopez',p:'FW',r:67}
+    {n:'Duarte',p:'CB',r:73},{n:'Calvo O',p:'CB',r:72},{n:'Oviedo',p:'LB',r:74},{n:'Fuller',p:'RB',r:71},{n:'Vargas A',p:'CB',r:70},
+    {n:'Tejeda',p:'CDM',r:73},{n:'Campbell J',p:'CM',r:74},{n:'Torres D',p:'CM',r:71},{n:'Salas',p:'LW',r:70},{n:'Borges',p:'CAM',r:69},
+    {n:'Ruiz B',p:'ST',r:73},{n:'Contreras',p:'ST',r:70},{n:'Lassiter',p:'ST',r:70},{n:'Hernandez C',p:'LW',r:68},{n:'Lopez',p:'RW',r:67}
   ]},
   {name:'Panama',flag:'🇵🇦',str:64,coach:{n:'Thomas Christiansen',r:68},players:[
     {n:'Penedo',p:'GK',r:73},{n:'Mosquera',p:'GK',r:69},{n:'Cohen',p:'GK',r:67},
-    {n:'Murillo C',p:'DF',r:71},{n:'Miller A',p:'DF',r:69},{n:'Davis E',p:'DF',r:70},{n:'Harvey',p:'DF',r:70},{n:'Cordoba B',p:'DF',r:68},
-    {n:'Gondola',p:'MF',r:68},{n:'Fajardo',p:'MF',r:68},{n:'Taylor',p:'MF',r:70},{n:'Quintero C',p:'MF',r:71},{n:'Rodriguez',p:'MF',r:67},
-    {n:'Barcenas',p:'FW',r:70},{n:'Cordoba A',p:'FW',r:69},{n:'Urrutia',p:'FW',r:68},{n:'Rodriguez E',p:'FW',r:67},{n:'Careaga',p:'FW',r:66}
+    {n:'Murillo C',p:'CB',r:71},{n:'Miller A',p:'CB',r:69},{n:'Davis E',p:'CB',r:70},{n:'Harvey',p:'LB',r:70},{n:'Cordoba B',p:'RB',r:68},
+    {n:'Gondola',p:'CM',r:68},{n:'Fajardo',p:'CDM',r:68},{n:'Taylor',p:'CM',r:70},{n:'Quintero C',p:'CAM',r:71},{n:'Rodriguez',p:'RW',r:67},
+    {n:'Barcenas',p:'LW',r:70},{n:'Cordoba A',p:'ST',r:69},{n:'Urrutia',p:'ST',r:68},{n:'Rodriguez E',p:'RW',r:67},{n:'Careaga',p:'ST',r:66}
   ]},
   // ── CAF ──
   {name:'Morocco',flag:'🇲🇦',str:81,coach:{n:'Walid Regragui',r:78},players:[
     {n:'Bounou',p:'GK',r:83},{n:'Tagnaouti',p:'GK',r:73},{n:'El Wardi',p:'GK',r:70},
-    {n:'Hakimi',p:'DF',r:86},{n:'Aguerd',p:'DF',r:81},{n:'Mazraoui',p:'DF',r:82},{n:'Saiss',p:'DF',r:79},{n:'Attiyat Allah',p:'DF',r:76},
-    {n:'Amrabat',p:'MF',r:83},{n:'Ounahi',p:'MF',r:80},{n:'Ziyech',p:'MF',r:82},{n:'Benhaima',p:'MF',r:75},{n:'Louza',p:'MF',r:76},
-    {n:'En-Nesyri',p:'FW',r:82},{n:'Boufal',p:'FW',r:79},{n:'El Kaabi',p:'FW',r:79},{n:'Ezzalzouli',p:'FW',r:77},{n:'Cheddira',p:'FW',r:76}
+    {n:'Hakimi',p:'RB',r:86},{n:'Aguerd',p:'CB',r:81},{n:'Mazraoui',p:'RB',r:82},{n:'Saiss',p:'CB',r:79},{n:'Attiyat Allah',p:'LB',r:76},
+    {n:'Amrabat',p:'CDM',r:83},{n:'Ounahi',p:'CM',r:80},{n:'Ziyech',p:'CAM',r:82},{n:'Benhaima',p:'CM',r:75},{n:'Louza',p:'CDM',r:76},
+    {n:'En-Nesyri',p:'ST',r:82},{n:'Boufal',p:'LW',r:79},{n:'El Kaabi',p:'ST',r:79},{n:'Ezzalzouli',p:'LW',r:77},{n:'Cheddira',p:'ST',r:76}
   ]},
   {name:'Nigeria',flag:'🇳🇬',str:79,coach:{n:'Eric Chelle',r:70},players:[
     {n:'Nwabali',p:'GK',r:77},{n:'Uzoho',p:'GK',r:76},{n:'Obi',p:'GK',r:70},
-    {n:'Troost-Ekong',p:'DF',r:79},{n:'Aina',p:'DF',r:79},{n:'Bassey',p:'DF',r:78},{n:'Tanimu',p:'DF',r:74},{n:'Awaziem',p:'DF',r:74},
-    {n:'Ndidi',p:'MF',r:82},{n:'Iwobi',p:'MF',r:80},{n:'Lookman',p:'MF',r:84},{n:'Aribo',p:'MF',r:77},{n:'Eze E',p:'MF',r:79},
-    {n:'Osimhen',p:'FW',r:90},{n:'Chukwueze',p:'FW',r:80},{n:'Awoniyi',p:'FW',r:78},{n:'Iheanacho',p:'FW',r:75},{n:'Dessers',p:'FW',r:74}
+    {n:'Troost-Ekong',p:'CB',r:79},{n:'Aina',p:'RB',r:79},{n:'Bassey',p:'CB',r:78},{n:'Tanimu',p:'LB',r:74},{n:'Awaziem',p:'CB',r:74},
+    {n:'Ndidi',p:'CDM',r:82},{n:'Iwobi',p:'CM',r:80},{n:'Lookman',p:'LW',r:84},{n:'Aribo',p:'CAM',r:77},{n:'Eze E',p:'CAM',r:79},
+    {n:'Osimhen',p:'ST',r:90},{n:'Chukwueze',p:'RW',r:80},{n:'Awoniyi',p:'ST',r:78},{n:'Iheanacho',p:'ST',r:75},{n:'Dessers',p:'ST',r:74}
   ]},
   {name:'Senegal',flag:'🇸🇳',str:79,coach:{n:'Aliou Cisse',r:76},players:[
     {n:'Mendy E',p:'GK',r:83},{n:'Gomis',p:'GK',r:73},{n:'Dieng',p:'GK',r:71},
-    {n:'Koulibaly',p:'DF',r:84},{n:'Jakobs',p:'DF',r:77},{n:'Mendy B',p:'DF',r:77},{n:'Sabaly',p:'DF',r:76},{n:'Diallo A',p:'DF',r:75},
-    {n:'Gueye I',p:'MF',r:82},{n:'Diatta',p:'MF',r:78},{n:'Kouyate',p:'MF',r:76},{n:'Ciss',p:'MF',r:73},{n:'Ndiaye',p:'MF',r:75},
-    {n:'Mane S',p:'FW',r:85},{n:'Sarr I',p:'FW',r:80},{n:'Dia B',p:'FW',r:81},{n:'Diedhiou',p:'FW',r:76},{n:'Niane',p:'FW',r:74}
+    {n:'Koulibaly',p:'CB',r:84},{n:'Jakobs',p:'LB',r:77},{n:'Mendy B',p:'CB',r:77},{n:'Sabaly',p:'RB',r:76},{n:'Diallo A',p:'CB',r:75},
+    {n:'Gueye I',p:'CDM',r:82},{n:'Diatta',p:'RW',r:78},{n:'Kouyate',p:'CM',r:76},{n:'Ciss',p:'CDM',r:73},{n:'Ndiaye',p:'CM',r:75},
+    {n:'Mane S',p:'LW',r:85},{n:'Sarr I',p:'RW',r:80},{n:'Dia B',p:'ST',r:81},{n:'Diedhiou',p:'ST',r:76},{n:'Niane',p:'ST',r:74}
   ]},
   {name:'Ghana',flag:'🇬🇭',str:73,coach:{n:'Otto Addo',r:70},players:[
     {n:'Ati-Zigi',p:'GK',r:77},{n:'Wollacott',p:'GK',r:73},{n:'Danlad',p:'GK',r:69},
-    {n:'Salisu',p:'DF',r:78},{n:'Amartey',p:'DF',r:76},{n:'Djiku',p:'DF',r:75},{n:'Baba R',p:'DF',r:75},{n:'Mensah',p:'DF',r:73},
-    {n:'Partey',p:'MF',r:83},{n:'Kudus',p:'MF',r:83},{n:'Ayew J',p:'MF',r:78},{n:'Sowah',p:'MF',r:75},{n:'Odoi',p:'MF',r:72},
-    {n:'Sulemana',p:'FW',r:78},{n:'Williams I',p:'FW',r:74},{n:'Bansa',p:'FW',r:75},{n:'Afena-Gyan',p:'FW',r:75},{n:'Kyere',p:'FW',r:72}
+    {n:'Salisu',p:'CB',r:78},{n:'Amartey',p:'CB',r:76},{n:'Djiku',p:'CB',r:75},{n:'Baba R',p:'LB',r:75},{n:'Mensah',p:'RB',r:73},
+    {n:'Partey',p:'CDM',r:83},{n:'Kudus',p:'CAM',r:83},{n:'Ayew J',p:'LW',r:78},{n:'Sowah',p:'CM',r:75},{n:'Odoi',p:'CM',r:72},
+    {n:'Sulemana',p:'LW',r:78},{n:'Williams I',p:'RW',r:74},{n:'Bansa',p:'ST',r:75},{n:'Afena-Gyan',p:'ST',r:75},{n:'Kyere',p:'ST',r:72}
   ]},
   {name:'Cameroon',flag:'🇨🇲',str:72,coach:{n:'Rigobert Song',r:68},players:[
     {n:'Onana A',p:'GK',r:86},{n:'Epassy',p:'GK',r:75},{n:'Ondoa',p:'GK',r:68},
-    {n:'Tolo',p:'DF',r:75},{n:'Castelletto',p:'DF',r:74},{n:'Fai',p:'DF',r:74},{n:'Ngadeu',p:'DF',r:73},{n:'Wooh',p:'DF',r:72},
-    {n:'Anguissa',p:'MF',r:83},{n:'Hongla',p:'MF',r:77},{n:'Zambo',p:'MF',r:73},{n:'Kunde',p:'MF',r:73},{n:'Oum Gouet',p:'MF',r:72},
-    {n:'Mbeumo',p:'FW',r:82},{n:'Toko Ekambi',p:'FW',r:78},{n:'Aboubakar',p:'FW',r:77},{n:'Choupo-Moting',p:'FW',r:75},{n:'Ntcham',p:'FW',r:73}
+    {n:'Tolo',p:'CB',r:75},{n:'Castelletto',p:'CB',r:74},{n:'Fai',p:'RB',r:74},{n:'Ngadeu',p:'CB',r:73},{n:'Wooh',p:'LB',r:72},
+    {n:'Anguissa',p:'CM',r:83},{n:'Hongla',p:'CDM',r:77},{n:'Zambo',p:'CDM',r:73},{n:'Kunde',p:'CM',r:73},{n:'Oum Gouet',p:'CM',r:72},
+    {n:'Mbeumo',p:'RW',r:82},{n:'Toko Ekambi',p:'LW',r:78},{n:'Aboubakar',p:'ST',r:77},{n:'Choupo-Moting',p:'ST',r:75},{n:'Ntcham',p:'ST',r:73}
   ]},
   {name:'Ivory Coast',flag:'🇨🇮',str:76,coach:{n:'Emerse Fae',r:69},players:[
     {n:'Sangare OR',p:'GK',r:76},{n:'Zogbo',p:'GK',r:70},{n:'Tape',p:'GK',r:68},
-    {n:'Singo',p:'DF',r:78},{n:'Boly',p:'DF',r:76},{n:'Konate D',p:'DF',r:75},{n:'Deli',p:'DF',r:73},{n:'Diomande',p:'DF',r:74},
-    {n:'Kessie',p:'MF',r:83},{n:'Sangare I',p:'MF',r:79},{n:'Kone A',p:'MF',r:77},{n:'Bamba',p:'MF',r:74},{n:'Doumbia',p:'MF',r:73},
-    {n:'Pepe N',p:'FW',r:79},{n:'Haller',p:'FW',r:79},{n:'Cornet',p:'FW',r:78},{n:'Fofana',p:'FW',r:77},{n:'Boga',p:'FW',r:75}
+    {n:'Singo',p:'RB',r:78},{n:'Boly',p:'CB',r:76},{n:'Konate D',p:'CB',r:75},{n:'Deli',p:'CB',r:73},{n:'Diomande',p:'LB',r:74},
+    {n:'Kessie',p:'CDM',r:83},{n:'Sangare I',p:'CDM',r:79},{n:'Kone A',p:'CM',r:77},{n:'Bamba',p:'LW',r:74},{n:'Doumbia',p:'CM',r:73},
+    {n:'Pepe N',p:'RW',r:79},{n:'Haller',p:'ST',r:79},{n:'Cornet',p:'LW',r:78},{n:'Fofana',p:'ST',r:77},{n:'Boga',p:'LW',r:75}
   ]},
   {name:'Egypt',flag:'🇪🇬',str:72,coach:{n:'Hossam El-Badry',r:70},players:[
     {n:'El-Shenawy',p:'GK',r:77},{n:'Gabaski',p:'GK',r:73},{n:'Shobeir',p:'GK',r:70},
-    {n:'Hegazy',p:'DF',r:77},{n:'Hamdi F',p:'DF',r:75},{n:'Ashraf H',p:'DF',r:74},{n:'Abdelmonem',p:'DF',r:73},{n:'Hamdy R',p:'DF',r:72},
-    {n:'Elneny',p:'MF',r:76},{n:'Nabil M',p:'MF',r:74},{n:'Sobhi',p:'MF',r:73},{n:'Marmoush',p:'MF',r:81},{n:'Hassan M',p:'MF',r:72},
-    {n:'Salah M',p:'FW',r:89},{n:'Mostafa M',p:'FW',r:75},{n:'Ahmed S',p:'FW',r:73},{n:'Trezeguet',p:'FW',r:74},{n:'Kahraba',p:'FW',r:71}
+    {n:'Hegazy',p:'CB',r:77},{n:'Hamdi F',p:'CB',r:75},{n:'Ashraf H',p:'RB',r:74},{n:'Abdelmonem',p:'CB',r:73},{n:'Hamdy R',p:'LB',r:72},
+    {n:'Elneny',p:'CDM',r:76},{n:'Nabil M',p:'CM',r:74},{n:'Sobhi',p:'LW',r:73},{n:'Marmoush',p:'CAM',r:81},{n:'Hassan M',p:'CM',r:72},
+    {n:'Salah M',p:'RW',r:89},{n:'Mostafa M',p:'ST',r:75},{n:'Ahmed S',p:'ST',r:73},{n:'Trezeguet',p:'LW',r:74},{n:'Kahraba',p:'LW',r:71}
   ]},
   {name:'Tunisia',flag:'🇹🇳',str:68,coach:{n:'Jalel Kadri',r:68},players:[
     {n:'Dahmen',p:'GK',r:74},{n:'Mathlouthi',p:'GK',r:70},{n:'Ben Said',p:'GK',r:68},
-    {n:'Talbi',p:'DF',r:73},{n:'Ben Romdhane',p:'DF',r:71},{n:'Maaloul',p:'DF',r:72},{n:'Rekik',p:'DF',r:72},{n:'Abdi',p:'DF',r:70},
-    {n:'Skhiri',p:'MF',r:77},{n:'Slimane',p:'MF',r:75},{n:'Chaalali',p:'MF',r:72},{n:'Ben Slimane',p:'MF',r:73},{n:'Sassi',p:'MF',r:72},
-    {n:'Jebali',p:'FW',r:75},{n:'Khazri',p:'FW',r:73},{n:'Sahraoui',p:'FW',r:71},{n:'Msakni',p:'FW',r:70},{n:'Sghaier',p:'FW',r:70}
+    {n:'Talbi',p:'CB',r:73},{n:'Ben Romdhane',p:'CB',r:71},{n:'Maaloul',p:'LB',r:72},{n:'Rekik',p:'CB',r:72},{n:'Abdi',p:'RB',r:70},
+    {n:'Skhiri',p:'CDM',r:77},{n:'Slimane',p:'CM',r:75},{n:'Chaalali',p:'CAM',r:72},{n:'Ben Slimane',p:'CM',r:73},{n:'Sassi',p:'CM',r:72},
+    {n:'Jebali',p:'ST',r:75},{n:'Khazri',p:'ST',r:73},{n:'Sahraoui',p:'RW',r:71},{n:'Msakni',p:'LW',r:70},{n:'Sghaier',p:'ST',r:70}
   ]},
   {name:'South Africa',flag:'🇿🇦',str:63,coach:{n:'Hugo Broos',r:72},players:[
     {n:'Williams R',p:'GK',r:71},{n:'Mothwa',p:'GK',r:69},{n:'Petersen',p:'GK',r:67},
-    {n:'Mudau',p:'DF',r:68},{n:'De Reuck',p:'DF',r:67},{n:'Modise H',p:'DF',r:67},{n:'Mobbie',p:'DF',r:66},{n:'Ngcongca',p:'DF',r:66},
-    {n:'Zungu B',p:'MF',r:70},{n:'Maart',p:'MF',r:69},{n:'Grobler',p:'MF',r:67},{n:'Lepasa',p:'MF',r:67},{n:'Mkhize',p:'MF',r:66},
-    {n:'Tau P',p:'FW',r:75},{n:'Dolly',p:'FW',r:72},{n:'Lorch',p:'FW',r:72},{n:'Majoro',p:'FW',r:68},{n:'Ndlovu B',p:'FW',r:68}
+    {n:'Mudau',p:'RB',r:68},{n:'De Reuck',p:'CB',r:67},{n:'Modise H',p:'CB',r:67},{n:'Mobbie',p:'LB',r:66},{n:'Ngcongca',p:'CB',r:66},
+    {n:'Zungu B',p:'CDM',r:70},{n:'Maart',p:'CM',r:69},{n:'Grobler',p:'CM',r:67},{n:'Lepasa',p:'CAM',r:67},{n:'Mkhize',p:'CM',r:66},
+    {n:'Tau P',p:'LW',r:75},{n:'Dolly',p:'RW',r:72},{n:'Lorch',p:'LW',r:72},{n:'Majoro',p:'ST',r:68},{n:'Ndlovu B',p:'ST',r:68}
   ]},
   {name:'Algeria',flag:'🇩🇿',str:70,coach:{n:'Djamel Belmadi',r:76},players:[
     {n:'Mbolhi',p:'GK',r:74},{n:'Zeghba',p:'GK',r:70},{n:'Oukkal',p:'GK',r:68},
-    {n:'Mandi',p:'DF',r:75},{n:'Ait Nouri',p:'DF',r:76},{n:'Bensebaini',p:'DF',r:75},{n:'Benlamri',p:'DF',r:73},{n:'Tahrat',p:'DF',r:70},
-    {n:'Bennacer',p:'MF',r:80},{n:'Amoura',p:'MF',r:75},{n:'Belaili',p:'MF',r:75},{n:'Bentaleb',p:'MF',r:74},{n:'Guedioura',p:'MF',r:73},
-    {n:'Mahrez',p:'FW',r:83},{n:'Said Benrahma',p:'FW',r:78},{n:'Brahimi',p:'FW',r:73},{n:'Slimani',p:'FW',r:73},{n:'Boudaoui',p:'FW',r:74}
+    {n:'Mandi',p:'CB',r:75},{n:'Ait Nouri',p:'LB',r:76},{n:'Bensebaini',p:'LB',r:75},{n:'Benlamri',p:'CB',r:73},{n:'Tahrat',p:'RB',r:70},
+    {n:'Bennacer',p:'CDM',r:80},{n:'Amoura',p:'LW',r:75},{n:'Belaili',p:'RW',r:75},{n:'Bentaleb',p:'CM',r:74},{n:'Guedioura',p:'CM',r:73},
+    {n:'Mahrez',p:'RW',r:83},{n:'Said Benrahma',p:'LW',r:78},{n:'Brahimi',p:'LW',r:73},{n:'Slimani',p:'ST',r:73},{n:'Boudaoui',p:'ST',r:74}
   ]},
   // ── AFC ──
   {name:'Japan',flag:'🇯🇵',str:78,coach:{n:'Hajime Moriyasu',r:77},players:[
     {n:'Gonda',p:'GK',r:79},{n:'Suzuki Z',p:'GK',r:75},{n:'Tani',p:'GK',r:72},
-    {n:'Tomiyasu',p:'DF',r:81},{n:'Itakura',p:'DF',r:80},{n:'Tanaka K',p:'DF',r:80},{n:'Machida',p:'DF',r:76},{n:'Nagatomo',p:'DF',r:74},
-    {n:'Endo W',p:'MF',r:83},{n:'Kamada',p:'MF',r:81},{n:'Kubo T',p:'MF',r:84},{n:'Morita',p:'MF',r:78},{n:'Doan',p:'MF',r:79},
-    {n:'Mitoma',p:'FW',r:83},{n:'Minamino',p:'FW',r:81},{n:'Furuhashi',p:'FW',r:80},{n:'Maeda',p:'FW',r:78},{n:'Ueda',p:'FW',r:79}
+    {n:'Tomiyasu',p:'RB',r:81},{n:'Itakura',p:'CB',r:80},{n:'Tanaka K',p:'CB',r:80},{n:'Machida',p:'LB',r:76},{n:'Nagatomo',p:'LB',r:74},
+    {n:'Endo W',p:'CDM',r:83},{n:'Kamada',p:'CAM',r:81},{n:'Kubo T',p:'RW',r:84},{n:'Morita',p:'CM',r:78},{n:'Doan',p:'LW',r:79},
+    {n:'Mitoma',p:'LW',r:83},{n:'Minamino',p:'ST',r:81},{n:'Furuhashi',p:'ST',r:80},{n:'Maeda',p:'ST',r:78},{n:'Ueda',p:'ST',r:79}
   ]},
   {name:'South Korea',flag:'🇰🇷',str:75,coach:{n:'Hong Myung-bo',r:72},players:[
     {n:'Kim SG',p:'GK',r:83},{n:'Jo HW',p:'GK',r:74},{n:'Park JH',p:'GK',r:71},
-    {n:'Kim MJ',p:'DF',r:84},{n:'Kim YG',p:'DF',r:79},{n:'Lee JY',p:'DF',r:77},{n:'Lee GJ',p:'DF',r:76},{n:'Lee YJ',p:'DF',r:75},
-    {n:'Lee KI',p:'MF',r:83},{n:'Jung WY',p:'MF',r:77},{n:'Hwang IB',p:'MF',r:77},{n:'Son JH',p:'MF',r:76},{n:'Baek SH',p:'MF',r:75},
-    {n:'Son HM',p:'FW',r:89},{n:'Hwang HC',p:'FW',r:80},{n:'Cho GS',p:'FW',r:79},{n:'Oh HG',p:'FW',r:77},{n:'Yang HJ',p:'FW',r:77}
+    {n:'Kim MJ',p:'CB',r:84},{n:'Kim YG',p:'CB',r:79},{n:'Lee JY',p:'LB',r:77},{n:'Lee GJ',p:'CB',r:76},{n:'Lee YJ',p:'RB',r:75},
+    {n:'Lee KI',p:'CDM',r:83},{n:'Jung WY',p:'CM',r:77},{n:'Hwang IB',p:'CM',r:77},{n:'Son JH',p:'LW',r:76},{n:'Baek SH',p:'CM',r:75},
+    {n:'Son HM',p:'LW',r:89},{n:'Hwang HC',p:'ST',r:80},{n:'Cho GS',p:'ST',r:79},{n:'Oh HG',p:'ST',r:77},{n:'Yang HJ',p:'RW',r:77}
   ]},
   {name:'Australia',flag:'🇦🇺',str:72,coach:{n:'Tony Popovic',r:72},players:[
     {n:'Ryan M',p:'GK',r:80},{n:'Redmayne',p:'GK',r:75},{n:'Vukovic',p:'GK',r:71},
-    {n:'Rowles',p:'DF',r:76},{n:'Souttar',p:'DF',r:77},{n:'Atkinson',p:'DF',r:75},{n:'Behich',p:'DF',r:74},{n:'Gliding',p:'DF',r:72},
-    {n:'Mooy',p:'MF',r:79},{n:'Irvine J',p:'MF',r:77},{n:'Leckie',p:'MF',r:78},{n:'McGree',p:'MF',r:77},{n:'Hrustic',p:'MF',r:76},
-    {n:'Duke',p:'FW',r:77},{n:'Maclaren',p:'FW',r:76},{n:'Baccus',p:'FW',r:73},{n:'Nabbout',p:'FW',r:74},{n:'Silvera',p:'FW',r:72}
+    {n:'Rowles',p:'CB',r:76},{n:'Souttar',p:'CB',r:77},{n:'Atkinson',p:'CB',r:75},{n:'Behich',p:'LB',r:74},{n:'Gliding',p:'RB',r:72},
+    {n:'Mooy',p:'CM',r:79},{n:'Irvine J',p:'CM',r:77},{n:'Leckie',p:'RW',r:78},{n:'McGree',p:'CM',r:77},{n:'Hrustic',p:'CAM',r:76},
+    {n:'Duke',p:'ST',r:77},{n:'Maclaren',p:'ST',r:76},{n:'Baccus',p:'LW',r:73},{n:'Nabbout',p:'ST',r:74},{n:'Silvera',p:'RW',r:72}
   ]},
   {name:'Iran',flag:'🇮🇷',str:70,coach:{n:'Amir Ghalenoei',r:70},players:[
     {n:'Beiranvand',p:'GK',r:78},{n:'Hosseini B',p:'GK',r:72},{n:'Rahmati',p:'GK',r:70},
-    {n:'Pouraliganji',p:'DF',r:75},{n:'Hosseini M',p:'DF',r:74},{n:'Hajsafi',p:'DF',r:75},{n:'Mohammadi',p:'DF',r:73},{n:'Rezaeian',p:'DF',r:72},
-    {n:'Ezatolahi',p:'MF',r:77},{n:'Jahanbakhsh',p:'MF',r:79},{n:'Gholizadeh',p:'MF',r:78},{n:'Karimi A',p:'MF',r:75},{n:'Noorollahi',p:'MF',r:74},
-    {n:'Taremi',p:'FW',r:83},{n:'Azmoun S',p:'FW',r:81},{n:'Ansarifard',p:'FW',r:73},{n:'Sarlak',p:'FW',r:71},{n:'Shojaei',p:'FW',r:70}
+    {n:'Pouraliganji',p:'CB',r:75},{n:'Hosseini M',p:'CB',r:74},{n:'Hajsafi',p:'LB',r:75},{n:'Mohammadi',p:'CB',r:73},{n:'Rezaeian',p:'RB',r:72},
+    {n:'Ezatolahi',p:'CDM',r:77},{n:'Jahanbakhsh',p:'LW',r:79},{n:'Gholizadeh',p:'RW',r:78},{n:'Karimi A',p:'CM',r:75},{n:'Noorollahi',p:'CM',r:74},
+    {n:'Taremi',p:'ST',r:83},{n:'Azmoun S',p:'ST',r:81},{n:'Ansarifard',p:'ST',r:73},{n:'Sarlak',p:'LW',r:71},{n:'Shojaei',p:'ST',r:70}
   ]},
   {name:'Saudi Arabia',flag:'🇸🇦',str:69,coach:{n:'Roberto Mancini',r:80},players:[
     {n:'Al-Owais',p:'GK',r:76},{n:'Al-Rubaie',p:'GK',r:71},{n:'Fawaz',p:'GK',r:68},
-    {n:'Al-Tambakti',p:'DF',r:73},{n:'Al-Bulayhi',p:'DF',r:73},{n:'Al-Shahrani',p:'DF',r:73},{n:'Sultan',p:'DF',r:71},{n:'Al-Ghanam',p:'DF',r:70},
-    {n:'Al-Faraj',p:'MF',r:75},{n:'Kanno',p:'MF',r:74},{n:'Al-Malki',p:'MF',r:73},{n:'Kheneza',p:'MF',r:73},{n:'Al-Ghannam',p:'MF',r:72},
-    {n:'Al-Dawsari F',p:'FW',r:79},{n:'Al-Buraikan',p:'FW',r:76},{n:'Al-Shehri',p:'FW',r:74},{n:'Bahebri',p:'FW',r:74},{n:'Nasser A',p:'FW',r:72}
+    {n:'Al-Tambakti',p:'CB',r:73},{n:'Al-Bulayhi',p:'RB',r:73},{n:'Al-Shahrani',p:'LB',r:73},{n:'Sultan',p:'CB',r:71},{n:'Al-Ghanam',p:'CB',r:70},
+    {n:'Al-Faraj',p:'CDM',r:75},{n:'Kanno',p:'CM',r:74},{n:'Al-Malki',p:'CM',r:73},{n:'Kheneza',p:'CAM',r:73},{n:'Al-Ghannam',p:'LW',r:72},
+    {n:'Al-Dawsari F',p:'LW',r:79},{n:'Al-Buraikan',p:'ST',r:76},{n:'Al-Shehri',p:'ST',r:74},{n:'Bahebri',p:'ST',r:74},{n:'Nasser A',p:'RW',r:72}
   ]},
   {name:'Qatar',flag:'🇶🇦',str:64,coach:{n:'Marquez Lopez',r:66},players:[
     {n:'Al-Sheeb',p:'GK',r:73},{n:'Barsham',p:'GK',r:71},{n:'Al-Baker',p:'GK',r:68},
-    {n:'Pedro Miguel',p:'DF',r:71},{n:'Khoukhi',p:'DF',r:71},{n:'Al-Rawi',p:'DF',r:69},{n:'Hassan Y',p:'DF',r:68},{n:'Salman',p:'DF',r:68},
-    {n:'Boudiaf',p:'MF',r:73},{n:'Al-Haydos',p:'MF',r:75},{n:'Afif A',p:'MF',r:77},{n:'Al-Ahrak',p:'MF',r:70},{n:'Abdulaziz H',p:'MF',r:69},
-    {n:'Muntari',p:'FW',r:72},{n:'Al-Moez Ali',p:'FW',r:73},{n:'Hassan A',p:'FW',r:70},{n:'Bassam',p:'FW',r:68},{n:'Alaaeldin',p:'FW',r:68}
+    {n:'Pedro Miguel',p:'LB',r:71},{n:'Khoukhi',p:'CB',r:71},{n:'Al-Rawi',p:'CB',r:69},{n:'Hassan Y',p:'CB',r:68},{n:'Salman',p:'RB',r:68},
+    {n:'Boudiaf',p:'CDM',r:73},{n:'Al-Haydos',p:'RW',r:75},{n:'Afif A',p:'LW',r:77},{n:'Al-Ahrak',p:'CM',r:70},{n:'Abdulaziz H',p:'CM',r:69},
+    {n:'Muntari',p:'ST',r:72},{n:'Al-Moez Ali',p:'ST',r:73},{n:'Hassan A',p:'ST',r:70},{n:'Bassam',p:'RW',r:68},{n:'Alaaeldin',p:'LW',r:68}
   ]},
   {name:'Uzbekistan',flag:'🇺🇿',str:66,coach:{n:'Srecko Katanec',r:70},players:[
     {n:'Nishonov',p:'GK',r:70},{n:'Yusupov G',p:'GK',r:67},{n:'Abdullayev',p:'GK',r:65},
-    {n:'Ashurmatov',p:'DF',r:70},{n:'Khakmurdov',p:'DF',r:69},{n:'Narzullayev',p:'DF',r:68},{n:'Alimov',p:'DF',r:67},{n:'Urunov',p:'DF',r:66},
-    {n:'Masharipov',p:'MF',r:74},{n:'Komilov',p:'MF',r:71},{n:'Tursunov',p:'MF',r:70},{n:'Yuldoshev',p:'MF',r:68},{n:'Khamdamov',p:'MF',r:67},
-    {n:'Shomurodov',p:'FW',r:75},{n:'Yusupov A',p:'FW',r:71},{n:'Ergashev',p:'FW',r:68},{n:'Djeparov J',p:'FW',r:69},{n:'Iskanderov',p:'FW',r:67}
+    {n:'Ashurmatov',p:'CB',r:70},{n:'Khakmurdov',p:'CB',r:69},{n:'Narzullayev',p:'LB',r:68},{n:'Alimov',p:'RB',r:67},{n:'Urunov',p:'CB',r:66},
+    {n:'Masharipov',p:'LW',r:74},{n:'Komilov',p:'CM',r:71},{n:'Tursunov',p:'CDM',r:70},{n:'Yuldoshev',p:'CM',r:68},{n:'Khamdamov',p:'CAM',r:67},
+    {n:'Shomurodov',p:'ST',r:75},{n:'Yusupov A',p:'ST',r:71},{n:'Ergashev',p:'ST',r:68},{n:'Djeparov J',p:'RW',r:69},{n:'Iskanderov',p:'LW',r:67}
   ]},
   {name:'Jordan',flag:'🇯🇴',str:63,coach:{n:'Hossam Hassan',r:68},players:[
     {n:'Shuaibi',p:'GK',r:69},{n:'Al-Rousan',p:'GK',r:66},{n:'Al-Dardour',p:'GK',r:64},
-    {n:'Abu Zema',p:'DF',r:67},{n:'Al-Bawab',p:'DF',r:66},{n:'Bani Hani',p:'DF',r:66},{n:'Al-Rawabdeh',p:'DF',r:64},{n:'Al-Deeb',p:'DF',r:64},
-    {n:'Alzubaidi',p:'MF',r:68},{n:'Nimer',p:'MF',r:67},{n:'Bani Attiyeh',p:'MF',r:66},{n:'Al-Hajawi',p:'MF',r:65},{n:'Al-Nassar',p:'MF',r:64},
-    {n:'Al-Taamari',p:'FW',r:73},{n:'Safri',p:'FW',r:68},{n:'Nasib',p:'FW',r:66},{n:'Abu Duhair',p:'FW',r:65},{n:'Haddad',p:'FW',r:64}
+    {n:'Abu Zema',p:'CB',r:67},{n:'Al-Bawab',p:'CB',r:66},{n:'Bani Hani',p:'LB',r:66},{n:'Al-Rawabdeh',p:'CB',r:64},{n:'Al-Deeb',p:'RB',r:64},
+    {n:'Alzubaidi',p:'CDM',r:68},{n:'Nimer',p:'CM',r:67},{n:'Bani Attiyeh',p:'CM',r:66},{n:'Al-Hajawi',p:'CAM',r:65},{n:'Al-Nassar',p:'LW',r:64},
+    {n:'Al-Taamari',p:'LW',r:73},{n:'Safri',p:'ST',r:68},{n:'Nasib',p:'ST',r:66},{n:'Abu Duhair',p:'RW',r:65},{n:'Haddad',p:'ST',r:64}
   ]},
   {name:'Iraq',flag:'🇮🇶',str:65,coach:{n:'Jesus Casas',r:68},players:[
     {n:'Dawood',p:'GK',r:70},{n:'Karrar B',p:'GK',r:67},{n:'Hamid',p:'GK',r:65},
-    {n:'Karrar Jasim',p:'DF',r:68},{n:'Resan',p:'DF',r:68},{n:'Hamza',p:'DF',r:67},{n:'Hassan M',p:'DF',r:66},{n:'Saad',p:'DF',r:65},
-    {n:'Tariq',p:'MF',r:71},{n:'Amjed A',p:'MF',r:70},{n:'Al-Hamdani',p:'MF',r:69},{n:'Alaa M',p:'MF',r:68},{n:'Dirar',p:'MF',r:67},
-    {n:'Alaa Abbas',p:'FW',r:72},{n:'Mohanad Ali',p:'FW',r:71},{n:'Amir S',p:'FW',r:69},{n:'Bashar R',p:'FW',r:68},{n:'Essam',p:'FW',r:67}
+    {n:'Karrar Jasim',p:'CB',r:68},{n:'Resan',p:'CB',r:68},{n:'Hamza',p:'LB',r:67},{n:'Hassan M',p:'CB',r:66},{n:'Saad',p:'RB',r:65},
+    {n:'Tariq',p:'CM',r:71},{n:'Amjed A',p:'CDM',r:70},{n:'Al-Hamdani',p:'CM',r:69},{n:'Alaa M',p:'CAM',r:68},{n:'Dirar',p:'CM',r:67},
+    {n:'Alaa Abbas',p:'ST',r:72},{n:'Mohanad Ali',p:'ST',r:71},{n:'Amir S',p:'LW',r:69},{n:'Bashar R',p:'RW',r:68},{n:'Essam',p:'ST',r:67}
   ]},
   // ── OFC ──
   {name:'New Zealand',flag:'🇳🇿',str:61,coach:{n:'Darren Bazeley',r:65},players:[
     {n:'Sail',p:'GK',r:69},{n:'Marinovic',p:'GK',r:66},{n:'Old',p:'GK',r:63},
-    {n:'Boxall',p:'DF',r:66},{n:'Reid',p:'DF',r:65},{n:'Cacace',p:'DF',r:67},{n:'Ingham',p:'DF',r:63},{n:'Garbett M',p:'DF',r:63},
-    {n:'McGlinchey',p:'MF',r:66},{n:'De Vries',p:'MF',r:65},{n:'Bell J',p:'MF',r:65},{n:'Stamenic',p:'MF',r:64},{n:'Just',p:'MF',r:63},
-    {n:'Wood C',p:'FW',r:68},{n:'Waine',p:'FW',r:67},{n:'Barbarouses',p:'FW',r:64},{n:'Rojas',p:'FW',r:63},{n:'Payne T',p:'FW',r:63}
+    {n:'Boxall',p:'CB',r:66},{n:'Reid',p:'CB',r:65},{n:'Cacace',p:'LB',r:67},{n:'Ingham',p:'CB',r:63},{n:'Garbett M',p:'RB',r:63},
+    {n:'McGlinchey',p:'LW',r:66},{n:'De Vries',p:'CM',r:65},{n:'Bell J',p:'CM',r:65},{n:'Stamenic',p:'CDM',r:64},{n:'Just',p:'CM',r:63},
+    {n:'Wood C',p:'ST',r:68},{n:'Waine',p:'ST',r:67},{n:'Barbarouses',p:'RW',r:64},{n:'Rojas',p:'LW',r:63},{n:'Payne T',p:'ST',r:63}
   ]}
 ];
 
