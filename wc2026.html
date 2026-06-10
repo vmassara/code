@@ -117,120 +117,159 @@
   .loading-dots::after{content:'...';animation:dots 1.2s infinite}
   @keyframes dots{0%{content:'.'}40%{content:'..'}80%{content:'...'}}
 
-  /* Override single-column constraint for draft screen */
-  #screen-draft { max-width: 100% !important; padding: 0; }
+/* ===== DRAFT LAYOUT ===== */
+#screen-draft { max-width: 100% !important; padding: 0; }
 
-  .draft-header {
-    padding: 10px 16px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    border-bottom: 1px solid rgba(245,197,24,.15);
-    flex-wrap: wrap;
-  }
-  .draft-header h1 { font-size: 1.2rem; margin: 0; }
+.draft-header {
+  height: 44px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 1px solid rgba(245,197,24,.1);
+  flex-shrink: 0;
+}
+.header-steps { display:flex;gap:4px;align-items:center; }
+.header-steps .step { width:9px;height:9px; }
 
+.draft-layout {
+  display: grid;
+  grid-template-columns: 260px 1fr 200px;
+  height: calc(100vh - 44px);
+}
+
+/* LEFT */
+.draft-left {
+  border-right: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 14px 12px;
+}
+#spinResult {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+.player-list { overflow-y: auto; flex: 1; }
+
+/* CENTER */
+.draft-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  overflow: hidden;
+}
+.draft-center .pitch-wrap {
+  height: 100%;
+  width: auto;
+  aspect-ratio: 9/13;
+  max-height: calc(100vh - 64px);
+  max-width: 100%;
+  margin: 0;
+}
+
+/* RIGHT */
+.draft-right {
+  border-left: 1px solid rgba(255,255,255,.06);
+  padding: 14px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+.sheet-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.sheet-title {
+  font-size: .65rem;
+  color: rgba(232,232,240,.35);
+  text-transform: uppercase;
+  letter-spacing: .12em;
+}
+.sheet-count {
+  font-size: .72rem;
+  font-weight: 700;
+  color: rgba(245,197,24,.7);
+}
+.sheet-progress-wrap {
+  height: 2px;
+  background: rgba(255,255,255,.08);
+  border-radius: 1px;
+  margin-bottom: 4px;
+}
+.sheet-progress-bar {
+  height: 100%;
+  background: #f5c518;
+  border-radius: 1px;
+  transition: width .3s;
+}
+.sheet-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  font-size: .8rem;
+}
+.sheet-pos {
+  min-width: 32px;
+  font-size: .6rem;
+  font-weight: 700;
+  color: rgba(245,197,24,.6);
+  text-transform: uppercase;
+}
+.sheet-name { flex:1; color:#e8e8f0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.sheet-name.empty { color:rgba(232,232,240,.2); }
+.sheet-coach {
+  margin-top: 10px;
+  padding: 8px 0 0;
+  border-top: 1px solid rgba(245,197,24,.15);
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* PLAYER CARDS in left panel */
+.player-card {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: all .15s;
+  margin-bottom: 2px;
+}
+.player-card:hover { background: rgba(255,255,255,.05); }
+.player-card.selected { background: rgba(245,197,24,.12); border-color: rgba(245,197,24,.4); }
+.player-num { font-size:.68rem; color:rgba(232,232,240,.3); min-width:18px; }
+.player-name { flex:1; font-size:.82rem; color:#e8e8f0; }
+.player-pos { font-size:.6rem; font-weight:700; padding:2px 5px; border-radius:3px; }
+.player-rating { font-size:.85rem; font-weight:700; color:#f5c518; min-width:28px; text-align:right; }
+.pos-GK { background:rgba(245,197,24,.2); color:#f5c518; }
+.pos-DF { background:rgba(39,174,96,.2); color:#27ae60; }
+.pos-MF { background:rgba(52,152,219,.2); color:#3498db; }
+.pos-FW { background:rgba(231,76,60,.2); color:#e74c3c; }
+.pos-COACH { background:rgba(155,89,182,.2); color:#9b59b6; }
+
+/* MOBILE */
+@media (max-width: 720px) {
   .draft-layout {
-    display: grid;
-    grid-template-columns: 260px 1fr 220px;
-    height: calc(100vh - 52px);
-    overflow: hidden;
+    grid-template-columns: 1fr;
+    height: auto;
   }
-  .draft-left {
-    padding: 12px;
-    overflow-y: auto;
-    border-right: 1px solid rgba(245,197,24,.1);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  .draft-center {
-    padding: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
-  .draft-center .pitch-wrap {
-    height: calc(100vh - 80px);
-    width: auto;
-    aspect-ratio: 9/13;
-    max-width: 100%;
-    margin: 0;
-  }
-  .draft-right {
-    padding: 12px;
-    overflow-y: auto;
-    border-left: 1px solid rgba(245,197,24,.1);
-  }
-
-  /* Team sheet (right panel) */
-  .sheet-title {
-    font-size: .7rem;
-    color: rgba(232,232,240,.4);
-    text-transform: uppercase;
-    letter-spacing: .08em;
-    margin-bottom: 8px;
-  }
-  .sheet-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 5px 0;
-    border-bottom: 1px solid rgba(255,255,255,.05);
-    font-size: .82rem;
-  }
-  .sheet-pos {
-    min-width: 36px;
-    font-size: .65rem;
-    font-weight: 700;
-    color: rgba(245,197,24,.7);
-    text-transform: uppercase;
-  }
-  .sheet-name {
-    flex: 1;
-    color: #e8e8f0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .sheet-name.empty { color: rgba(232,232,240,.25); }
-  .sheet-coach {
-    margin-top: 10px;
-    padding: 6px 0;
-    border-top: 1px solid rgba(245,197,24,.2);
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    font-size: .82rem;
-  }
-
-  /* Left panel spin area - more compact */
-  .spin-country { font-size: 1rem; font-weight: 700; margin-top: 4px; }
-  .spin-flag { font-size: 2.5rem; min-height: 50px; }
-
-  /* Step indicator in header */
-  .header-steps { display: flex; gap: 4px; align-items: center; }
-  .header-steps .step { width: 10px; height: 10px; }
-
-  /* Mobile */
-  @media (max-width: 720px) {
-    .draft-layout {
-      grid-template-columns: 1fr;
-      height: auto;
-      overflow: visible;
-    }
-    .draft-left, .draft-right {
-      border: none;
-      border-top: 1px solid rgba(245,197,24,.1);
-    }
-    .draft-center .pitch-wrap {
-      height: auto;
-      width: 100%;
-      aspect-ratio: 9/13;
-    }
-    .draft-right { display: none; } /* hide sheet on mobile to save space */
-  }
+  .draft-left { height: auto; border-right: none; border-bottom: 1px solid rgba(255,255,255,.06); }
+  .draft-center .pitch-wrap { height: auto; width: 100%; max-height: none; }
+  .draft-right { border-left: none; border-top: 1px solid rgba(255,255,255,.06); }
+  #spinResult { height: auto; }
+  .player-list { max-height: 240px; }
+}
 </style>
 </head>
 <body>
@@ -913,15 +952,18 @@ function renderTeamSheet() {
     const row = document.createElement('div');
     row.className = 'sheet-row';
     const filled = !!slot.player;
-    row.innerHTML = `<span class="sheet-pos">${slot.lbl}</span><span class="sheet-name ${filled ? '' : 'empty'}">${filled ? slot.player.n : '—'}</span>`;
+    row.innerHTML = `<span class="sheet-pos">${slot.lbl}</span><span class="sheet-name ${filled?'':'empty'}">${filled ? slot.player.n.split(' ')[0] : '—'}</span>`;
     sheet.appendChild(row);
   });
-  document.getElementById('sheetCount').textContent = state.slots.filter(s=>s.player).length;
-  // Coach
-  const coachNameEl = document.getElementById('sheetCoachName');
-  if (coachNameEl) {
-    coachNameEl.textContent = state.coach ? state.coach.n : 'No coach yet';
-    coachNameEl.style.color = state.coach ? '#e8e8f0' : 'rgba(232,232,240,.25)';
+  const filled = state.slots.filter(s=>s.player).length;
+  const el = document.getElementById('sheetCount');
+  if(el) el.textContent = filled;
+  const bar = document.getElementById('sheetProgressBar');
+  if(bar) bar.style.width = (filled/11*100)+'%';
+  const coachEl = document.getElementById('sheetCoachName');
+  if(coachEl){
+    coachEl.textContent = state.coach ? state.coach.n.split(' ').slice(-1)[0] : '—';
+    coachEl.className = 'sheet-name' + (state.coach ? '' : ' empty');
   }
 }
 
@@ -946,23 +988,18 @@ function updateDraftUI() {
     startSimulation();
     return;
   }
-  // Step indicator
   const ind = document.getElementById('draftStepIndicator');
   ind.innerHTML = '';
   for(let i=0;i<total;i++){
     const s = document.createElement('div');
-    s.className = 'step' + (i===state.draftStep?' active':(i<state.draftStep?' done':''));
+    s.className = 'step'+(i===state.draftStep?' active':(i<state.draftStep?' done':''));
     ind.appendChild(s);
   }
-  const prog = document.getElementById('draftProgress');
-  prog.textContent = `Pick ${state.draftStep+1} of 12 — spin for a player or coach`;
-  // Show/hide cards
-  document.getElementById('spinCard').style.display = 'block';
-  document.getElementById('playerSelectCard').style.display = 'none';
-  document.getElementById('spinBtn').disabled = false;
-  document.getElementById('spinFlag').textContent = '🌍';
-  document.getElementById('spinCountry').textContent = 'Press Spin!';
-  document.getElementById('spinProg').textContent = '';
+  document.getElementById('draftProgress').textContent = `Pick ${state.draftStep+1} of 12`;
+  document.getElementById('spinPrompt').style.display = 'block';
+  document.getElementById('spinResult').style.display = 'none';
+  document.getElementById('slotHint').style.display = 'none';
+  renderTeamSheet();
 }
 
 let spinInterval = null;
@@ -979,11 +1016,13 @@ function doSpin() {
   function frame(){
     if(frames >= 26){
       clearInterval(spinInterval);
+      state.currentCountry = target;
+      state.usedCountries.push(target.name);
+      document.getElementById('spinPrompt').style.display = 'none';
+      document.getElementById('spinResult').style.display = 'flex';
       document.getElementById('spinFlag').textContent = target.flag;
       document.getElementById('spinCountry').textContent = target.name;
       document.getElementById('spinProg').textContent = '';
-      state.currentCountry = target;
-      state.usedCountries.push(target.name);
       showPlayerPick(target);
       return;
     }
@@ -999,13 +1038,10 @@ function doSpin() {
 }
 
 function showPlayerPick(squad) {
-  document.getElementById('playerSelectCard').style.display = 'block';
-  document.getElementById('playerSelectTitle').textContent = `${squad.flag} ${squad.name} — Pick a Player`;
   const list = document.getElementById('playerList');
   list.innerHTML = '';
   state.selectedPlayer = null;
   document.getElementById('confirmPickBtn').disabled = true;
-  document.getElementById('selectedPlayerInfo').style.display = 'none';
   document.getElementById('slotHint').style.display = 'none';
 
   // Filter players to only those with at least one compatible empty slot
@@ -1068,7 +1104,6 @@ function assignCoach() {
   state.coach = state.selectedPlayer;
   state.selectedPlayer = null;
   state.draftStep++;
-  document.getElementById('playerSelectCard').style.display = 'none';
   renderTeamSheet();
   if (state.draftStep >= 12) {
     startSimulation();
@@ -1107,7 +1142,6 @@ function assignPlayerToSlot() {
   state.selectedSlotId = null;
   state.draftStep++;
   renderPitch();
-  document.getElementById('playerSelectCard').style.display='none';
   updateDraftUI();
 }
 
