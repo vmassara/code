@@ -765,7 +765,11 @@ function clickSlot(slotId) {
 
 // ===== DRAFT =====
 function updateDraftUI() {
-  const total = 12; // 11 players + 1 coach
+  const total = 12;
+  if (state.draftStep >= 12) {
+    startSimulation();
+    return;
+  }
   // Step indicator
   const ind = document.getElementById('draftStepIndicator');
   ind.innerHTML = '';
