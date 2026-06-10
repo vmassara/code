@@ -149,7 +149,8 @@
 #spinResult {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   overflow: hidden;
 }
 .player-list { overflow-y: auto; flex: 1; }
@@ -1006,20 +1007,22 @@ let spinInterval = null;
 function doSpin() {
   const btn = document.getElementById('spinBtn');
   btn.disabled = true;
-  // Always spin for a country
+  // Show result panel immediately so animation is visible
+  document.getElementById('spinPrompt').style.display = 'none';
+  document.getElementById('spinResult').style.display = 'flex';
   const available = SQUADS.filter(s => !state.usedCountries.includes(s.name));
   if(available.length===0){state.usedCountries=[];}
   const available2 = SQUADS.filter(s => !state.usedCountries.includes(s.name));
   const target = available2[Math.floor(Math.random()*available2.length)];
   let frames = 0;
   const allFlags = SQUADS.map(s=>s.flag);
+  // Clear player list during spin
+  document.getElementById('playerList').innerHTML = '';
+  document.getElementById('confirmPickBtn').disabled = true;
   function frame(){
     if(frames >= 26){
-      clearInterval(spinInterval);
       state.currentCountry = target;
       state.usedCountries.push(target.name);
-      document.getElementById('spinPrompt').style.display = 'none';
-      document.getElementById('spinResult').style.display = 'flex';
       document.getElementById('spinFlag').textContent = target.flag;
       document.getElementById('spinCountry').textContent = target.name;
       document.getElementById('spinProg').textContent = '';
@@ -1031,6 +1034,7 @@ function doSpin() {
     const randSquad = SQUADS[Math.floor(Math.random()*SQUADS.length)];
     document.getElementById('spinFlag').textContent = randFlag;
     document.getElementById('spinCountry').textContent = randSquad.name;
+    document.getElementById('spinProg').textContent = '...';
     frames++;
     setTimeout(frame, delay);
   }
