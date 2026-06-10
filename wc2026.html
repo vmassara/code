@@ -30,21 +30,27 @@
   .slider-row label{min-width:70px;margin-bottom:0}
   .slider-val{min-width:22px;text-align:right;color:#f5c518;font-weight:700;font-size:.9rem}
   /* PITCH */
-  .pitch-wrap{position:relative;width:100%;aspect-ratio:9/13;background:linear-gradient(180deg,#1a4a1a 0%,#1e5c1e 20%,#1a4a1a 40%,#1e5c1e 60%,#1a4a1a 80%,#1e5c1e 100%);border-radius:10px;border:2px solid rgba(255,255,255,.12);overflow:hidden;margin-bottom:12px}
-  .pitch-line{position:absolute;border:1px solid rgba(255,255,255,.18)}
-  .pitch-center{left:5%;right:5%;top:50%;height:1px}
-  .pitch-center-circle{left:50%;top:50%;transform:translate(-50%,-50%);width:22%;padding-bottom:22%;border-radius:50%}
-  .pitch-box-top{left:20%;right:20%;top:3%;height:18%}
-  .pitch-box-bot{left:20%;right:20%;bottom:3%;height:18%}
-  .slot{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-direction:column;gap:1px}
-  .slot-empty{border:2px dashed #f5c518;background:rgba(245,197,24,.08)}
-  .slot-empty:hover{background:rgba(245,197,24,.22);border-style:solid}
-  .slot-filled{border:2px solid #f5c518;background:rgba(245,197,24,.25)}
+  .pitch-wrap{position:relative;width:100%;aspect-ratio:9/13;background:linear-gradient(180deg,#1f5c1f 0%,#246424 12.5%,#1f5c1f 25%,#246424 37.5%,#1f5c1f 50%,#246424 62.5%,#1f5c1f 75%,#246424 87.5%,#1f5c1f 100%);border-radius:4px;border:3px solid rgba(255,255,255,.25);overflow:hidden;margin-bottom:12px;box-shadow:inset 0 0 40px rgba(0,0,0,.3)}
+  .pitch-line{position:absolute;background:transparent}
+  .pitch-border{left:4%;right:4%;top:2%;bottom:2%;border:2px solid rgba(255,255,255,.55);border-radius:2px}
+  .pitch-halfway{left:4%;right:4%;top:50%;height:0;border-top:2px solid rgba(255,255,255,.55)}
+  .pitch-center-circle{left:50%;top:50%;transform:translate(-50%,-50%);width:20%;padding-bottom:20%;border-radius:50%;border:2px solid rgba(255,255,255,.55)}
+  .pitch-center-dot{left:50%;top:50%;transform:translate(-50%,-50%);width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.7)}
+  .pitch-box-top{left:23%;right:23%;top:2%;height:16%;border:2px solid rgba(255,255,255,.55);border-top:none}
+  .pitch-box-bot{left:23%;right:23%;bottom:2%;height:16%;border:2px solid rgba(255,255,255,.55);border-bottom:none}
+  .pitch-goal-top{left:38%;right:38%;top:2%;height:4%;border:2px solid rgba(255,255,255,.55);border-top:none}
+  .pitch-goal-bot{left:38%;right:38%;bottom:2%;height:4%;border:2px solid rgba(255,255,255,.55);border-bottom:none}
+  .pitch-spot-top{left:50%;top:13%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.6)}
+  .pitch-spot-bot{left:50%;bottom:13%;transform:translateX(-50%);width:5px;height:5px;border-radius:50%;background:rgba(255,255,255,.6)}
+  .slot{position:absolute;transform:translate(-50%,-50%);width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-direction:column;gap:0}
+  .slot-empty{border:2px dashed rgba(255,255,255,.5);background:rgba(0,0,0,.35)}
+  .slot-empty:hover{background:rgba(245,197,24,.25);border-color:#f5c518;border-style:solid}
+  .slot-filled{border:2px solid #f5c518;background:rgba(245,197,24,.3)}
   .slot-active{border-color:#fff;background:rgba(255,255,255,.2);animation:pulse .8s infinite}
   @keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.4)}50%{box-shadow:0 0 0 6px rgba(255,255,255,0)}}
-  .slot-lbl{font-size:.55rem;color:#f5c518;font-weight:700;line-height:1}
-  .slot-name{font-size:.45rem;color:#fff;line-height:1;text-align:center;max-width:42px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
-  .slot-init{font-size:.75rem;color:#fff;font-weight:700}
+  .slot-lbl{font-size:.48rem;color:rgba(255,255,255,.7);font-weight:700;line-height:1;text-transform:uppercase;letter-spacing:.02em}
+  .slot-filled .slot-lbl{color:rgba(245,197,24,.8)}
+  .slot-init{font-size:.82rem;color:#fff;font-weight:800;line-height:1}
   /* SPIN */
   .spin-area{text-align:center;padding:10px 0}
   .spin-flag{font-size:4rem;min-height:70px;display:flex;align-items:center;justify-content:center;transition:opacity .05s}
@@ -360,10 +366,16 @@
     <!-- CENTER: pitch -->
     <div class="draft-center">
       <div class="pitch-wrap" id="pitchWrap">
-        <div class="pitch-line pitch-center"></div>
+        <div class="pitch-line pitch-border"></div>
+        <div class="pitch-line pitch-halfway"></div>
         <div class="pitch-line pitch-center-circle"></div>
+        <div class="pitch-line pitch-center-dot"></div>
         <div class="pitch-line pitch-box-top"></div>
+        <div class="pitch-line pitch-goal-top"></div>
+        <div class="pitch-line pitch-spot-top"></div>
         <div class="pitch-line pitch-box-bot"></div>
+        <div class="pitch-line pitch-goal-bot"></div>
+        <div class="pitch-line pitch-spot-bot"></div>
       </div>
     </div>
 
@@ -942,7 +954,8 @@ function renderPitch() {
     el.style.top = slot.y + '%';
     el.id = 'slot-' + slot.id;
     if (isFilled) {
-      el.innerHTML = `<span class="slot-init">${slot.player.n.charAt(0)}</span><span class="slot-lbl">${slot.lbl}</span><span class="slot-name">${slot.player.n.split(' ')[0]}</span>`;
+      const initials = slot.player.n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+      el.innerHTML = `<span class="slot-lbl">${slot.lbl}</span><span class="slot-init">${initials}</span>`;
     } else {
       el.innerHTML = `<span class="slot-lbl">${slot.lbl}</span>`;
     }
@@ -1299,10 +1312,13 @@ function randGoals(min, max){ return Math.floor(Math.random()*(max-min+1))+min; 
 
 function getScoringPool(){
   const pool = [];
+  const fwPos = ['ST','LW','RW'];
+  const mfPos = ['CAM','CM','CDM'];
+  const dfPos = ['CB','LB','RB'];
   state.slots.forEach(slot=>{
     if(!slot.player) return;
     const p = slot.player;
-    let w = p.p==='FW'?55:p.p==='MF'?30:p.p==='DF'?10:0;
+    let w = fwPos.includes(p.p)?55:mfPos.includes(p.p)?30:dfPos.includes(p.p)?10:0;
     if(w>0) for(let i=0;i<w;i++) pool.push(p.n);
   });
   return pool;
