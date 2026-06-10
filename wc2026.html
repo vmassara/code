@@ -116,6 +116,121 @@
   .qualified-banner{background:#1a4a1a;border:1px solid #2a7a2a;border-radius:10px;padding:14px;text-align:center;margin-bottom:12px}
   .loading-dots::after{content:'...';animation:dots 1.2s infinite}
   @keyframes dots{0%{content:'.'}40%{content:'..'}80%{content:'...'}}
+
+  /* Override single-column constraint for draft screen */
+  #screen-draft { max-width: 100% !important; padding: 0; }
+
+  .draft-header {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid rgba(245,197,24,.15);
+    flex-wrap: wrap;
+  }
+  .draft-header h1 { font-size: 1.2rem; margin: 0; }
+
+  .draft-layout {
+    display: grid;
+    grid-template-columns: 260px 1fr 220px;
+    height: calc(100vh - 52px);
+    overflow: hidden;
+  }
+  .draft-left {
+    padding: 12px;
+    overflow-y: auto;
+    border-right: 1px solid rgba(245,197,24,.1);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .draft-center {
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .draft-center .pitch-wrap {
+    height: calc(100vh - 80px);
+    width: auto;
+    aspect-ratio: 9/13;
+    max-width: 100%;
+    margin: 0;
+  }
+  .draft-right {
+    padding: 12px;
+    overflow-y: auto;
+    border-left: 1px solid rgba(245,197,24,.1);
+  }
+
+  /* Team sheet (right panel) */
+  .sheet-title {
+    font-size: .7rem;
+    color: rgba(232,232,240,.4);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    margin-bottom: 8px;
+  }
+  .sheet-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,.05);
+    font-size: .82rem;
+  }
+  .sheet-pos {
+    min-width: 36px;
+    font-size: .65rem;
+    font-weight: 700;
+    color: rgba(245,197,24,.7);
+    text-transform: uppercase;
+  }
+  .sheet-name {
+    flex: 1;
+    color: #e8e8f0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .sheet-name.empty { color: rgba(232,232,240,.25); }
+  .sheet-coach {
+    margin-top: 10px;
+    padding: 6px 0;
+    border-top: 1px solid rgba(245,197,24,.2);
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    font-size: .82rem;
+  }
+
+  /* Left panel spin area - more compact */
+  .spin-country { font-size: 1rem; font-weight: 700; margin-top: 4px; }
+  .spin-flag { font-size: 2.5rem; min-height: 50px; }
+
+  /* Step indicator in header */
+  .header-steps { display: flex; gap: 4px; align-items: center; }
+  .header-steps .step { width: 10px; height: 10px; }
+
+  /* Mobile */
+  @media (max-width: 720px) {
+    .draft-layout {
+      grid-template-columns: 1fr;
+      height: auto;
+      overflow: visible;
+    }
+    .draft-left, .draft-right {
+      border: none;
+      border-top: 1px solid rgba(245,197,24,.1);
+    }
+    .draft-center .pitch-wrap {
+      height: auto;
+      width: 100%;
+      aspect-ratio: 9/13;
+    }
+    .draft-right { display: none; } /* hide sheet on mobile to save space */
+  }
 </style>
 </head>
 <body>
@@ -154,37 +269,55 @@
 
 <!-- DRAFT SCREEN -->
 <div id="screen-draft" class="screen">
-  <h1>⚽ Player Draft</h1>
-  <div id="draftStepIndicator" class="step-indicator"></div>
-  <div id="draftProgress" class="notice">Spin to get a country, then pick a player!</div>
-
-  <!-- Pitch -->
-  <div class="pitch-wrap" id="pitchWrap">
-    <div class="pitch-line pitch-center"></div>
-    <div class="pitch-line pitch-center-circle"></div>
-    <div class="pitch-line pitch-box-top"></div>
-    <div class="pitch-line pitch-box-bot"></div>
+  <!-- Header bar -->
+  <div class="draft-header">
+    <h1>⚽ WC 2026 Draft</h1>
+    <div id="draftStepIndicator" class="step-indicator header-steps"></div>
+    <div id="draftProgress" style="font-size:.8rem;color:rgba(232,232,240,.6)">Spin to get started</div>
   </div>
 
-  <!-- Spin area -->
-  <div class="card" id="spinCard">
-    <div class="spin-area">
-      <div class="spin-flag" id="spinFlag">🌍</div>
-      <div class="spin-country" id="spinCountry">Press Spin!</div>
-      <div class="spin-progress" id="spinProg"></div>
+  <div class="draft-layout">
+    <!-- LEFT: spin + player list -->
+    <div class="draft-left">
+      <!-- Spin area -->
+      <div id="spinCard">
+        <div class="spin-area">
+          <div class="spin-flag" id="spinFlag">🌍</div>
+          <div class="spin-country" id="spinCountry">Press Spin!</div>
+          <div class="spin-progress" id="spinProg"></div>
+        </div>
+        <button class="btn btn-block" id="spinBtn" onclick="doSpin()">🎰 Spin!</button>
+      </div>
+
+      <!-- Player selection (shown after spin) -->
+      <div id="playerSelectCard" style="display:none">
+        <div style="font-size:.75rem;color:rgba(232,232,240,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px" id="playerSelectTitle">Pick a Player</div>
+        <div class="player-list" id="playerList"></div>
+        <div id="slotHint" class="notice" style="display:none;margin-top:6px"></div>
+        <button class="btn btn-block" id="confirmPickBtn" onclick="confirmPick()" disabled style="margin-top:8px">Confirm Pick →</button>
+      </div>
     </div>
-    <button class="btn btn-block" id="spinBtn" onclick="doSpin()">🎰 Spin!</button>
-  </div>
 
-  <!-- Player selection (shown after spin) -->
-  <div class="card" id="playerSelectCard" style="display:none">
-    <h3 id="playerSelectTitle">Pick a Player</h3>
-    <div class="player-list" id="playerList"></div>
-    <div id="selectedPlayerInfo" style="display:none;margin-bottom:8px"></div>
-    <div id="slotHint" class="notice" style="display:none"></div>
-    <button class="btn btn-block" id="confirmPickBtn" onclick="confirmPick()" disabled>Confirm Pick →</button>
-  </div>
+    <!-- CENTER: pitch -->
+    <div class="draft-center">
+      <div class="pitch-wrap" id="pitchWrap">
+        <div class="pitch-line pitch-center"></div>
+        <div class="pitch-line pitch-center-circle"></div>
+        <div class="pitch-line pitch-box-top"></div>
+        <div class="pitch-line pitch-box-bot"></div>
+      </div>
+    </div>
 
+    <!-- RIGHT: team sheet -->
+    <div class="draft-right">
+      <div class="sheet-title">Your XI · <span id="sheetCount">0</span>/11</div>
+      <div id="teamSheet"></div>
+      <div class="sheet-coach" id="sheetCoach">
+        <span style="font-size:1rem">👔</span>
+        <span id="sheetCoachName" style="color:rgba(232,232,240,.25)">No coach yet</span>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- SIMULATION SCREEN -->
@@ -747,6 +880,27 @@ function renderPitch() {
     el.onclick = () => clickSlot(slot.id);
     wrap.appendChild(el);
   });
+  renderTeamSheet();
+}
+
+function renderTeamSheet() {
+  const sheet = document.getElementById('teamSheet');
+  if (!sheet) return;
+  sheet.innerHTML = '';
+  state.slots.forEach(slot => {
+    const row = document.createElement('div');
+    row.className = 'sheet-row';
+    const filled = !!slot.player;
+    row.innerHTML = `<span class="sheet-pos">${slot.lbl}</span><span class="sheet-name ${filled ? '' : 'empty'}">${filled ? slot.player.n : '—'}</span>`;
+    sheet.appendChild(row);
+  });
+  document.getElementById('sheetCount').textContent = state.slots.filter(s=>s.player).length;
+  // Coach
+  const coachNameEl = document.getElementById('sheetCoachName');
+  if (coachNameEl) {
+    coachNameEl.textContent = state.coach ? state.coach.n : 'No coach yet';
+    coachNameEl.style.color = state.coach ? '#e8e8f0' : 'rgba(232,232,240,.25)';
+  }
 }
 
 function clickSlot(slotId) {
@@ -893,6 +1047,7 @@ function assignCoach() {
   state.selectedPlayer = null;
   state.draftStep++;
   document.getElementById('playerSelectCard').style.display = 'none';
+  renderTeamSheet();
   if (state.draftStep >= 12) {
     startSimulation();
   } else {
