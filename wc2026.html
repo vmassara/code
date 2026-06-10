@@ -269,32 +269,50 @@
 
 <!-- DRAFT SCREEN -->
 <div id="screen-draft" class="screen">
-  <!-- Header bar -->
   <div class="draft-header">
-    <h1>⚽ WC 2026 Draft</h1>
+    <div style="display:flex;align-items:center;gap:10px;flex:1">
+      <span style="font-size:.7rem;color:rgba(232,232,240,.4);text-transform:uppercase;letter-spacing:.1em">WC 2026 Draft</span>
+      <span style="color:rgba(245,197,24,.4)">·</span>
+      <span id="draftProgress" style="font-size:.75rem;color:rgba(232,232,240,.55)">Spin to get started</span>
+    </div>
     <div id="draftStepIndicator" class="step-indicator header-steps"></div>
-    <div id="draftProgress" style="font-size:.8rem;color:rgba(232,232,240,.6)">Spin to get started</div>
   </div>
 
   <div class="draft-layout">
-    <!-- LEFT: spin + player list -->
+    <!-- LEFT -->
     <div class="draft-left">
-      <!-- Spin area -->
-      <div id="spinCard">
-        <div class="spin-area">
-          <div class="spin-flag" id="spinFlag">🌍</div>
-          <div class="spin-country" id="spinCountry">Press Spin!</div>
-          <div class="spin-progress" id="spinProg"></div>
+      <!-- State A: spin prompt (shown before spinning) -->
+      <div id="spinPrompt">
+        <div style="text-align:center;padding:24px 0 16px">
+          <div style="font-size:3.5rem;margin-bottom:8px">🌍</div>
+          <div style="font-size:.7rem;color:rgba(232,232,240,.4);text-transform:uppercase;letter-spacing:.1em;margin-bottom:16px">Spin for a country</div>
+          <button class="btn btn-block" id="spinBtn" onclick="doSpin()">🎰 Spin!</button>
         </div>
-        <button class="btn btn-block" id="spinBtn" onclick="doSpin()">🎰 Spin!</button>
       </div>
 
-      <!-- Player selection (shown after spin) -->
-      <div id="playerSelectCard" style="display:none">
-        <div style="font-size:.75rem;color:rgba(232,232,240,.5);text-transform:uppercase;letter-spacing:.06em;margin-bottom:6px" id="playerSelectTitle">Pick a Player</div>
-        <div class="player-list" id="playerList"></div>
-        <div id="slotHint" class="notice" style="display:none;margin-top:6px"></div>
-        <button class="btn btn-block" id="confirmPickBtn" onclick="confirmPick()" disabled style="margin-top:8px">Confirm Pick →</button>
+      <!-- State B: spun result + player list (shown after spin) -->
+      <div id="spinResult" style="display:none">
+        <!-- Country card -->
+        <div style="margin-bottom:12px">
+          <div style="font-size:.62rem;color:rgba(232,232,240,.35);text-transform:uppercase;letter-spacing:.12em;margin-bottom:4px">Drawn</div>
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px">
+            <span id="spinFlag" style="font-size:1.8rem;line-height:1"></span>
+            <span id="spinCountry" style="font-size:1.3rem;font-weight:800;color:#e8e8f0"></span>
+          </div>
+          <div id="spinProg" style="font-size:.75rem;color:rgba(232,232,240,.4);margin-top:2px"></div>
+        </div>
+
+        <!-- Slot hint -->
+        <div id="slotHint" class="notice" style="display:none;margin-bottom:8px;font-size:.76rem"></div>
+
+        <!-- Player list label -->
+        <div style="font-size:.62rem;color:rgba(232,232,240,.35);text-transform:uppercase;letter-spacing:.12em;margin-bottom:6px">Pick a player</div>
+
+        <!-- Players -->
+        <div class="player-list" id="playerList" style="flex:1;overflow-y:auto"></div>
+
+        <!-- Confirm button -->
+        <button class="btn btn-block" id="confirmPickBtn" onclick="confirmPick()" disabled style="margin-top:10px;flex-shrink:0">Confirm Pick →</button>
       </div>
     </div>
 
@@ -308,13 +326,17 @@
       </div>
     </div>
 
-    <!-- RIGHT: team sheet -->
+    <!-- RIGHT: box score -->
     <div class="draft-right">
-      <div class="sheet-title">Your XI · <span id="sheetCount">0</span>/11</div>
-      <div id="teamSheet"></div>
+      <div class="sheet-header">
+        <span class="sheet-title">Box Score</span>
+        <span class="sheet-count"><span id="sheetCount">0</span>/11</span>
+      </div>
+      <div class="sheet-progress-wrap"><div class="sheet-progress-bar" id="sheetProgressBar" style="width:0%"></div></div>
+      <div id="teamSheet" style="margin-top:12px"></div>
       <div class="sheet-coach" id="sheetCoach">
-        <span style="font-size:1rem">👔</span>
-        <span id="sheetCoachName" style="color:rgba(232,232,240,.25)">No coach yet</span>
+        <span class="sheet-pos">MGR</span>
+        <span id="sheetCoachName" class="sheet-name empty">—</span>
       </div>
     </div>
   </div>
@@ -387,95 +409,95 @@
 // ===== DATA =====
 const FORMATIONS = {
   '4-4-2':{slots:[
-    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:25,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:25,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:25,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:25,roles:['DF']},
-    {id:'LM',lbl:'LM',x:15,y:55,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:35,y:55,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:65,y:55,roles:['MF']},
-    {id:'RM',lbl:'RM',x:85,y:55,roles:['MF']},
-    {id:'ST1',lbl:'ST',x:35,y:80,roles:['FW','MF']},
-    {id:'ST2',lbl:'ST',x:65,y:80,roles:['FW','MF']},
+    {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:75,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:75,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:75,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:75,roles:['DF']},
+    {id:'LM',lbl:'LM',x:15,y:45,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:35,y:45,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:65,y:45,roles:['MF']},
+    {id:'RM',lbl:'RM',x:85,y:45,roles:['MF']},
+    {id:'ST1',lbl:'ST',x:35,y:20,roles:['FW','MF']},
+    {id:'ST2',lbl:'ST',x:65,y:20,roles:['FW','MF']},
   ]},
   '4-3-3':{slots:[
-    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:25,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:25,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:25,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:25,roles:['DF']},
-    {id:'CM1',lbl:'CM',x:25,y:52,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:50,y:52,roles:['MF']},
-    {id:'CM3',lbl:'CM',x:75,y:52,roles:['MF']},
-    {id:'LW',lbl:'LW',x:15,y:78,roles:['FW','MF']},
-    {id:'ST',lbl:'ST',x:50,y:85,roles:['FW']},
-    {id:'RW',lbl:'RW',x:85,y:78,roles:['FW','MF']},
+    {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:75,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:75,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:75,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:75,roles:['DF']},
+    {id:'CM1',lbl:'CM',x:25,y:48,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:50,y:48,roles:['MF']},
+    {id:'CM3',lbl:'CM',x:75,y:48,roles:['MF']},
+    {id:'LW',lbl:'LW',x:15,y:22,roles:['FW','MF']},
+    {id:'ST',lbl:'ST',x:50,y:14,roles:['FW']},
+    {id:'RW',lbl:'RW',x:85,y:22,roles:['FW','MF']},
   ]},
   '3-4-3':{slots:[
-    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
-    {id:'CB1',lbl:'CB',x:25,y:25,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:50,y:25,roles:['DF']},
-    {id:'CB3',lbl:'CB',x:75,y:25,roles:['DF']},
-    {id:'LM',lbl:'LM',x:12,y:55,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:37,y:55,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:63,y:55,roles:['MF']},
-    {id:'RM',lbl:'RM',x:88,y:55,roles:['MF']},
-    {id:'LW',lbl:'LW',x:18,y:80,roles:['FW','MF']},
-    {id:'ST',lbl:'ST',x:50,y:88,roles:['FW']},
-    {id:'RW',lbl:'RW',x:82,y:80,roles:['FW','MF']},
+    {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
+    {id:'CB1',lbl:'CB',x:25,y:75,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:50,y:75,roles:['DF']},
+    {id:'CB3',lbl:'CB',x:75,y:75,roles:['DF']},
+    {id:'LM',lbl:'LM',x:12,y:45,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:37,y:45,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:63,y:45,roles:['MF']},
+    {id:'RM',lbl:'RM',x:88,y:45,roles:['MF']},
+    {id:'LW',lbl:'LW',x:18,y:20,roles:['FW','MF']},
+    {id:'ST',lbl:'ST',x:50,y:12,roles:['FW']},
+    {id:'RW',lbl:'RW',x:82,y:20,roles:['FW','MF']},
   ]},
   '3-5-2':{slots:[
-    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
-    {id:'CB1',lbl:'CB',x:25,y:25,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:50,y:25,roles:['DF']},
-    {id:'CB3',lbl:'CB',x:75,y:25,roles:['DF']},
+    {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
+    {id:'CB1',lbl:'CB',x:25,y:75,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:50,y:75,roles:['DF']},
+    {id:'CB3',lbl:'CB',x:75,y:75,roles:['DF']},
     {id:'LWB',lbl:'LWB',x:10,y:50,roles:['MF','DF']},
-    {id:'CM1',lbl:'CM',x:30,y:52,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:50,y:52,roles:['MF']},
-    {id:'CM3',lbl:'CM',x:70,y:52,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:30,y:48,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:50,y:48,roles:['MF']},
+    {id:'CM3',lbl:'CM',x:70,y:48,roles:['MF']},
     {id:'RWB',lbl:'RWB',x:90,y:50,roles:['MF','DF']},
-    {id:'ST1',lbl:'ST',x:33,y:82,roles:['FW']},
-    {id:'ST2',lbl:'ST',x:67,y:82,roles:['FW']},
+    {id:'ST1',lbl:'ST',x:33,y:18,roles:['FW']},
+    {id:'ST2',lbl:'ST',x:67,y:18,roles:['FW']},
   ]},
   '5-4-1':{slots:[
-    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
-    {id:'LWB',lbl:'LWB',x:8,y:30,roles:['DF','MF']},
-    {id:'CB1',lbl:'CB',x:28,y:22,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:50,y:22,roles:['DF']},
-    {id:'CB3',lbl:'CB',x:72,y:22,roles:['DF']},
-    {id:'RWB',lbl:'RWB',x:92,y:30,roles:['DF','MF']},
-    {id:'LM',lbl:'LM',x:15,y:57,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:37,y:57,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:63,y:57,roles:['MF']},
-    {id:'RM',lbl:'RM',x:85,y:57,roles:['MF']},
-    {id:'ST',lbl:'ST',x:50,y:85,roles:['FW','MF']},
+    {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
+    {id:'LWB',lbl:'LWB',x:8,y:70,roles:['DF','MF']},
+    {id:'CB1',lbl:'CB',x:28,y:78,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:50,y:78,roles:['DF']},
+    {id:'CB3',lbl:'CB',x:72,y:78,roles:['DF']},
+    {id:'RWB',lbl:'RWB',x:92,y:70,roles:['DF','MF']},
+    {id:'LM',lbl:'LM',x:15,y:43,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:37,y:43,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:63,y:43,roles:['MF']},
+    {id:'RM',lbl:'RM',x:85,y:43,roles:['MF']},
+    {id:'ST',lbl:'ST',x:50,y:15,roles:['FW','MF']},
   ]},
   '4-1-4-1':{slots:[
-    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:22,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:22,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:22,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:22,roles:['DF']},
-    {id:'CDM',lbl:'CDM',x:50,y:40,roles:['MF']},
-    {id:'LM',lbl:'LM',x:12,y:60,roles:['MF']},
-    {id:'CM1',lbl:'CM',x:37,y:60,roles:['MF']},
-    {id:'CM2',lbl:'CM',x:63,y:60,roles:['MF']},
-    {id:'RM',lbl:'RM',x:88,y:60,roles:['MF']},
-    {id:'ST',lbl:'ST',x:50,y:83,roles:['FW','MF']},
+    {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:78,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:78,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:78,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:78,roles:['DF']},
+    {id:'CDM',lbl:'CDM',x:50,y:60,roles:['MF']},
+    {id:'LM',lbl:'LM',x:12,y:40,roles:['MF']},
+    {id:'CM1',lbl:'CM',x:37,y:40,roles:['MF']},
+    {id:'CM2',lbl:'CM',x:63,y:40,roles:['MF']},
+    {id:'RM',lbl:'RM',x:88,y:40,roles:['MF']},
+    {id:'ST',lbl:'ST',x:50,y:17,roles:['FW','MF']},
   ]},
   '4-2-3-1':{slots:[
-    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
-    {id:'LB',lbl:'LB',x:15,y:22,roles:['DF']},
-    {id:'CB1',lbl:'CB',x:35,y:22,roles:['DF']},
-    {id:'CB2',lbl:'CB',x:65,y:22,roles:['DF']},
-    {id:'RB',lbl:'RB',x:85,y:22,roles:['DF']},
-    {id:'CDM1',lbl:'DM',x:35,y:40,roles:['MF']},
-    {id:'CDM2',lbl:'DM',x:65,y:40,roles:['MF']},
-    {id:'LW',lbl:'LW',x:15,y:62,roles:['MF','FW']},
-    {id:'CAM',lbl:'CAM',x:50,y:62,roles:['MF']},
-    {id:'RW',lbl:'RW',x:85,y:62,roles:['MF','FW']},
-    {id:'ST',lbl:'ST',x:50,y:83,roles:['FW']},
+    {id:'GK',lbl:'GK',x:50,y:92,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:78,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:78,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:78,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:78,roles:['DF']},
+    {id:'CDM1',lbl:'DM',x:35,y:60,roles:['MF']},
+    {id:'CDM2',lbl:'DM',x:65,y:60,roles:['MF']},
+    {id:'LW',lbl:'LW',x:15,y:38,roles:['MF','FW']},
+    {id:'CAM',lbl:'CAM',x:50,y:38,roles:['MF']},
+    {id:'RW',lbl:'RW',x:85,y:38,roles:['MF','FW']},
+    {id:'ST',lbl:'ST',x:50,y:17,roles:['FW']},
   ]},
 };
 
