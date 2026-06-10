@@ -185,11 +185,11 @@
     <button class="btn btn-block" id="confirmPickBtn" onclick="confirmPick()" disabled>Confirm Pick →</button>
   </div>
 
-  <!-- Coach selection (last pick) -->
+  <!-- Coach spin result -->
   <div class="card" id="coachSelectCard" style="display:none">
-    <h3>Choose Your Coach</h3>
-    <div id="coachList"></div>
-    <button class="btn btn-block" id="confirmCoachBtn" onclick="confirmCoach()" disabled>Confirm Coach →</button>
+    <h3>Your Coach</h3>
+    <div id="coachSpunDisplay"></div>
+    <button class="btn btn-block" id="confirmCoachBtn" onclick="confirmCoach()" disabled>Start Tournament →</button>
   </div>
 </div>
 
@@ -336,6 +336,19 @@ const FORMATIONS = {
     {id:'CM2',lbl:'CM',x:63,y:60,roles:['MF']},
     {id:'RM',lbl:'RM',x:88,y:60,roles:['MF']},
     {id:'ST',lbl:'ST',x:50,y:83,roles:['FW','MF']},
+  ]},
+  '4-2-3-1':{slots:[
+    {id:'GK',lbl:'GK',x:50,y:8,roles:['GK']},
+    {id:'LB',lbl:'LB',x:15,y:22,roles:['DF']},
+    {id:'CB1',lbl:'CB',x:35,y:22,roles:['DF']},
+    {id:'CB2',lbl:'CB',x:65,y:22,roles:['DF']},
+    {id:'RB',lbl:'RB',x:85,y:22,roles:['DF']},
+    {id:'CDM1',lbl:'DM',x:35,y:40,roles:['MF']},
+    {id:'CDM2',lbl:'DM',x:65,y:40,roles:['MF']},
+    {id:'LW',lbl:'LW',x:15,y:62,roles:['MF','FW']},
+    {id:'CAM',lbl:'CAM',x:50,y:62,roles:['MF']},
+    {id:'RW',lbl:'RW',x:85,y:62,roles:['MF','FW']},
+    {id:'ST',lbl:'ST',x:50,y:83,roles:['FW']},
   ]},
 };
 
@@ -769,13 +782,12 @@ function updateDraftUI() {
     prog.textContent = `Pick 12 of 12 — Choose your coach!`;
   }
   // Show/hide cards
-  document.getElementById('spinCard').style.display = state.draftStep < 11 ? 'block' : 'none';
+  document.getElementById('spinCard').style.display = 'block';
   document.getElementById('playerSelectCard').style.display = 'none';
-  document.getElementById('coachSelectCard').style.display = state.draftStep === 11 ? 'block' : 'none';
-  if(state.draftStep === 11) showCoachPick();
+  document.getElementById('coachSelectCard').style.display = 'none';
   document.getElementById('spinBtn').disabled = false;
-  document.getElementById('spinFlag').textContent = '🌍';
-  document.getElementById('spinCountry').textContent = 'Press Spin!';
+  document.getElementById('spinFlag').textContent = state.draftStep === 11 ? '👔' : '🌍';
+  document.getElementById('spinCountry').textContent = state.draftStep === 11 ? 'Spin for a Coach!' : 'Press Spin!';
   document.getElementById('spinProg').textContent = '';
 }
 
@@ -783,17 +795,37 @@ let spinInterval = null;
 function doSpin() {
   const btn = document.getElementById('spinBtn');
   btn.disabled = true;
-  // Pick random country not yet used
+  // Coach spin (step 11)
+  if(state.draftStep === 11) {
+    const target = COACHES[Math.floor(Math.random()*COACHES.length)];
+    let frames = 0;
+    const coachNames = COACHES.map(c=>c.n);
+    function coachFrame(){
+      if(frames >= 26){
+        document.getElementById('spinFlag').textContent = '👔';
+        document.getElementById('spinCountry').textContent = target.n;
+        document.getElementById('spinProg').textContent = '';
+        showCoachSpun(target);
+        return;
+      }
+      const delay = frames < 10 ? 60 : frames < 18 ? 100 : frames < 24 ? 160 : 300;
+      document.getElementById('spinFlag').textContent = '👔';
+      document.getElementById('spinCountry').textContent = coachNames[Math.floor(Math.random()*coachNames.length)];
+      frames++;
+      setTimeout(coachFrame, delay);
+    }
+    coachFrame();
+    return;
+  }
+  // Player spin
   const available = SQUADS.filter(s => !state.usedCountries.includes(s.name));
-  if(available.length===0){state.usedCountries=[];} // reset if exhausted
+  if(available.length===0){state.usedCountries=[];}
   const available2 = SQUADS.filter(s => !state.usedCountries.includes(s.name));
   const target = available2[Math.floor(Math.random()*available2.length)];
-  // Animate
   let frames = 0;
-  const totalFrames = 26;
   const allFlags = SQUADS.map(s=>s.flag);
   function frame(){
-    if(frames >= totalFrames){
+    if(frames >= 26){
       clearInterval(spinInterval);
       document.getElementById('spinFlag').textContent = target.flag;
       document.getElementById('spinCountry').textContent = target.name;
@@ -884,27 +916,17 @@ function assignPlayerToSlot() {
   }
 }
 
-function showCoachPick() {
-  // Pick 3 random coaches
-  const shuffled = [...COACHES].sort(()=>Math.random()-.5);
-  state.coachOptions = shuffled.slice(0,3);
-  state.coach = null;
-  const list = document.getElementById('coachList');
-  list.innerHTML = '';
-  document.getElementById('confirmCoachBtn').disabled = true;
-  state.coachOptions.forEach((c,i) => {
-    const card = document.createElement('div');
-    card.className = 'coach-card';
-    card.id = 'coach-'+i;
-    card.innerHTML = `<span class="coach-icon">👔</span><span class="coach-name">${c.n}</span><span class="coach-r">???</span>`;
-    card.onclick = () => {
-      state.coach = c;
-      document.querySelectorAll('.coach-card').forEach(x=>x.classList.remove('selected'));
-      card.classList.add('selected');
-      document.getElementById('confirmCoachBtn').disabled = false;
-    };
-    list.appendChild(card);
-  });
+function showCoachSpun(coach) {
+  state.coach = coach;
+  document.getElementById('spinCard').style.display = 'none';
+  document.getElementById('coachSelectCard').style.display = 'block';
+  document.getElementById('coachSpunDisplay').innerHTML =
+    `<div class="coach-card selected" style="cursor:default">
+      <span class="coach-icon">👔</span>
+      <span class="coach-name">${coach.n}</span>
+      <span class="coach-r">???</span>
+    </div>`;
+  document.getElementById('confirmCoachBtn').disabled = false;
 }
 
 function confirmCoach() {
