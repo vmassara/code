@@ -7,21 +7,25 @@ Compares every team in a competition/season on:
 - the xG generated from corner-originated possessions
 - where the delivery typically lands (near post / central / far post / short)
 
-## Two ways to run it
+## Running it
 
-**Option A — no install, just a browser:** open `live_dashboard.html` directly
-(double-click it, or drag it into a browser tab). Type in your Wyscout
-username/password and a competition, click "Run analysis". It calls the
-Wyscout API directly from your browser (the API's OpenAPI spec declares CORS
-support on every endpoint) — nothing is installed, nothing is stored, your
-credentials never leave your machine except in the HTTPS request to
-apirest.wyscout.com. Good default for a one-off look; slower to re-run
-repeatedly since it re-fetches everything each time the page loads.
+Use the Python CLI (`cli.py`). There's also a `live_dashboard.html` that calls
+the API directly from a browser with no install — **it doesn't work**:
+Wyscout's API doesn't send the `Access-Control-Allow-Origin` header a browser
+requires for a cross-origin request, so every call fails with a CORS error
+before credentials are even checked, regardless of how the page is hosted.
+That's a decision on Wyscout's server, not something fixable client-side.
+Confirmed against a real account on 2026-07-16 (browser console:
+`Access to fetch at 'https://apirest.wyscout.com/v3/search?...' from origin
+'null' has been blocked by CORS policy: No 'Access-Control-Allow-Origin'
+header is present`). Kept in the repo as-is (now with a warning banner) in
+case Wyscout ever adds CORS support, or in case someone runs it from a domain
+Wyscout has separately allowlisted — otherwise, ignore it.
 
-**Option B — Python CLI:** better if you want the CSV/JSON output, want to
-automate/schedule runs, or want to re-render without re-fetching. See below.
+CORS is purely a browser mechanism, so it doesn't affect `cli.py` at all —
+that's a direct HTTPS call, same as `curl` or Postman.
 
-## Setup (Option B only)
+## Setup
 
 ```bash
 cd wyscout_corners
@@ -85,9 +89,8 @@ Only matches with `status == "Played"` are included.
 
 ## Files
 
-- `live_dashboard.html` — the no-install option: a self-contained page that
-  calls the Wyscout API straight from the browser and renders the same
-  dashboard as Option B. Has its own JS port of the resolution/analysis logic
+- `live_dashboard.html` — browser-only version; **doesn't work**, see above.
+  Kept for reference. Has its own JS port of the resolution/analysis logic
   below (kept in lockstep with `corner_analysis.py` — same test fixture
   validates both, see Testing below).
 - `wyscout_client.py` — Basic Auth HTTP client with the documented 12 req/s
@@ -106,11 +109,12 @@ Only matches with `status == "Played"` are included.
 ## Notes
 
 - This session's network egress policy blocked `apirest.wyscout.com`, so
-  neither path has been exercised against a live competition — both are
-  validated against a synthetic fixture and the schema in the provided
-  OpenAPI spec. Run either against AUS VIC NPL 2026 (or whatever scope you
-  want) and send over any error output if something doesn't match the spec's
-  shape (e.g. a 401, or a field named slightly differently than documented).
+  `cli.py` hasn't been exercised end-to-end against a live competition from
+  here — it's validated against a synthetic fixture and the schema in the
+  provided OpenAPI spec. Run it against AUS VIC NPL 2026 (or whatever scope
+  you want) and send over any error output if something doesn't match the
+  spec's shape (e.g. a 401, or a field named slightly differently than
+  documented).
 - Wyscout's own `MatchAdvancedStats` endpoint separately exposes a match-level
   `attacks.corners` / `attacks.cornersWithShot` pair per team, which is a
   reasonable cross-check for the "corners taken" / "chances" counts if you

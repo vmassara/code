@@ -167,6 +167,15 @@
   <h1>Wyscout corner-kick analysis</h1>
   <p class="subtitle">Runs entirely in your browser: credentials go straight from this page to apirest.wyscout.com over HTTPS, and are never sent anywhere else or stored.</p>
 
+  <div class="error-box" style="margin-bottom:24px;">
+    <strong>Known issue: this doesn't currently work.</strong> Wyscout's API doesn't send the
+    <code>Access-Control-Allow-Origin</code> header a browser requires to call it directly, so every
+    request fails with a CORS error before it even reaches your credentials. This isn't fixable from
+    this page &mdash; use the Python version instead (<code>cli.py</code> in the same
+    <code>wyscout_corners</code> folder), which talks to the API directly and isn't subject to this
+    browser-only restriction. See that folder's README for setup.
+  </div>
+
   <div class="card" id="form-card">
     <h2>Run analysis</h2>
     <label>Wyscout username <span class="req">*</span></label>
@@ -287,7 +296,17 @@ class WyscoutClient {
     let backoff = 1000;
     for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
       await this.limiter.wait();
-      const resp = await fetch(url.toString(), { headers: { Authorization: this.authHeader } });
+      let resp;
+      try {
+        resp = await fetch(url.toString(), { headers: { Authorization: this.authHeader } });
+      } catch (networkErr) {
+        throw new Error(
+          "The browser couldn't reach apirest.wyscout.com directly — Wyscout's API doesn't send the " +
+          "Access-Control-Allow-Origin header a browser needs to call it cross-origin, so this page can't work " +
+          "no matter how it's hosted. Use the Python version instead (cli.py in the same wyscout_corners " +
+          "folder) — it isn't a browser, so this restriction doesn't apply to it."
+        );
+      }
       if (resp.status === 200) return resp.json();
       if (resp.status === 429 && attempt < MAX_RETRIES) {
         const retryAfter = Number(resp.headers.get("Retry-After")) || backoff / 1000;
