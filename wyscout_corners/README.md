@@ -7,7 +7,21 @@ Compares every team in a competition/season on:
 - the xG generated from corner-originated possessions
 - where the delivery typically lands (near post / central / far post / short)
 
-## Setup
+## Two ways to run it
+
+**Option A — no install, just a browser:** open `live_dashboard.html` directly
+(double-click it, or drag it into a browser tab). Type in your Wyscout
+username/password and a competition, click "Run analysis". It calls the
+Wyscout API directly from your browser (the API's OpenAPI spec declares CORS
+support on every endpoint) — nothing is installed, nothing is stored, your
+credentials never leave your machine except in the HTTPS request to
+apirest.wyscout.com. Good default for a one-off look; slower to re-run
+repeatedly since it re-fetches everything each time the page loads.
+
+**Option B — Python CLI:** better if you want the CSV/JSON output, want to
+automate/schedule runs, or want to re-render without re-fetching. See below.
+
+## Setup (Option B only)
 
 ```bash
 cd wyscout_corners
@@ -71,6 +85,11 @@ Only matches with `status == "Played"` are included.
 
 ## Files
 
+- `live_dashboard.html` — the no-install option: a self-contained page that
+  calls the Wyscout API straight from the browser and renders the same
+  dashboard as Option B. Has its own JS port of the resolution/analysis logic
+  below (kept in lockstep with `corner_analysis.py` — same test fixture
+  validates both, see Testing below).
 - `wyscout_client.py` — Basic Auth HTTP client with the documented 12 req/s
   rate limit and retry/backoff on 429/5xx.
 - `corner_analysis.py` — the corner/possession extraction and per-team
@@ -79,17 +98,19 @@ Only matches with `status == "Played"` are included.
 - `cli.py` — wires it together: resolve competition/season → list matches →
   fetch events concurrently → analyze → write CSV/JSON/HTML.
 - `test_fixture.py` — a synthetic events payload (no network) that exercises
-  the full pipeline and asserts the arithmetic; run with `python3
-  test_fixture.py` any time you change the extraction/aggregation logic.
+  the full Python pipeline and asserts the arithmetic; run with `python3
+  test_fixture.py` any time you change the extraction/aggregation logic. The
+  same fixture values were run through `live_dashboard.html`'s JS in a
+  headless browser to confirm both give identical output.
 
 ## Notes
 
-- This session's network egress policy blocked `apirest.wyscout.com`, so the
-  pipeline is validated against a synthetic fixture (`test_fixture.py`) and
-  the schema in the provided OpenAPI spec, not a live competition. Run it
-  against AUS VIC NPL 2026 (or whatever scope you want) from an environment
-  that can reach the Wyscout API, and share any error output if something
-  doesn't match the spec's shape.
+- This session's network egress policy blocked `apirest.wyscout.com`, so
+  neither path has been exercised against a live competition — both are
+  validated against a synthetic fixture and the schema in the provided
+  OpenAPI spec. Run either against AUS VIC NPL 2026 (or whatever scope you
+  want) and send over any error output if something doesn't match the spec's
+  shape (e.g. a 401, or a field named slightly differently than documented).
 - Wyscout's own `MatchAdvancedStats` endpoint separately exposes a match-level
   `attacks.corners` / `attacks.cornersWithShot` pair per team, which is a
   reasonable cross-check for the "corners taken" / "chances" counts if you
