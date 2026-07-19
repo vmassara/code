@@ -55,8 +55,10 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--
 #video{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;background:#000}
 #drawCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
 
-#transport,#autoHoldBar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+#transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
 #transport button,#transport select{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 9px;cursor:pointer;font-size:.85rem}
+#addNoteBtn{background:var(--green-d)!important;border-color:var(--green)!important;color:#04140b!important;font-weight:700}
+#addNoteBtn.note-active{background:var(--amber)!important;border-color:var(--amber)!important;color:#241900!important;animation:recPulse 1.4s infinite}
 #seek{flex:1;min-width:120px;accent-color:var(--green)}
 #timeLabel{font-size:.78rem;color:var(--muted);white-space:nowrap;min-width:88px;text-align:right}
 
@@ -75,7 +77,6 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--
 @keyframes recPulse{0%,100%{opacity:1}50%{opacity:.65}}
 .sep{width:1px;align-self:stretch;background:var(--border);margin:0 2px}
 .text-input-overlay{position:absolute;z-index:40;background:rgba(0,0,0,.6);border:1px dashed #fff;color:#fff;font-family:system-ui;font-weight:700;padding:2px 5px;outline:none;min-width:60px;border-radius:3px}
-#holdSecInput{width:48px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px}
 
 #momentsPanel{width:280px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;max-height:660px;display:flex;flex-direction:column}
 #momentsPanel h3{font-size:.95rem;margin-bottom:10px;color:var(--green)}
@@ -116,8 +117,9 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--
         <div><b>C</b> — clear drawing</div>
         <div><b>S</b> — save moment</div>
         <div><b>R</b> — start / stop recording</div>
-        <h4 style="margin-top:10px">Auto-pause on draw</h4>
-        <div>When on, drawing a telestration freezes the video, holds it for the chosen number of seconds, then clears the drawing and resumes play — great for narrating a passage of play, or for recording a clip with timed pauses baked in.</div>
+        <div><b>N</b> — add note / resume</div>
+        <h4 style="margin-top:10px">Add Note</h4>
+        <div>Click <b>Add Note</b> at any point while a clip is playing to freeze that frame and draw on it. Take your time — nothing clears until you click <b>Resume Video</b>, at which point your drawing is saved to Saved Moments and the clip continues playing without it. Repeat as many times as you like through a clip.</div>
       </div>
     </div>
   </div>
@@ -172,12 +174,8 @@ body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--
           <label style="display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--muted)"><input type="checkbox" id="loopChk"> Loop</label>
           <button id="setInBtn">Set In</button>
           <button id="setOutBtn">Set Out</button>
-        </div>
-
-        <div id="autoHoldBar">
-          <label style="display:flex;align-items:center;gap:6px;font-size:.8rem;color:var(--muted)"><input type="checkbox" id="autoHoldChk"> Auto-pause on draw, hold for</label>
-          <input type="number" id="holdSecInput" min="0.5" max="60" step="0.5" value="5">
-          <span style="font-size:.78rem;color:var(--muted)">seconds, then resume</span>
+          <div class="sep"></div>
+          <button id="addNoteBtn" title="Pause here and draw a telestration (N)">&#128221; Add Note</button>
         </div>
 
         <div id="toolbar">
@@ -301,8 +299,7 @@ const speedSel=document.getElementById('speedSel');
 const loopChk=document.getElementById('loopChk');
 const setInBtn=document.getElementById('setInBtn');
 const setOutBtn=document.getElementById('setOutBtn');
-const autoHoldChk=document.getElementById('autoHoldChk');
-const holdSecInput=document.getElementById('holdSecInput');
+const addNoteBtn=document.getElementById('addNoteBtn');
 const recordBtn=document.getElementById('recordBtn');
 
 const toolButtons=document.getElementById('toolButtons');
@@ -331,8 +328,7 @@ const state={
   width:6,
   moments:[],
   loop:{a:null,b:null,active:false},
-  autoHold:false,
-  holdSeconds:5,
+  noteMode:false,
   recording:false,
 };
 let currentObjectUrl=null;
@@ -581,38 +577,39 @@ function hitTest(pos){
   return best;
 }
 
-/* ---------- Auto-pause-and-hold ---------- */
-let holdTimer=null;
-function autoHoldOnStart(){
-  if(!state.autoHold) return;
-  clearTimeout(holdTimer); holdTimer=null;
-  if(!video.paused) video.pause();
+/* ---------- Add Note: pause, draw, resume ---------- */
+let noteTimestamp=0;
+function enterNoteMode(){
+  if(state.noteMode || !state.clip) return;
+  state.noteMode=true;
+  noteTimestamp=video.currentTime;
+  video.pause();
+  if(state.strokes.length){ pushHistory(); state.strokes=[]; redraw(); }
+  addNoteBtn.innerHTML='&#9654; Resume Video';
+  addNoteBtn.classList.add('note-active');
 }
-function autoHoldOnComplete(){
-  if(!state.autoHold) return;
-  clearTimeout(holdTimer);
-  const snapshot=state.strokes.slice();
-  const ts=video.currentTime;
-  holdTimer=setTimeout(()=>{
-    holdTimer=null;
-    autoSaveMoment(snapshot,ts);
-    state.strokes=[];
-    redraw();
-    video.play().catch(()=>{});
-  }, state.holdSeconds*1000);
+async function exitNoteMode(resume){
+  if(!state.noteMode) return;
+  state.noteMode=false;
+  if(state.strokes.length && state.clip){
+    const moment={ id:uid(), clipId:state.clip.id, timestamp:noteTimestamp, note:'', strokes:JSON.parse(JSON.stringify(state.strokes)), createdAt:Date.now() };
+    await dbPut('moments',moment);
+    state.moments.push(moment);
+    renderMoments();
+  }
+  state.strokes=[];
+  state.history=[]; state.redoStack=[];
+  redraw();
+  addNoteBtn.innerHTML='&#128221; Add Note';
+  addNoteBtn.classList.remove('note-active');
+  if(resume) video.play().catch(()=>{});
 }
-function cancelAutoHold(){
-  if(holdTimer){ clearTimeout(holdTimer); holdTimer=null; }
+addNoteBtn.addEventListener('click',()=>{ state.noteMode?exitNoteMode(true):enterNoteMode(); });
+function resetNoteUI(){
+  state.noteMode=false;
+  addNoteBtn.innerHTML='&#128221; Add Note';
+  addNoteBtn.classList.remove('note-active');
 }
-async function autoSaveMoment(strokesSnapshot,ts){
-  if(!strokesSnapshot.length || !state.clip) return;
-  const moment={ id:uid(), clipId:state.clip.id, timestamp:ts, note:'', strokes:JSON.parse(JSON.stringify(strokesSnapshot)), createdAt:Date.now() };
-  await dbPut('moments',moment);
-  state.moments.push(moment);
-  renderMoments();
-}
-autoHoldChk.addEventListener('change',()=>{ state.autoHold=autoHoldChk.checked; if(!state.autoHold) cancelAutoHold(); });
-holdSecInput.addEventListener('input',()=>{ state.holdSeconds=Math.max(0.5,parseFloat(holdSecInput.value)||5); });
 
 /* ---------- Inline text entry ---------- */
 function startTextInput(pos){
@@ -636,16 +633,12 @@ function startTextInput(pos){
       pushHistory();
       state.strokes.push({tool:'text',x:pos[0],y:pos[1],color:state.color,text:txt,size:16+state.width});
       redraw();
-      autoHoldOnComplete();
-    } else if(state.autoHold && video.paused){
-      video.play().catch(()=>{});
     }
   }
   function cancel(){
     if(committed) return;
     committed=true;
     input.remove();
-    if(state.autoHold && video.paused) video.play().catch(()=>{});
   }
   input.addEventListener('keydown',e=>{
     if(e.key==='Enter'){ e.preventDefault(); commit(); }
@@ -669,14 +662,12 @@ function onPointerDown(e){
     if(idx!=null){ pushHistory(); state.strokes.splice(idx,1); redraw(); }
     return;
   }
-  autoHoldOnStart();
   if(tool==='marker'){
     pushHistory();
     const label=markerNumInput.value||'';
     state.strokes.push({tool:'marker',x:pos[0],y:pos[1],color:state.color,label});
     markerNumInput.value=(parseInt(markerNumInput.value,10)||0)+1;
     redraw();
-    autoHoldOnComplete();
     return;
   }
   if(tool==='text'){
@@ -706,7 +697,6 @@ function onPointerUp(){
   if(state.drawing){
     state.drawing=null;
     redraw();
-    autoHoldOnComplete();
   }
 }
 canvas.addEventListener('pointerdown',onPointerDown);
@@ -716,13 +706,16 @@ window.addEventListener('pointercancel',onPointerUp);
 
 /* ---------- Transport ---------- */
 function getFps(){ return parseInt(fpsSel.value,10)||30; }
-playBtn.addEventListener('click',()=>{ cancelAutoHold(); video.paused?video.play():video.pause(); });
+playBtn.addEventListener('click',()=>{
+  if(state.noteMode){ exitNoteMode(true); return; }
+  video.paused?video.play():video.pause();
+});
 video.addEventListener('play',()=>playBtn.innerHTML='&#9208;');
 video.addEventListener('pause',()=>playBtn.innerHTML='&#9654;');
-stepBackBtn.addEventListener('click',()=>{ cancelAutoHold(); video.pause(); video.currentTime=Math.max(0,video.currentTime-1/getFps()); });
-stepFwdBtn.addEventListener('click',()=>{ cancelAutoHold(); video.pause(); video.currentTime=Math.min(video.duration||0,video.currentTime+1/getFps()); });
+stepBackBtn.addEventListener('click',()=>{ exitNoteMode(false); video.pause(); video.currentTime=Math.max(0,video.currentTime-1/getFps()); });
+stepFwdBtn.addEventListener('click',()=>{ exitNoteMode(false); video.pause(); video.currentTime=Math.min(video.duration||0,video.currentTime+1/getFps()); });
 let seeking=false;
-seek.addEventListener('input',()=>{ cancelAutoHold(); seeking=true; if(video.duration) video.currentTime=(seek.value/1000)*video.duration; });
+seek.addEventListener('input',()=>{ exitNoteMode(false); seeking=true; if(video.duration) video.currentTime=(seek.value/1000)*video.duration; });
 seek.addEventListener('change',()=>{ seeking=false; });
 video.addEventListener('timeupdate',()=>{
   if(video.duration && !seeking) seek.value=(video.currentTime/video.duration)*1000;
@@ -819,7 +812,7 @@ function startRecording(){
   };
 
   state.recording=true;
-  cancelAutoHold();
+  exitNoteMode(false);
   state.loop.active=false; loopChk.checked=false;
   recordBtn.textContent='⏹ Stop & Save (0:00)';
   recordBtn.classList.add('recording');
@@ -963,7 +956,7 @@ async function openClip(id){
   const blobRec=await dbGet('clipsBlob',id);
   if(!meta||!blobRec){ toast('Clip not found'); return; }
   stopRecording();
-  cancelAutoHold();
+  resetNoteUI();
   state.clip=meta;
   state.strokes=[]; state.history=[]; state.redoStack=[];
   state.loop={a:null,b:null,active:false};
@@ -981,7 +974,7 @@ async function openClip(id){
 }
 backBtn.addEventListener('click',()=>{
   stopRecording();
-  cancelAutoHold();
+  resetNoteUI();
   video.pause();
   libraryGrid.innerHTML='';
   editorView.style.display='none';
@@ -997,7 +990,7 @@ deleteClipBtn.addEventListener('click', async ()=>{
   if(!state.clip) return;
   if(!confirm(`Delete "${state.clip.name}" and all its moments?`)) return;
   stopRecording();
-  cancelAutoHold();
+  resetNoteUI();
   const id=state.clip.id;
   video.pause(); video.removeAttribute('src'); video.load();
   await deleteClip(id);
@@ -1040,12 +1033,18 @@ window.addEventListener('keydown', e=>{
   if(tag==='input'||tag==='textarea') return;
   const map={'1':'pen','2':'line','3':'arrow','4':'rect','5':'circle','6':'zone','7':'spotlight','8':'marker','9':'text','0':'eraser'};
   if(map[e.key]){ setTool(map[e.key]); return; }
-  if(e.code==='Space'){ e.preventDefault(); cancelAutoHold(); video.paused?video.play():video.pause(); return; }
-  if(e.key==='ArrowLeft'){ e.preventDefault(); cancelAutoHold(); video.pause(); video.currentTime=Math.max(0,video.currentTime-1/getFps()); return; }
-  if(e.key==='ArrowRight'){ e.preventDefault(); cancelAutoHold(); video.pause(); video.currentTime=Math.min(video.duration||0,video.currentTime+1/getFps()); return; }
+  if(e.code==='Space'){
+    e.preventDefault();
+    if(state.noteMode){ exitNoteMode(true); return; }
+    video.paused?video.play():video.pause();
+    return;
+  }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); exitNoteMode(false); video.pause(); video.currentTime=Math.max(0,video.currentTime-1/getFps()); return; }
+  if(e.key==='ArrowRight'){ e.preventDefault(); exitNoteMode(false); video.pause(); video.currentTime=Math.min(video.duration||0,video.currentTime+1/getFps()); return; }
   if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
   if(e.key.toLowerCase()==='c'){ clearStrokes(); return; }
   if(e.key.toLowerCase()==='s'){ saveMoment(); return; }
+  if(e.key.toLowerCase()==='n'){ state.noteMode?exitNoteMode(true):enterNoteMode(); return; }
   if(e.key.toLowerCase()==='r'){ state.recording?stopRecording():startRecording(); return; }
 });
 
