@@ -1,0 +1,825 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Telestrator · Soccer Coaching Video Tool</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0b0f14;--surface:#121822;--card:#161f2c;--border:#243040;
+  --green:#33d17a;--green-d:#1f9e57;--amber:#f5a623;--red:#ff5a5a;
+  --text:#e8ecf1;--muted:#8a97a8;--faint:#3a4657;
+}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
+#app{max-width:1200px;margin:0 auto;padding:14px 12px 60px}
+
+#topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;position:relative}
+#brand{font-size:1.3rem;font-weight:800;display:flex;align-items:center;gap:8px}
+#brand span{color:var(--green)}
+#topbarRight{display:flex;align-items:center;gap:10px}
+#storageInfo{font-size:.7rem;color:var(--muted)}
+#helpBtn{background:var(--surface);border:1px solid var(--border);color:var(--text);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:.8rem}
+#helpPanel{display:none;position:absolute;top:38px;right:0;background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px;width:260px;font-size:.76rem;color:var(--muted);z-index:60;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+#helpPanel.show{display:block}
+#helpPanel h4{color:var(--text);margin-bottom:6px;font-size:.8rem}
+#helpPanel div{margin-bottom:3px}
+#helpPanel b{color:var(--text)}
+
+/* Library */
+#dropzone{border:2px dashed var(--faint);border-radius:14px;padding:28px 16px;text-align:center;cursor:pointer;margin-bottom:20px;transition:all .15s;background:var(--surface)}
+#dropzone.drag{border-color:var(--green);background:rgba(51,209,122,.08)}
+.dz-icon{font-size:2rem;margin-bottom:8px}
+.dz-sub{color:var(--muted);font-size:.78rem;margin-top:4px}
+#libraryGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.clip-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px}
+.cc-title{font-weight:700;margin-bottom:4px;word-break:break-word}
+.cc-meta{font-size:.75rem;color:var(--muted);margin-bottom:10px}
+.cc-actions{display:flex;gap:8px}
+.cc-actions button{flex:1;padding:7px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--text);cursor:pointer;font-size:.8rem}
+.cc-open{background:var(--green-d)!important;border-color:var(--green)!important;color:#04140b!important;font-weight:700}
+.cc-del{color:var(--red)!important}
+.empty{color:var(--muted);font-size:.85rem;padding:20px 0;text-align:center}
+
+/* Editor */
+#editorView{display:flex;flex-direction:column;gap:12px}
+#editorTop{display:flex;align-items:center;gap:10px}
+#backBtn{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:7px 12px;border-radius:8px;cursor:pointer;flex-shrink:0}
+#clipNameInput{flex:1;background:transparent;border:none;color:var(--text);font-size:1.1rem;font-weight:700;padding:6px;min-width:0}
+#clipNameInput:focus{outline:1px solid var(--green);border-radius:6px}
+#deleteClipBtn{background:none;border:1px solid var(--border);border-radius:8px;color:var(--red);padding:6px 10px;cursor:pointer;flex-shrink:0}
+
+#editorBody{display:flex;gap:16px;flex-wrap:wrap}
+#mainCol{flex:1;min-width:300px;display:flex;flex-direction:column;gap:12px}
+#stageWrap{position:relative;width:100%;aspect-ratio:16/9;background:#000;border-radius:10px;overflow:hidden;border:1px solid var(--border)}
+#video{position:absolute;inset:0;width:100%;height:100%;object-fit:fill;background:#000}
+#drawCanvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+
+#transport{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:8px 10px}
+#transport button,#transport select{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 9px;cursor:pointer;font-size:.85rem}
+#seek{flex:1;min-width:120px;accent-color:var(--green)}
+#timeLabel{font-size:.78rem;color:var(--muted);white-space:nowrap;min-width:88px;text-align:right}
+
+#toolbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px}
+.tool-group{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.tool-btn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 10px;cursor:pointer;font-size:.8rem;white-space:nowrap}
+.tool-btn.active{border-color:var(--green);background:rgba(51,209,122,.15);color:var(--green)}
+.swatch{width:24px;height:24px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0}
+.swatch.active{border-color:#fff}
+#widthSlider{accent-color:var(--green);width:80px}
+#markerNum{width:52px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:5px}
+.toolbar-btn{background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 10px;cursor:pointer;font-size:.8rem}
+#exportBtn{background:var(--green-d);border:1px solid var(--green);color:#04140b;font-weight:700}
+.sep{width:1px;align-self:stretch;background:var(--border);margin:0 2px}
+
+#momentsPanel{width:280px;flex-shrink:0;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:12px;max-height:660px;display:flex;flex-direction:column}
+#momentsPanel h3{font-size:.95rem;margin-bottom:10px;color:var(--green)}
+#saveMomentRow{display:flex;gap:6px;margin-bottom:10px}
+#momentNote{flex:1;min-width:0;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:6px 8px;font-size:.8rem}
+#saveMomentBtn{background:var(--green-d);border:1px solid var(--green);color:#04140b;font-weight:700;border-radius:7px;padding:6px 10px;cursor:pointer;font-size:.78rem;white-space:nowrap}
+#momentsList{overflow-y:auto;display:flex;flex-direction:column;gap:6px}
+.moment-row{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--border);border-radius:8px;padding:6px 8px;font-size:.78rem;cursor:pointer}
+.moment-row:hover{border-color:var(--green)}
+.m-time{color:var(--green);font-weight:700;flex-shrink:0}
+.m-note{flex:1;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.m-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:.85rem;flex-shrink:0}
+.m-del:hover{color:var(--red)}
+
+@media(max-width:820px){
+  #editorBody{flex-direction:column}
+  #momentsPanel{width:100%;max-height:280px}
+}
+
+#toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%) translateY(20px);background:#1c2530;border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:8px;font-size:.85rem;opacity:0;pointer-events:none;transition:all .25s;z-index:80;max-width:90vw;text-align:center}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <div id="topbar">
+    <div id="brand">&#9917; <span>Telestrator</span></div>
+    <div id="topbarRight">
+      <div id="storageInfo"></div>
+      <button id="helpBtn" title="Shortcuts">?</button>
+      <div id="helpPanel">
+        <h4>Keyboard shortcuts</h4>
+        <div><b>Space</b> — play / pause</div>
+        <div><b>&larr; / &rarr;</b> — step one frame</div>
+        <div><b>1-9</b> — pick a tool</div>
+        <div><b>Ctrl+Z</b> / <b>Ctrl+Shift+Z</b> — undo / redo</div>
+        <div><b>C</b> — clear drawing</div>
+        <div><b>S</b> — save moment</div>
+      </div>
+    </div>
+  </div>
+
+  <section id="libraryView">
+    <div id="dropzone">
+      <input type="file" id="fileInput" accept="video/*" hidden>
+      <div id="dropzoneInner">
+        <div class="dz-icon">&#127909;</div>
+        <p><strong>Click to upload</strong> or drag a match clip here</p>
+        <p class="dz-sub">MP4, MOV, WebM &middot; stored locally in this browser only &mdash; nothing is uploaded anywhere</p>
+      </div>
+    </div>
+    <div id="libraryGrid"></div>
+  </section>
+
+  <section id="editorView" style="display:none">
+    <div id="editorTop">
+      <button id="backBtn">&larr; Library</button>
+      <input id="clipNameInput" type="text">
+      <button id="deleteClipBtn" title="Delete clip">&#128465;</button>
+    </div>
+
+    <div id="editorBody">
+      <div id="mainCol">
+        <div id="stageWrap">
+          <video id="video" playsinline></video>
+          <canvas id="drawCanvas"></canvas>
+        </div>
+
+        <div id="transport">
+          <button id="playBtn">&#9654;</button>
+          <button id="stepBackBtn" title="Previous frame">&#9198;</button>
+          <button id="stepFwdBtn" title="Next frame">&#9197;</button>
+          <input id="seek" type="range" min="0" max="1000" value="0">
+          <span id="timeLabel">0:00 / 0:00</span>
+          <select id="fpsSel" title="Frame rate">
+            <option value="24">24fps</option>
+            <option value="25">25fps</option>
+            <option value="30" selected>30fps</option>
+            <option value="50">50fps</option>
+            <option value="60">60fps</option>
+          </select>
+          <select id="speedSel" title="Playback speed">
+            <option value="0.25">0.25x</option>
+            <option value="0.5">0.5x</option>
+            <option value="0.75">0.75x</option>
+            <option value="1" selected>1x</option>
+            <option value="1.5">1.5x</option>
+            <option value="2">2x</option>
+          </select>
+          <label style="display:flex;align-items:center;gap:4px;font-size:.8rem;color:var(--muted)"><input type="checkbox" id="loopChk"> Loop</label>
+          <button id="setInBtn">Set In</button>
+          <button id="setOutBtn">Set Out</button>
+        </div>
+
+        <div id="toolbar">
+          <div class="tool-group" id="toolButtons"></div>
+          <div class="sep"></div>
+          <div class="tool-group" id="colorSwatches"></div>
+          <input type="color" id="customColor" value="#ffe14d" title="Custom color">
+          <div class="sep"></div>
+          <span style="font-size:.75rem;color:var(--muted)">Width</span>
+          <input type="range" id="widthSlider" min="2" max="20" value="6">
+          <span style="font-size:.75rem;color:var(--muted)">Next #</span>
+          <input type="number" id="markerNum" min="1" value="1">
+          <div class="sep"></div>
+          <button id="undoBtn" class="toolbar-btn" title="Undo (Ctrl+Z)">&#8630;</button>
+          <button id="redoBtn" class="toolbar-btn" title="Redo (Ctrl+Shift+Z)">&#8631;</button>
+          <button id="clearBtn" class="toolbar-btn">Clear</button>
+          <button id="exportBtn">&#11015; Export PNG</button>
+        </div>
+      </div>
+
+      <aside id="momentsPanel">
+        <h3>Saved Moments</h3>
+        <div id="saveMomentRow">
+          <input id="momentNote" placeholder="Note (optional)">
+          <button id="saveMomentBtn">+ Save</button>
+        </div>
+        <div id="momentsList"></div>
+      </aside>
+    </div>
+  </section>
+
+  <div id="toast"></div>
+</div>
+
+<script>
+/* ---------- IndexedDB ---------- */
+const DB_NAME='telestrator-db', DB_VERSION=1;
+function openDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(DB_NAME,DB_VERSION);
+    req.onupgradeneeded=e=>{
+      const db=e.target.result;
+      if(!db.objectStoreNames.contains('clipsMeta')) db.createObjectStore('clipsMeta',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('clipsBlob')) db.createObjectStore('clipsBlob',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('moments')){
+        const s=db.createObjectStore('moments',{keyPath:'id'});
+        s.createIndex('clipId','clipId',{unique:false});
+      }
+    };
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error);
+  });
+}
+const dbPromise=openDB();
+async function dbPut(store,val){const db=await dbPromise;return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).put(val);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+async function dbDelete(store,key){const db=await dbPromise;return new Promise((res,rej)=>{const tx=db.transaction(store,'readwrite');tx.objectStore(store).delete(key);tx.oncomplete=()=>res();tx.onerror=()=>rej(tx.error);});}
+async function dbGetAll(store){const db=await dbPromise;return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).getAll();req.onsuccess=()=>res(req.result);req.onerror=()=>rej(req.error);});}
+async function dbGet(store,key){const db=await dbPromise;return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).get(key);req.onsuccess=()=>res(req.result);req.onerror=()=>rej(req.error);});}
+async function dbGetByIndex(store,indexName,key){const db=await dbPromise;return new Promise((res,rej)=>{const tx=db.transaction(store,'readonly');const req=tx.objectStore(store).index(indexName).getAll(key);req.onsuccess=()=>res(req.result);req.onerror=()=>rej(req.error);});}
+
+/* ---------- Helpers ---------- */
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,8);}
+function clamp01(v){return Math.max(0,Math.min(1,v));}
+function dist(a,b){return Math.hypot(a[0]-b[0],a[1]-b[1]);}
+function formatTime(t){
+  if(!isFinite(t)||t<0) return '0:00';
+  const m=Math.floor(t/60), s=Math.floor(t%60);
+  return `${m}:${s.toString().padStart(2,'0')}`;
+}
+function escapeHtml(str){
+  return String(str).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function getContrastColor(hex){
+  const c=hex.replace('#','');
+  if(c.length<6) return '#111';
+  const r=parseInt(c.substr(0,2),16), g=parseInt(c.substr(2,2),16), b=parseInt(c.substr(4,2),16);
+  const lum=(0.299*r+0.587*g+0.114*b)/255;
+  return lum>0.6?'#111':'#fff';
+}
+let toastTimer=null;
+function toast(msg){
+  const el=document.getElementById('toast');
+  el.textContent=msg; el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>el.classList.remove('show'),2600);
+}
+
+/* ---------- DOM refs ---------- */
+const libraryView=document.getElementById('libraryView');
+const editorView=document.getElementById('editorView');
+const dropzone=document.getElementById('dropzone');
+const dropzoneInner=document.getElementById('dropzoneInner');
+const fileInput=document.getElementById('fileInput');
+const libraryGrid=document.getElementById('libraryGrid');
+const storageInfo=document.getElementById('storageInfo');
+const helpBtn=document.getElementById('helpBtn');
+const helpPanel=document.getElementById('helpPanel');
+
+const backBtn=document.getElementById('backBtn');
+const clipNameInput=document.getElementById('clipNameInput');
+const deleteClipBtn=document.getElementById('deleteClipBtn');
+const stageWrap=document.getElementById('stageWrap');
+const video=document.getElementById('video');
+const canvas=document.getElementById('drawCanvas');
+const ctx=canvas.getContext('2d');
+
+const playBtn=document.getElementById('playBtn');
+const stepBackBtn=document.getElementById('stepBackBtn');
+const stepFwdBtn=document.getElementById('stepFwdBtn');
+const seek=document.getElementById('seek');
+const timeLabel=document.getElementById('timeLabel');
+const fpsSel=document.getElementById('fpsSel');
+const speedSel=document.getElementById('speedSel');
+const loopChk=document.getElementById('loopChk');
+const setInBtn=document.getElementById('setInBtn');
+const setOutBtn=document.getElementById('setOutBtn');
+
+const toolButtons=document.getElementById('toolButtons');
+const colorSwatches=document.getElementById('colorSwatches');
+const customColor=document.getElementById('customColor');
+const widthSlider=document.getElementById('widthSlider');
+const markerNumInput=document.getElementById('markerNum');
+const undoBtn=document.getElementById('undoBtn');
+const redoBtn=document.getElementById('redoBtn');
+const clearBtn=document.getElementById('clearBtn');
+const exportBtn=document.getElementById('exportBtn');
+
+const momentNote=document.getElementById('momentNote');
+const saveMomentBtn=document.getElementById('saveMomentBtn');
+const momentsList=document.getElementById('momentsList');
+
+/* ---------- State ---------- */
+const state={
+  clip:null,
+  strokes:[],
+  history:[],
+  redoStack:[],
+  drawing:null,
+  tool:'pen',
+  color:'#ffe14d',
+  width:6,
+  moments:[],
+  loop:{a:null,b:null,active:false},
+};
+let currentObjectUrl=null;
+
+/* ---------- Tools & colors ---------- */
+const TOOLS=[
+  {id:'pen',label:'&#9998; Pen'},
+  {id:'line',label:'&#9585; Line'},
+  {id:'arrow',label:'&#10132; Arrow'},
+  {id:'rect',label:'&#9633; Box'},
+  {id:'circle',label:'&#9711; Circle'},
+  {id:'spotlight',label:'&#128269; Spotlight'},
+  {id:'marker',label:'&#9899; Marker'},
+  {id:'text',label:'Aa Text'},
+  {id:'eraser',label:'&#129529; Eraser'},
+];
+const COLORS=['#ffe14d','#ff4444','#4488ff','#ffffff','#39d353','#ff8c1a','#ff45c8','#111111'];
+
+function buildToolbar(){
+  toolButtons.innerHTML='';
+  TOOLS.forEach(t=>{
+    const b=document.createElement('button');
+    b.className='tool-btn'+(t.id===state.tool?' active':'');
+    b.innerHTML=t.label;
+    b.dataset.tool=t.id;
+    b.addEventListener('click',()=>setTool(t.id));
+    toolButtons.appendChild(b);
+  });
+  colorSwatches.innerHTML='';
+  COLORS.forEach(c=>{
+    const b=document.createElement('button');
+    b.className='swatch'+(c===state.color?' active':'');
+    b.style.background=c;
+    b.dataset.color=c;
+    b.addEventListener('click',()=>setColor(c));
+    colorSwatches.appendChild(b);
+  });
+}
+function setTool(id){
+  state.tool=id;
+  [...toolButtons.children].forEach(b=>b.classList.toggle('active',b.dataset.tool===id));
+}
+function setColor(c){
+  state.color=c;
+  [...colorSwatches.children].forEach(b=>b.classList.toggle('active',b.dataset.color===c));
+  customColor.value=c;
+}
+customColor.addEventListener('input',()=>setColor(customColor.value));
+widthSlider.addEventListener('input',()=>{state.width=+widthSlider.value;});
+buildToolbar();
+
+/* ---------- Canvas sizing ---------- */
+function resizeCanvas(){
+  const rect=stageWrap.getBoundingClientRect();
+  const dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(rect.width*dpr);
+  canvas.height=Math.round(rect.height*dpr);
+  canvas.style.width=rect.width+'px';
+  canvas.style.height=rect.height+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  redraw();
+}
+new ResizeObserver(()=>resizeCanvas()).observe(stageWrap);
+window.addEventListener('resize',resizeCanvas);
+
+/* ---------- Drawing ---------- */
+function drawStroke(c,s,w,h){
+  c.save();
+  switch(s.tool){
+    case 'pen':{
+      if(s.points.length<2){
+        if(s.points.length===1){ c.beginPath(); c.arc(s.points[0][0]*w,s.points[0][1]*h,s.width/2,0,Math.PI*2); c.fillStyle=s.color; c.fill(); }
+        break;
+      }
+      c.beginPath();
+      c.moveTo(s.points[0][0]*w,s.points[0][1]*h);
+      for(let i=1;i<s.points.length;i++) c.lineTo(s.points[i][0]*w,s.points[i][1]*h);
+      c.strokeStyle=s.color; c.lineWidth=s.width; c.lineCap='round'; c.lineJoin='round';
+      c.stroke();
+      break;
+    }
+    case 'line':{
+      c.beginPath(); c.moveTo(s.x1*w,s.y1*h); c.lineTo(s.x2*w,s.y2*h);
+      c.strokeStyle=s.color; c.lineWidth=s.width; c.lineCap='round';
+      c.stroke();
+      break;
+    }
+    case 'arrow':{
+      const x1=s.x1*w,y1=s.y1*h,x2=s.x2*w,y2=s.y2*h;
+      c.beginPath(); c.moveTo(x1,y1); c.lineTo(x2,y2);
+      c.strokeStyle=s.color; c.lineWidth=s.width; c.lineCap='round';
+      c.stroke();
+      const angle=Math.atan2(y2-y1,x2-x1);
+      const size=8+s.width*1.6;
+      c.beginPath();
+      c.moveTo(x2,y2);
+      c.lineTo(x2-size*Math.cos(angle-Math.PI/7), y2-size*Math.sin(angle-Math.PI/7));
+      c.lineTo(x2-size*Math.cos(angle+Math.PI/7), y2-size*Math.sin(angle+Math.PI/7));
+      c.closePath();
+      c.fillStyle=s.color; c.fill();
+      break;
+    }
+    case 'rect':{
+      c.strokeStyle=s.color; c.lineWidth=s.width;
+      c.strokeRect(s.x1*w,s.y1*h,(s.x2-s.x1)*w,(s.y2-s.y1)*h);
+      break;
+    }
+    case 'circle':{
+      const cx=(s.x1+s.x2)/2*w, cy=(s.y1+s.y2)/2*h;
+      const rx=Math.abs(s.x2-s.x1)/2*w, ry=Math.abs(s.y2-s.y1)/2*h;
+      c.beginPath(); c.ellipse(cx,cy,rx,ry,0,0,Math.PI*2);
+      c.strokeStyle=s.color; c.lineWidth=s.width; c.stroke();
+      break;
+    }
+    case 'spotlight':{
+      const r=Math.max(s.r*w,4);
+      c.beginPath();
+      c.rect(0,0,w,h);
+      c.moveTo(s.x*w+r, s.y*h);
+      c.arc(s.x*w,s.y*h,r,0,Math.PI*2,true);
+      c.fillStyle='rgba(0,0,0,.55)';
+      c.fill('evenodd');
+      c.beginPath();
+      c.arc(s.x*w,s.y*h,r,0,Math.PI*2);
+      c.strokeStyle=s.color; c.lineWidth=3; c.stroke();
+      break;
+    }
+    case 'marker':{
+      c.beginPath(); c.arc(s.x*w,s.y*h,17,0,Math.PI*2);
+      c.fillStyle=s.color; c.fill();
+      c.lineWidth=2; c.strokeStyle='#fff'; c.stroke();
+      c.fillStyle=getContrastColor(s.color);
+      c.font='bold 15px system-ui'; c.textAlign='center'; c.textBaseline='middle';
+      c.fillText(s.label,s.x*w,s.y*h);
+      break;
+    }
+    case 'text':{
+      c.font=`bold ${s.size||20}px system-ui`;
+      c.fillStyle=s.color; c.textAlign='left'; c.textBaseline='top';
+      c.shadowColor='rgba(0,0,0,.85)'; c.shadowBlur=5;
+      c.fillText(s.text,s.x*w,s.y*h);
+      break;
+    }
+  }
+  c.restore();
+}
+function redraw(){
+  const w=canvas.clientWidth, h=canvas.clientHeight;
+  ctx.clearRect(0,0,w,h);
+  for(const s of state.strokes) drawStroke(ctx,s,w,h);
+}
+
+/* ---------- History ---------- */
+function pushHistory(){
+  state.history.push(JSON.stringify(state.strokes));
+  if(state.history.length>60) state.history.shift();
+  state.redoStack=[];
+}
+function undo(){
+  if(!state.history.length) return;
+  state.redoStack.push(JSON.stringify(state.strokes));
+  state.strokes=JSON.parse(state.history.pop());
+  redraw();
+}
+function redo(){
+  if(!state.redoStack.length) return;
+  state.history.push(JSON.stringify(state.strokes));
+  state.strokes=JSON.parse(state.redoStack.pop());
+  redraw();
+}
+function clearStrokes(){
+  if(!state.strokes.length) return;
+  pushHistory();
+  state.strokes=[];
+  redraw();
+}
+undoBtn.addEventListener('click',undo);
+redoBtn.addEventListener('click',redo);
+clearBtn.addEventListener('click',clearStrokes);
+
+/* ---------- Hit testing (eraser) ---------- */
+function segDist(p,a,b){
+  const [x,y]=p,[x1,y1]=a,[x2,y2]=b;
+  const dx=x2-x1,dy=y2-y1;
+  const len2=dx*dx+dy*dy;
+  let t=len2?((x-x1)*dx+(y-y1)*dy)/len2:0;
+  t=Math.max(0,Math.min(1,t));
+  return Math.hypot(x-(x1+t*dx), y-(y1+t*dy));
+}
+function rectEdgeDist(p,s){
+  const pts=[[s.x1,s.y1],[s.x2,s.y1],[s.x2,s.y2],[s.x1,s.y2]];
+  let min=Infinity;
+  for(let i=0;i<4;i++) min=Math.min(min,segDist(p,pts[i],pts[(i+1)%4]));
+  return min;
+}
+function strokeDistance(s,pos){
+  switch(s.tool){
+    case 'pen':{
+      if(s.points.length===1) return dist(pos,s.points[0]);
+      let min=Infinity;
+      for(let i=0;i<s.points.length-1;i++) min=Math.min(min,segDist(pos,s.points[i],s.points[i+1]));
+      return min;
+    }
+    case 'line': case 'arrow': return segDist(pos,[s.x1,s.y1],[s.x2,s.y2]);
+    case 'rect': return rectEdgeDist(pos,s);
+    case 'circle':{
+      const cx=(s.x1+s.x2)/2, cy=(s.y1+s.y2)/2;
+      return Math.abs(dist(pos,[cx,cy])-Math.hypot(s.x2-s.x1,s.y2-s.y1)/2);
+    }
+    case 'spotlight': return Math.abs(dist(pos,[s.x,s.y])-s.r);
+    case 'marker': case 'text': return dist(pos,[s.x,s.y]);
+  }
+  return Infinity;
+}
+function hitTest(pos){
+  let best=null,bestDist=0.035;
+  for(let i=state.strokes.length-1;i>=0;i--){
+    const d=strokeDistance(state.strokes[i],pos);
+    if(d<bestDist){bestDist=d;best=i;}
+  }
+  return best;
+}
+
+/* ---------- Pointer handling ---------- */
+function getPos(e){
+  const rect=canvas.getBoundingClientRect();
+  return [clamp01((e.clientX-rect.left)/rect.width), clamp01((e.clientY-rect.top)/rect.height)];
+}
+function onPointerDown(e){
+  if(!state.clip) return;
+  e.preventDefault();
+  const pos=getPos(e);
+  const tool=state.tool;
+  if(tool==='eraser'){
+    const idx=hitTest(pos);
+    if(idx!=null){ pushHistory(); state.strokes.splice(idx,1); redraw(); }
+    return;
+  }
+  if(tool==='marker'){
+    pushHistory();
+    const label=markerNumInput.value||'';
+    state.strokes.push({tool:'marker',x:pos[0],y:pos[1],color:state.color,label});
+    markerNumInput.value=(parseInt(markerNumInput.value,10)||0)+1;
+    redraw();
+    return;
+  }
+  if(tool==='text'){
+    const txt=prompt('Label text:');
+    if(txt){
+      pushHistory();
+      state.strokes.push({tool:'text',x:pos[0],y:pos[1],color:state.color,text:txt,size:16+state.width});
+      redraw();
+    }
+    return;
+  }
+  pushHistory();
+  let s;
+  if(tool==='pen') s={tool,color:state.color,width:state.width,points:[pos]};
+  else if(tool==='spotlight') s={tool,color:state.color,x:pos[0],y:pos[1],r:0};
+  else s={tool,color:state.color,width:state.width,x1:pos[0],y1:pos[1],x2:pos[0],y2:pos[1]};
+  state.strokes.push(s);
+  state.drawing=s;
+  try{ canvas.setPointerCapture(e.pointerId); }catch(err){}
+  redraw();
+}
+function onPointerMove(e){
+  if(!state.drawing) return;
+  const pos=getPos(e);
+  const s=state.drawing;
+  if(s.tool==='pen') s.points.push(pos);
+  else if(s.tool==='spotlight') s.r=dist(pos,[s.x,s.y]);
+  else { s.x2=pos[0]; s.y2=pos[1]; }
+  redraw();
+}
+function onPointerUp(){ state.drawing=null; }
+canvas.addEventListener('pointerdown',onPointerDown);
+canvas.addEventListener('pointermove',onPointerMove);
+window.addEventListener('pointerup',onPointerUp);
+window.addEventListener('pointercancel',onPointerUp);
+
+/* ---------- Transport ---------- */
+function getFps(){ return parseInt(fpsSel.value,10)||30; }
+playBtn.addEventListener('click',()=>{ video.paused?video.play():video.pause(); });
+video.addEventListener('play',()=>playBtn.innerHTML='&#9208;');
+video.addEventListener('pause',()=>playBtn.innerHTML='&#9654;');
+stepBackBtn.addEventListener('click',()=>{ video.pause(); video.currentTime=Math.max(0,video.currentTime-1/getFps()); });
+stepFwdBtn.addEventListener('click',()=>{ video.pause(); video.currentTime=Math.min(video.duration||0,video.currentTime+1/getFps()); });
+let seeking=false;
+seek.addEventListener('input',()=>{ seeking=true; if(video.duration) video.currentTime=(seek.value/1000)*video.duration; });
+seek.addEventListener('change',()=>{ seeking=false; });
+video.addEventListener('timeupdate',()=>{
+  if(video.duration && !seeking) seek.value=(video.currentTime/video.duration)*1000;
+  timeLabel.textContent=`${formatTime(video.currentTime)} / ${formatTime(video.duration||0)}`;
+  if(state.loop.active && state.loop.a!=null && state.loop.b!=null && video.currentTime>=state.loop.b){
+    video.currentTime=state.loop.a;
+  }
+});
+speedSel.addEventListener('change',()=>{ video.playbackRate=parseFloat(speedSel.value); });
+setInBtn.addEventListener('click',()=>{ state.loop.a=video.currentTime; toast(`Loop start set: ${formatTime(state.loop.a)}`); });
+setOutBtn.addEventListener('click',()=>{
+  state.loop.b=video.currentTime;
+  state.loop.active=true; loopChk.checked=true;
+  toast(`Loop end set: ${formatTime(state.loop.b)}`);
+});
+loopChk.addEventListener('change',()=>{ state.loop.active=loopChk.checked; });
+
+/* ---------- Export ---------- */
+function exportPNG(){
+  if(!state.clip || !video.videoWidth) { toast('No clip loaded'); return; }
+  const w=video.videoWidth, h=video.videoHeight;
+  const off=document.createElement('canvas'); off.width=w; off.height=h;
+  const octx=off.getContext('2d');
+  octx.drawImage(video,0,0,w,h);
+  for(const s of state.strokes) drawStroke(octx,s,w,h);
+  off.toBlob(blob=>{
+    if(!blob){ toast('Export failed'); return; }
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`${(state.clip.name||'clip').replace(/[^\w\-]+/g,'_')}_${formatTime(video.currentTime).replace(':','-')}.png`;
+    a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),3000);
+  },'image/png');
+}
+exportBtn.addEventListener('click',exportPNG);
+
+/* ---------- Moments ---------- */
+async function saveMoment(){
+  if(!state.clip) return;
+  const moment={
+    id:uid(), clipId:state.clip.id, timestamp:video.currentTime,
+    note:momentNote.value.trim(), strokes:JSON.parse(JSON.stringify(state.strokes)),
+    createdAt:Date.now(),
+  };
+  await dbPut('moments',moment);
+  state.moments.push(moment);
+  momentNote.value='';
+  renderMoments();
+  toast('Moment saved');
+}
+function loadMoment(m){
+  video.pause();
+  video.currentTime=m.timestamp;
+  state.strokes=JSON.parse(JSON.stringify(m.strokes));
+  state.history=[]; state.redoStack=[];
+  redraw();
+}
+function renderMoments(){
+  const sorted=[...state.moments].sort((a,b)=>a.timestamp-b.timestamp);
+  momentsList.innerHTML='';
+  if(!sorted.length){
+    momentsList.innerHTML='<p class="empty">No moments saved yet. Pause, draw, then hit Save.</p>';
+    return;
+  }
+  for(const m of sorted){
+    const row=document.createElement('div');
+    row.className='moment-row';
+    row.innerHTML=`<span class="m-time">${formatTime(m.timestamp)}</span><span class="m-note">${escapeHtml(m.note||'(no note)')}</span><button class="m-del" title="Delete">&#10005;</button>`;
+    row.addEventListener('click',(e)=>{ if(e.target.classList.contains('m-del')) return; loadMoment(m); });
+    row.querySelector('.m-del').addEventListener('click', async (e)=>{
+      e.stopPropagation();
+      await dbDelete('moments',m.id);
+      state.moments=state.moments.filter(x=>x.id!==m.id);
+      renderMoments();
+    });
+    momentsList.appendChild(row);
+  }
+}
+saveMomentBtn.addEventListener('click',saveMoment);
+
+/* ---------- Library / clip management ---------- */
+async function updateStorageInfo(){
+  if(navigator.storage && navigator.storage.estimate){
+    try{
+      const {usage,quota}=await navigator.storage.estimate();
+      storageInfo.textContent=`${(usage/1e9).toFixed(2)} GB used of ${(quota/1e9).toFixed(1)} GB`;
+    }catch(err){}
+  }
+}
+async function renderLibrary(){
+  const metas=(await dbGetAll('clipsMeta')).sort((a,b)=>b.createdAt-a.createdAt);
+  libraryGrid.innerHTML='';
+  if(!metas.length){
+    libraryGrid.innerHTML='<p class="empty">No clips yet — upload a match video above to get started.</p>';
+  }
+  for(const m of metas){
+    const moments=await dbGetByIndex('moments','clipId',m.id);
+    const card=document.createElement('div');
+    card.className='clip-card';
+    card.innerHTML=`
+      <div class="cc-title">${escapeHtml(m.name)}</div>
+      <div class="cc-meta">${m.duration?formatTime(m.duration):'—'} &middot; ${moments.length} moment${moments.length===1?'':'s'} &middot; ${(m.size/1e6).toFixed(0)}MB</div>
+      <div class="cc-actions">
+        <button class="cc-open">Open</button>
+        <button class="cc-del">Delete</button>
+      </div>`;
+    card.querySelector('.cc-open').addEventListener('click',()=>openClip(m.id));
+    card.querySelector('.cc-del').addEventListener('click', async ()=>{
+      if(!confirm(`Delete "${m.name}" and all its saved moments? This cannot be undone.`)) return;
+      await deleteClip(m.id);
+      renderLibrary();
+    });
+    libraryGrid.appendChild(card);
+  }
+  updateStorageInfo();
+}
+async function deleteClip(id){
+  await dbDelete('clipsMeta',id);
+  await dbDelete('clipsBlob',id);
+  const moments=await dbGetByIndex('moments','clipId',id);
+  for(const mo of moments) await dbDelete('moments',mo.id);
+}
+async function handleUpload(file){
+  if(!file.type.startsWith('video/')){ toast('Please select a video file'); return; }
+  toast('Uploading…');
+  const id=uid();
+  const meta={id,name:file.name.replace(/\.[^/.]+$/,''),createdAt:Date.now(),size:file.size,type:file.type,duration:0,width:0,height:0};
+  try{
+    await dbPut('clipsBlob',{id,blob:file});
+    await dbPut('clipsMeta',meta);
+  }catch(err){
+    toast('Could not store video — your browser storage may be full.');
+    console.error(err);
+    return;
+  }
+  await renderLibrary();
+  openClip(id);
+}
+async function openClip(id){
+  const meta=await dbGet('clipsMeta',id);
+  const blobRec=await dbGet('clipsBlob',id);
+  if(!meta||!blobRec){ toast('Clip not found'); return; }
+  state.clip=meta;
+  state.strokes=[]; state.history=[]; state.redoStack=[];
+  state.loop={a:null,b:null,active:false};
+  loopChk.checked=false;
+  markerNumInput.value=1;
+  if(currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
+  currentObjectUrl=URL.createObjectURL(blobRec.blob);
+  video.src=currentObjectUrl;
+  clipNameInput.value=meta.name;
+  state.moments=await dbGetByIndex('moments','clipId',id);
+  libraryView.style.display='none';
+  editorView.style.display='flex';
+  renderMoments();
+  redraw();
+}
+backBtn.addEventListener('click',()=>{
+  video.pause();
+  libraryGrid.innerHTML='';
+  editorView.style.display='none';
+  libraryView.style.display='block';
+  renderLibrary();
+});
+clipNameInput.addEventListener('change', async ()=>{
+  if(!state.clip) return;
+  state.clip.name=clipNameInput.value.trim()||'Untitled clip';
+  await dbPut('clipsMeta',state.clip);
+});
+deleteClipBtn.addEventListener('click', async ()=>{
+  if(!state.clip) return;
+  if(!confirm(`Delete "${state.clip.name}" and all its moments?`)) return;
+  const id=state.clip.id;
+  video.pause(); video.removeAttribute('src'); video.load();
+  await deleteClip(id);
+  state.clip=null;
+  libraryGrid.innerHTML='';
+  editorView.style.display='none';
+  libraryView.style.display='block';
+  renderLibrary();
+});
+
+video.addEventListener('loadedmetadata', async ()=>{
+  stageWrap.style.aspectRatio=`${video.videoWidth} / ${video.videoHeight}`;
+  resizeCanvas();
+  if(state.clip){
+    state.clip.duration=video.duration;
+    state.clip.width=video.videoWidth;
+    state.clip.height=video.videoHeight;
+    await dbPut('clipsMeta',state.clip);
+  }
+});
+video.addEventListener('error',()=>{ toast('This video format could not be played by your browser.'); });
+
+/* ---------- Upload UI ---------- */
+dropzoneInner.addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',e=>{ if(e.target.files[0]) handleUpload(e.target.files[0]); fileInput.value=''; });
+['dragover'].forEach(ev=>dropzone.addEventListener(ev,e=>{ e.preventDefault(); dropzone.classList.add('drag'); }));
+['dragleave','drop'].forEach(ev=>dropzone.addEventListener(ev,e=>{ e.preventDefault(); dropzone.classList.remove('drag'); }));
+dropzone.addEventListener('drop',e=>{ const f=e.dataTransfer.files[0]; if(f) handleUpload(f); });
+
+/* ---------- Help panel ---------- */
+helpBtn.addEventListener('click',()=>helpPanel.classList.toggle('show'));
+document.addEventListener('click',e=>{
+  if(!helpPanel.contains(e.target) && e.target!==helpBtn) helpPanel.classList.remove('show');
+});
+
+/* ---------- Keyboard shortcuts ---------- */
+window.addEventListener('keydown', e=>{
+  if(editorView.style.display==='none') return;
+  const tag=(e.target.tagName||'').toLowerCase();
+  if(tag==='input'||tag==='textarea') return;
+  const map={'1':'pen','2':'line','3':'arrow','4':'rect','5':'circle','6':'spotlight','7':'marker','8':'text','9':'eraser'};
+  if(map[e.key]){ setTool(map[e.key]); return; }
+  if(e.code==='Space'){ e.preventDefault(); video.paused?video.play():video.pause(); return; }
+  if(e.key==='ArrowLeft'){ e.preventDefault(); video.pause(); video.currentTime=Math.max(0,video.currentTime-1/getFps()); return; }
+  if(e.key==='ArrowRight'){ e.preventDefault(); video.pause(); video.currentTime=Math.min(video.duration||0,video.currentTime+1/getFps()); return; }
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='z'){ e.preventDefault(); e.shiftKey?redo():undo(); return; }
+  if(e.key.toLowerCase()==='c'){ clearStrokes(); return; }
+  if(e.key.toLowerCase()==='s'){ saveMoment(); return; }
+});
+
+/* ---------- Init ---------- */
+renderLibrary();
+</script>
+</body>
+</html>
